@@ -1,0 +1,98 @@
+# Xcode 관련
+####################
+.DS_Store
+build/
+DerivedData/
+.idea/
+xcuserdata/
+*.xccheckout
+*.xcscmblueprint
+*.xcuserstate
+
+# Logs
+####################
+*.log
+
+# iOS 관련
+####################
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift 패키지 매니저 관련
+####################
+.build/
+Packages/
+.swiftpm/
+
+# Cocoapods 관련
+####################
+Pods/
+Podfile.lock
+xcworkspace/
+*.xcworkspace
+
+# Carthage 관련
+####################
+Carthage/Build/
+
+# Fastlane 관련
+####################
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+*.junit
+
+# SwiftPM 관련
+####################
+Package.resolved
+
+# Xcode 서버 관련
+####################
+*.xcodeproj/project.xcworkspace/xcshareddata/xcschemes/xcschememanagement.plist
+
+# Playgrounds 관련
+####################
+timeline.xctimeline
+playground.xcworkspace
+
+# 자동 생성되는 API 통신 및 디버그 관련 파일
+####################
+*.swiftdoc
+*.swiftsourceinfo
+*.xcodeproj/*
+*.xcassets
+
+# 앱 번들 관련
+####################
+*.xcappdata
+*.appex
+*.mobileprovision
+
+# 기타 IDE 설정
+####################
+*.xcuserdatad
+*.moved-aside
+*.lock
+
+# Simulator 관련
+####################
+*.simruntime
+*.simdevicetype
+*.simdevice
+*.simruntime
+*.simdeploymenttarget
+
+# 관련 환경변수 파일
+####################
+.env
+.env.local
+.env.production
+.env.*.local
+
+# 예시 프로젝트에서 테스트 관련
+####################
+*.test
+
