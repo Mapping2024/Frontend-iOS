@@ -17,33 +17,91 @@ struct MemoDetailView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             if let detail = memoDetail {
-                Text(detail.title)
-                    .font(.title)
-                    .fontWeight(.bold)
+                HStack {
+                    Text(detail.title)
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .padding(.top)
+                    Spacer()
+                    if let profileImageUrl = detail.profileImage {
+                        AsyncImage(url: URL(string: profileImageUrl)) { image in
+                            image
+                                .resizable()
+                                .frame(width: 40, height: 40)
+                                .clipShape(Circle())
+                                .padding(.top)
+                        } placeholder: {
+                            Image(systemName: "person.circle.fill")
+                                .font(.title)
+                        }
+                    } else {
+                        Image(systemName: "person.circle.fill")
+                            .font(.title)
+                            .padding(.top)
+                    }
+                    
+                    Text(detail.nickname)
+                        .font(.headline)
+                        .padding(.top)
+                }
+                
+                Divider()
                 
                 Text(detail.content)
                     .font(.body)
                 
-                if let imageUrl = detail.images?.first {
-                    AsyncImage(url: URL(string: imageUrl)) { phase in
-                        switch phase {
-                        case .empty:
-                            ProgressView()
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                        case .failure:
-                            Image(systemName: "photo")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .foregroundColor(.gray)
-                        @unknown default:
-                            EmptyView()
+                // 이미지 표시 - 하나일 때와 여러 개일 때 처리
+                if let images = detail.images, !images.isEmpty {
+                    if images.count == 1 {
+                        // 이미지가 하나일 경우
+                        AsyncImage(url: URL(string: images[0])) { phase in
+                            switch phase {
+                            case .empty:
+                                ProgressView()
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    //.frame(width: 200, height: 150)
+                                    .cornerRadius(8)
+                            case .failure:
+                                Image(systemName: "photo")
+                                    .resizable()
+                                    //.aspectRatio(contentMode: .fit)
+                                    .foregroundColor(.gray)
+                            @unknown default:
+                                EmptyView()
+                            }
                         }
+                    } else {
+                        // 이미지가 여러 개일 경우 수평 스크롤로 표시
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 10) {
+                                ForEach(images, id: \.self) { imageUrl in
+                                    AsyncImage(url: URL(string: imageUrl)) { phase in
+                                        switch phase {
+                                        case .empty:
+                                            ProgressView()
+                                        case .success(let image):
+                                            image
+                                                .resizable()
+                                                //.aspectRatio(contentMode: .fit)
+                                                .frame(width: 200, height: 150)
+                                                .cornerRadius(8)
+                                        case .failure:
+                                            Image(systemName: "photo")
+                                                .resizable()
+                                                //.aspectRatio(contentMode: .fit)
+                                                .foregroundColor(.gray)
+                                        @unknown default:
+                                            EmptyView()
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        .frame(height: 150) // 전체 이미지 뷰 높이 지정
                     }
-                    .frame(height: 200)
-                    .cornerRadius(8)
                 }
                 
                 HStack {
@@ -51,28 +109,6 @@ struct MemoDetailView: View {
                     Text("👎 \(detail.hateCnt)")
                 }
                 .font(.caption)
-                
-                HStack {
-                    if let profileImageUrl = detail.profileImage {
-                        AsyncImage(url: URL(string: profileImageUrl)) { image in
-                            image
-                                .resizable()
-                                .frame(width: 40, height: 40)
-                                .clipShape(Circle())
-                        } placeholder: {
-                            Circle()
-                                .frame(width: 40, height: 40)
-                                .foregroundColor(.gray)
-                        }
-                    } else {
-                        Circle()
-                            .frame(width: 40, height: 40)
-                            .foregroundColor(.gray)
-                    }
-                    
-                    Text(detail.nickname)
-                        .font(.headline)
-                }
                 
                 Spacer()
             } else if isLoading {
@@ -132,6 +168,6 @@ struct MemoDetail: Decodable {
 }
 
 #Preview {
-    MemoDetailView(id: 3)
+    MemoDetailView(id: 7)
         .environmentObject(UserManager())
 }
