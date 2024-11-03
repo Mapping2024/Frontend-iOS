@@ -29,22 +29,29 @@ struct MapView: View {
     @StateObject private var locationManager = LocationManager()
     @State private var showModal = false
     @State private var pinCoordinate: CLLocationCoordinate2D? = nil
-    @State private var isPinActive: Bool = false  // 핀 활성화 여부
-    @State private var mapView = MKMapView()  // MKMapView 인스턴스 추가
-    @State private var memoLocations: [MemoLocation] = [] // API로 받은 위치 데이터 배열
+    @State private var isPinActive: Bool = false
+    @State private var mapView = MKMapView()
+    @State private var memoLocations: [MemoLocation] = []
+    
+    // 선택한 핀의 ID만 저장
+    @State private var selectedLocationID: Int? = nil
+    @State private var showDetailModal = false
 
     var body: some View {
         ZStack {
-            CustomMapView(mapView: $mapView, region: $locationManager.region, pinCoordinate: $pinCoordinate, isPinActive: $isPinActive)
+            CustomMapView(mapView: $mapView, region: $locationManager.region, pinCoordinate: $pinCoordinate, isPinActive: $isPinActive, memoLocations: $memoLocations, selectedLocationID: $selectedLocationID, showDetailModal: $showDetailModal)
                 .edgesIgnoringSafeArea(.top)
                 .onAppear {
                     locationManager.requestLocationPermission()
                     locationManager.startUpdatingLocation()
-                    fetchMemoLocations() // 위치 데이터를 가져오는 메서드 호출
-                    //print("Latitude: \(locationManager.region.center.latitude), Longitude: \(locationManager.region.center.longitude)")
-
+                    fetchMemoLocations()
                 }
-            
+                .sheet(isPresented: $showDetailModal) {
+                    if let id = selectedLocationID {
+                        MemoDetailView(id: id)
+                            .presentationDetents([.medium, .large])
+                    }
+                }
             
             VStack {
                 Spacer()
@@ -70,8 +77,7 @@ struct MapView: View {
                             }
                         }
                     } else {
-                        Button(action: {
-                        }) {
+                        Button(action: {}) {
                             Image(systemName: "mappin.and.ellipse.circle.fill")
                                 .font(.title)
                         }.disabled(true)
@@ -105,13 +111,8 @@ struct MapView: View {
     }
     
     private func fetchMemoLocations() {
-        // GET 요청을 보내어 위치 데이터를 가져오는 메서드
         let accessToken = userManager.accessToken
-        
-        let headers: HTTPHeaders = [
-            "Authorization": "Bearer \(accessToken)"
-        ]
-        
+        let headers: HTTPHeaders = ["Authorization": "Bearer \(accessToken)"]
         let url = "https://api.mapping.kro.kr/api/v2/memo/total?lat=\(locationManager.region.center.latitude)&lng=\(locationManager.region.center.longitude)&km=5"
         
         AF.request(url, method: .get, headers: headers).responseDecodable(of: MemoResponse.self) { response in
@@ -119,7 +120,7 @@ struct MapView: View {
             case .success(let memoResponse):
                 if memoResponse.success {
                     self.memoLocations = memoResponse.data
-                    addAnnotations() // 응답을 받은 후 핀을 추가
+                    addAnnotations()
                 } else {
                     print("Failed to fetch memo locations: \(memoResponse.message)")
                 }
@@ -130,7 +131,6 @@ struct MapView: View {
     }
     
     private func addAnnotations() {
-        // 가져온 위치 데이터를 기반으로 지도에 핀을 추가
         for location in memoLocations {
             let annotation = MKPointAnnotation()
             annotation.title = location.title
@@ -139,11 +139,11 @@ struct MapView: View {
             mapView.addAnnotation(annotation)
         }
     }
-
+    
     private func removePin() {
         pinCoordinate = nil
         isPinActive = false
-        mapView.removeAnnotations(mapView.annotations) // 실제로 화면에 표시된 핀 제거
+        mapView.removeAnnotations(mapView.annotations)
     }
 }
 
