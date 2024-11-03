@@ -7,14 +7,32 @@
 
 import SwiftUI
 import MapKit
+import Alamofire
+
+struct MemoLocation: Identifiable, Decodable {
+    let id: Int
+    let title: String
+    let category: String
+    let lat: Double
+    let lng: Double
+}
+
+struct MemoResponse: Decodable {
+    let status: Int
+    let success: Bool
+    let message: String
+    let data: [MemoLocation]
+}
 
 struct MapView: View {
+    @EnvironmentObject var userManager: UserManager
     @StateObject private var locationManager = LocationManager()
     @State private var showModal = false
     @State private var pinCoordinate: CLLocationCoordinate2D? = nil
     @State private var isPinActive: Bool = false  // 핀 활성화 여부
     @State private var mapView = MKMapView()  // MKMapView 인스턴스 추가
-    
+    @State private var memoLocations: [MemoLocation] = [] // API로 받은 위치 데이터 배열
+
     var body: some View {
         ZStack {
             CustomMapView(mapView: $mapView, region: $locationManager.region, pinCoordinate: $pinCoordinate, isPinActive: $isPinActive)
@@ -22,7 +40,11 @@ struct MapView: View {
                 .onAppear {
                     locationManager.requestLocationPermission()
                     locationManager.startUpdatingLocation()
+                    fetchMemoLocations() // 위치 데이터를 가져오는 메서드 호출
+                    //print("Latitude: \(locationManager.region.center.latitude), Longitude: \(locationManager.region.center.longitude)")
+
                 }
+            
             
             VStack {
                 Spacer()
@@ -82,6 +104,42 @@ struct MapView: View {
         }
     }
     
+    private func fetchMemoLocations() {
+        // GET 요청을 보내어 위치 데이터를 가져오는 메서드
+        let accessToken = userManager.accessToken
+        
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)"
+        ]
+        
+        let url = "https://api.mapping.kro.kr/api/v2/memo/total?lat=\(locationManager.region.center.latitude)&lng=\(locationManager.region.center.longitude)&km=5"
+        
+        AF.request(url, method: .get, headers: headers).responseDecodable(of: MemoResponse.self) { response in
+            switch response.result {
+            case .success(let memoResponse):
+                if memoResponse.success {
+                    self.memoLocations = memoResponse.data
+                    addAnnotations() // 응답을 받은 후 핀을 추가
+                } else {
+                    print("Failed to fetch memo locations: \(memoResponse.message)")
+                }
+            case .failure(let error):
+                print("Error fetching memo locations: \(error)")
+            }
+        }
+    }
+    
+    private func addAnnotations() {
+        // 가져온 위치 데이터를 기반으로 지도에 핀을 추가
+        for location in memoLocations {
+            let annotation = MKPointAnnotation()
+            annotation.title = location.title
+            annotation.subtitle = location.category
+            annotation.coordinate = CLLocationCoordinate2D(latitude: location.lat, longitude: location.lng)
+            mapView.addAnnotation(annotation)
+        }
+    }
+
     private func removePin() {
         pinCoordinate = nil
         isPinActive = false
@@ -89,59 +147,7 @@ struct MapView: View {
     }
 }
 
-struct CustomMapView: UIViewRepresentable {
-    @Binding var mapView: MKMapView
-    @Binding var region: MKCoordinateRegion
-    @Binding var pinCoordinate: CLLocationCoordinate2D?
-    @Binding var isPinActive: Bool  // 핀 활성화 여부
-    
-    func makeUIView(context: Context) -> MKMapView {
-        mapView.showsUserLocation = true  // 사용자 위치 표시
-        mapView.setRegion(region, animated: true)
-        mapView.delegate = context.coordinator
-        
-        let longPressGesture = UILongPressGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleLongPress(_:)))
-        mapView.addGestureRecognizer(longPressGesture)
-        
-        return mapView
-    }
-    
-    func updateUIView(_ uiView: MKMapView, context: Context) {
-        uiView.setRegion(region, animated: true)
-    }
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
-    
-    class Coordinator: NSObject, MKMapViewDelegate {
-        var parent: CustomMapView
-        
-        init(_ parent: CustomMapView) {
-            self.parent = parent
-        }
-        
-        @objc func handleLongPress(_ gestureRecognizer: UILongPressGestureRecognizer) {
-            if gestureRecognizer.state == .began {
-                let locationInView = gestureRecognizer.location(in: gestureRecognizer.view)
-                let coordinate = (gestureRecognizer.view as! MKMapView).convert(locationInView, toCoordinateFrom: gestureRecognizer.view)
-                
-                parent.pinCoordinate = coordinate
-                parent.isPinActive = true
-                
-                // 기존 핀 제거
-                (gestureRecognizer.view as! MKMapView).removeAnnotations((gestureRecognizer.view as! MKMapView).annotations)
-                
-                // 새 핀 추가
-                let annotation = MKPointAnnotation()
-                annotation.coordinate = coordinate
-                annotation.title = "핀 위치"
-                (gestureRecognizer.view as! MKMapView).addAnnotation(annotation)
-            }
-        }
-    }
-}
-
 #Preview {
     MapView()
+        .environmentObject(UserManager())
 }
