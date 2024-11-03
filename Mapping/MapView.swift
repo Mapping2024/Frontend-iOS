@@ -73,6 +73,7 @@ struct MapView: View {
                             .sheet(isPresented: $showModal, onDismiss: removePin) {
                                 if let coordinate = pinCoordinate {
                                     PinMakeModal(latitude: coordinate.latitude, longitude: coordinate.longitude)
+                                        .presentationDetents([.medium, .large])
                                 }
                             }
                         }

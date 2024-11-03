@@ -38,7 +38,11 @@ struct PinMakeModal: View {
                 }
                 
                 Section(header: Text("내용")) {
-                    TextField("핀 설명", text: $pinDescription)
+                    TextEditor( text: $pinDescription)
+                        .overlay(alignment: .topLeading) {
+                            Text("핀 내용 ")
+                                .foregroundStyle(pinDescription.isEmpty ? Color(.systemGray3) : .clear)
+                        }
                 }
                 
                 Section(header: Text("카테고리")) {
@@ -48,11 +52,6 @@ struct PinMakeModal: View {
                         }
                     }
                     .pickerStyle(MenuPickerStyle())
-                }
-                
-                Section(header: Text("위치 정보")) {
-                    Text("위도: \(latitude)")
-                    Text("경도: \(longitude)")
                 }
                 
                 Section(header: Text("사진")) {
