@@ -4,7 +4,45 @@
 ////
 ////  Created by 김민정 on 11/2/24.
 ////
-//
+
+import SwiftUI
+import MapKit
+import CoreLocationUI
+
+struct MapView: View {
+    @StateObject private var locationManager = LocationManager()
+    @State private var region = MKCoordinateRegion(
+        center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
+        span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+    )
+    
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            Map(coordinateRegion: $region, showsUserLocation: true)
+                .ignoresSafeArea(.all)
+                .onAppear {
+                    locationManager.requestLocation()
+                }
+                .onChange(of: locationManager.userLocation) { oldLocation, newLocation in
+                    if let newLocation = newLocation {
+                        region.center = newLocation.coordinate
+                    }
+                }
+                .mapControls {
+                    MapUserLocationButton()
+                    MapCompass()
+                    MapScaleView()
+                }
+        }
+    }
+}
+
+#Preview {
+    MapView()
+        .environmentObject(UserManager())
+}
+
+
 //import SwiftUI
 //import MapKit
 //import Alamofire
