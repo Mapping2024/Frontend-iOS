@@ -29,10 +29,27 @@ struct MapView: View {
                 Map(coordinateRegion: $region, interactionModes: .all ,showsUserLocation: true, annotationItems: memoLocations) {memo in
                     MapAnnotation(coordinate: CLLocationCoordinate2D(latitude: memo.lat, longitude: memo.lng)) {
                         VStack {
-                            Image(systemName: "star.fill") // 예시: 별 모양 아이콘
-                                .foregroundColor(.yellow)
-                                .frame(width: 30, height: 30)
-                                .background(Circle().fill(Color.white))
+                            if (memo.category == "쓰레기통") {
+                                Image(systemName: "trash.circle.fill")
+                                    .font(.title)
+                                    .foregroundStyle(Color.black)
+                                    .background(Circle().fill(Color.white))
+                            } else if(memo.category == "공용 화장실") {
+                                Image(systemName: "toilet.circle.fill")
+                                    .font(.title)
+                                    .foregroundStyle(Color.blue)
+                                    .background(Circle().fill(Color.white))
+                            } else if (memo.category == "흡연장") {
+                                Image(systemName: "smoke.circle.fill")
+                                    .font(.title)
+                                    .foregroundStyle(Color.gray)
+                                    .background(Circle().fill(Color.white))
+                            } else {
+                                Image(systemName: "mappin.circle.fill")
+                                    .font(.title)
+                                    .foregroundStyle(Color.yellow)
+                                    .background(Circle().fill(Color.white))
+                            }
                             Text(memo.title) // 메모 제목 표시
                                 .font(.caption)
                         }
@@ -75,6 +92,7 @@ struct MapView: View {
                                         .frame(width: 50)
                                         .background(Circle().fill(Color.white))
                                         .foregroundStyle(Color.skyBlue)
+                                        .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
                                 }
                             } else {
                                 Button(action: {}) {
@@ -83,6 +101,7 @@ struct MapView: View {
                                         .scaledToFit()
                                         .frame(width: 50)
                                         .background(Circle().fill(Color.white))
+                                        .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
                                 }.disabled(true)
                             }
                             ProfileImageView()

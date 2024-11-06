@@ -74,7 +74,7 @@ class UserManager: ObservableObject {
                                 self.accessToken = userData.tokens.accessToken
                                 self.refreshToken = userData.tokens.refreshToken
                                 print(self.accessToken)
-                                print(self.userInfo?.profileImage)
+                                //print(self.userInfo?.profileImage)
                             }
                         }
                     } else {
