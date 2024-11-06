@@ -10,6 +10,7 @@ import MapKit
 import CoreLocationUI
 
 struct MapView: View {
+    @EnvironmentObject var userManager: UserManager
     @StateObject private var locationManager = LocationManager()
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
@@ -17,30 +18,71 @@ struct MapView: View {
     )
     
     var body: some View {
-        ZStack(alignment: .bottom) {
-            Map(coordinateRegion: $region, showsUserLocation: true)
-                .ignoresSafeArea(.all)
-                .onAppear {
-                    locationManager.requestLocation()
-                }
-                .onChange(of: locationManager.userLocation) { oldLocation, newLocation in
-                    if let newLocation = newLocation {
-                        region.center = newLocation.coordinate
+        NavigationStack {
+            ZStack(alignment: .bottom) {
+                
+                Map(coordinateRegion: $region, interactionModes: .all ,showsUserLocation: true)
+                    .ignoresSafeArea(.all)
+                    .onAppear {
+                        locationManager.requestLocation()
                     }
+                    .onChange(of: locationManager.userLocation) { oldLocation, newLocation in
+                        if let newLocation = newLocation {
+                            region.center = newLocation.coordinate
+                        }
+                    }
+                    .mapControls {
+                        MapUserLocationButton()
+                        MapCompass()
+                        MapScaleView()
+                    }
+                
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        VStack {
+                            if userManager.isLoggedIn {
+                                NavigationLink(destination: AddPinView()) {
+                                    Image(systemName: "mappin.and.ellipse.circle.fill")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 50)
+                                        .background(Circle().fill(Color.white))
+                                        .foregroundStyle(Color.skyBlue)
+                                }
+                            } else {
+                                Button(action: {}) {
+                                    Image(systemName: "mappin.and.ellipse.circle.fill")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 50)
+                                        .background(Circle().fill(Color.white))
+                                }.disabled(true)
+                            }
+                            ProfileImageView()
+                        }
+                    }
+                    .padding()
                 }
-                .mapControls {
-                    MapUserLocationButton()
-                    MapCompass()
-                    MapScaleView()
-                }
+            }
+        }
+        .onAppear {
+            if userManager.isLoggedIn && userManager.userInfo == nil {
+                userManager.fetchUserInfo()
+            }
         }
     }
 }
+
+
 
 #Preview {
     MapView()
         .environmentObject(UserManager())
 }
+
+
 
 
 //import SwiftUI
@@ -70,11 +112,11 @@ struct MapView: View {
 //    @State private var isPinActive: Bool = false
 //    @State private var mapView = MKMapView()
 //    @State private var memoLocations: [MemoLocation] = []
-//    
+//
 //    // 선택한 핀의 ID만 저장
 //    @State private var selectedLocationID: Int? = nil
 //    @State private var showDetailModal = false
-//    
+//
 //    var body: some View {
 //        ZStack {
 //            CustomMapView(mapView: $mapView, region: $locationManager.region, pinCoordinate: $pinCoordinate, isPinActive: $isPinActive, memoLocations: $memoLocations, selectedLocationID: $selectedLocationID, showDetailModal: $showDetailModal)
@@ -91,7 +133,7 @@ struct MapView: View {
 //                            .presentationDetents([.medium, .large])
 //                    }
 //                }
-//            
+//
 //            VStack {
 //                Spacer()
 //                HStack {
@@ -125,7 +167,7 @@ struct MapView: View {
 //                }
 //                .padding()
 //            }
-//            
+//
 //            if let coordinate = pinCoordinate {
 //                VStack {
 //                    Spacer()
@@ -149,12 +191,12 @@ struct MapView: View {
 //            }
 //        }
 //    }
-//    
+//
 //    private func fetchMemoLocations() {
 //        let accessToken = userManager.accessToken
 //        let headers: HTTPHeaders = ["Authorization": "Bearer \(accessToken)"]
 //        let url = "https://api.mapping.kro.kr/api/v2/memo/total?lat=\(locationManager.region.center.latitude)&lng=\(locationManager.region.center.longitude)&km=5"
-//        
+//
 //        AF.request(url, method: .get, headers: headers).responseDecodable(of: MemoResponse.self) { response in
 //            switch response.result {
 //            case .success(let memoResponse):
@@ -169,7 +211,7 @@ struct MapView: View {
 //            }
 //        }
 //    }
-//    
+//
 //    private func addAnnotations() {
 //        for location in memoLocations {
 //            let annotation = MKPointAnnotation()
@@ -179,7 +221,7 @@ struct MapView: View {
 //            mapView.addAnnotation(annotation)
 //        }
 //    }
-//    
+//
 //    private func removePin() {
 //        pinCoordinate = nil
 //        isPinActive = false
