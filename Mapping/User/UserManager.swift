@@ -25,6 +25,7 @@ class UserManager: ObservableObject {
     }
     
     func logout() {
+        self.accessTokenKakao = ""
         self.accessToken = ""
         self.refreshToken = ""
         self.userInfo = nil
@@ -73,6 +74,7 @@ class UserManager: ObservableObject {
                                 self.accessToken = userData.tokens.accessToken
                                 self.refreshToken = userData.tokens.refreshToken
                                 print(self.accessToken)
+                                print(self.userInfo?.profileImage)
                             }
                         }
                     } else {

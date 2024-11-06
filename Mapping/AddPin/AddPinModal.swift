@@ -18,7 +18,7 @@ enum PinCategory: String, CaseIterable, Identifiable {
     var id: String { self.rawValue }
 }
 
-struct PinMakeModal: View {
+struct AddPinModal: View {
     @EnvironmentObject var userManager: UserManager
     @Environment(\.presentationMode) var presentationMode
     @State private var pinName: String = ""
@@ -122,6 +122,7 @@ struct PinMakeModal: View {
                     print("요청 성공: 데이터 없음")
                 }
                 presentationMode.wrappedValue.dismiss()
+                
             case .failure(let error):
                 if let data = response.data, let responseString = String(data: data, encoding: .utf8) {
                     print("요청 실패: \(error)\n응답 내용: \(responseString)")
@@ -179,6 +180,6 @@ struct PhotoPicker: UIViewControllerRepresentable {
 
 
 #Preview {
-    PinMakeModal(latitude: 37.7749, longitude: -122.4194) // 예시 위도와 경도 값
+    AddPinModal(latitude: 37.7749, longitude: -122.4194) // 예시 위도와 경도 값
         .environmentObject(UserManager())
 }
