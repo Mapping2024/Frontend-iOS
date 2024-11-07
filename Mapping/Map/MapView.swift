@@ -13,6 +13,7 @@ import Alamofire
 struct MapView: View {
     @EnvironmentObject var userManager: UserManager
     @StateObject private var locationManager = LocationManager()
+    @State private var selectedPinID: Int? = nil
     @State private var memoLocations: [MemoLocation] = []
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
@@ -54,8 +55,7 @@ struct MapView: View {
                                 .font(.caption)
                         }
                         .onTapGesture {
-                            // 클릭 시 동작 예시 (메모 상세 보기)
-                            print("Tapped on \(memo.title)")
+                            selectedPinID = memo.id
                         }
                     }
                 }
@@ -77,6 +77,19 @@ struct MapView: View {
                     MapUserLocationButton()
                     MapCompass()
                     MapScaleView()
+                }
+                .sheet(isPresented: Binding<Bool>(
+                    get: { selectedPinID != nil }, // selectedPinID가 nil이 아니면 시트를 열어야 함
+                    set: { newValue in
+                        if !newValue {
+                            selectedPinID = nil // 시트가 닫힐 때 selectedPinID를 nil로 설정하여 상태 초기화
+                        }
+                    })
+                ) {
+                    if let pinId = selectedPinID {
+                        MemoDetailView(id: pinId)
+                            .presentationDetents([.medium, .large])
+                    }
                 }
                 
                 VStack {
@@ -100,7 +113,7 @@ struct MapView: View {
                                         .resizable()
                                         .scaledToFit()
                                         .frame(width: 50)
-                                        .background(Circle().fill(Color.white))
+                                        .background(Circle().fill(Color.gray))
                                         .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
                                 }.disabled(true)
                             }
