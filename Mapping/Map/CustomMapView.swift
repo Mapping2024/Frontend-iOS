@@ -21,7 +21,7 @@ struct CustomMapView: UIViewRepresentable {
         // Long-press gesture recognizer
         let longPressGesture = UILongPressGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.addPin(gesture:)))
         mapView.addGestureRecognizer(longPressGesture)
-        
+        mapView.showsUserTrackingButton = true
         return mapView
     }
 

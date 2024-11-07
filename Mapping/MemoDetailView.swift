@@ -8,6 +8,9 @@
 import SwiftUI
 import Alamofire
 
+import SwiftUI
+import Alamofire
+
 struct MemoDetailView: View {
     @EnvironmentObject var userManager: UserManager
     var id: Int
@@ -50,10 +53,8 @@ struct MemoDetailView: View {
                 Text(detail.content)
                     .font(.body)
                 
-                // 이미지 표시 - 하나일 때와 여러 개일 때 처리
                 if let images = detail.images, !images.isEmpty {
                     if images.count == 1 {
-                        // 이미지가 하나일 경우
                         AsyncImage(url: URL(string: images[0])) { phase in
                             switch phase {
                             case .empty:
@@ -62,19 +63,16 @@ struct MemoDetailView: View {
                                 image
                                     .resizable()
                                     .aspectRatio(contentMode: .fit)
-                                    //.frame(width: 200, height: 150)
                                     .cornerRadius(8)
                             case .failure:
                                 Image(systemName: "photo")
                                     .resizable()
-                                    //.aspectRatio(contentMode: .fit)
                                     .foregroundColor(.gray)
                             @unknown default:
                                 EmptyView()
                             }
                         }
                     } else {
-                        // 이미지가 여러 개일 경우 수평 스크롤로 표시
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 10) {
                                 ForEach(images, id: \.self) { imageUrl in
@@ -85,13 +83,11 @@ struct MemoDetailView: View {
                                         case .success(let image):
                                             image
                                                 .resizable()
-                                                //.aspectRatio(contentMode: .fit)
                                                 .frame(width: 200, height: 150)
                                                 .cornerRadius(8)
                                         case .failure:
                                             Image(systemName: "photo")
                                                 .resizable()
-                                                //.aspectRatio(contentMode: .fit)
                                                 .foregroundColor(.gray)
                                         @unknown default:
                                             EmptyView()
@@ -100,7 +96,7 @@ struct MemoDetailView: View {
                                 }
                             }
                         }
-                        .frame(height: 150) // 전체 이미지 뷰 높이 지정
+                        .frame(height: 150)
                     }
                 }
                 
@@ -120,6 +116,13 @@ struct MemoDetailView: View {
         }
         .padding()
         .onAppear {
+            delayFetch()
+        }
+    }
+    
+    private func delayFetch() {
+        // 데이터 요청 전에 1초 딜레이
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             fetchMemoDetail()
         }
     }
@@ -146,6 +149,7 @@ struct MemoDetailView: View {
     }
 }
 
+
 // 응답 전체 구조체
 struct MemoDetailResponse: Decodable {
     let status: Int
@@ -168,6 +172,6 @@ struct MemoDetail: Decodable {
 }
 
 #Preview {
-    MemoDetailView(id: 7)
+    MemoDetailView(id: 3)
         .environmentObject(UserManager())
 }
