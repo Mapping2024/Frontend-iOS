@@ -121,7 +121,6 @@ struct MemoDetailView: View {
     }
     
     private func delayFetch() {
-        // 데이터 요청 전에 1초 딜레이
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             fetchMemoDetail()
         }
