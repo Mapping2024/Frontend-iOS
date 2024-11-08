@@ -81,7 +81,7 @@ struct AddPinModal: View {
                 }
             )
             .sheet(isPresented: $isPickerPresented) {
-                PhotoPicker(selectedImages: $selectedImages)
+                PhotoPicker(selectedImages: $selectedImages, selectionLimit: 5)
             }
         }
     }
@@ -133,51 +133,6 @@ struct AddPinModal: View {
         }
     }
 }
-
-struct PhotoPicker: UIViewControllerRepresentable {
-    @Binding var selectedImages: [UIImage]
-    
-    func makeUIViewController(context: Context) -> PHPickerViewController {
-        var config = PHPickerConfiguration()
-        config.filter = .images
-        config.selectionLimit = 5 // 선택할 이미지 개수 제한
-        
-        let picker = PHPickerViewController(configuration: config)
-        picker.delegate = context.coordinator
-        return picker
-    }
-    
-    func updateUIViewController(_ uiViewController: PHPickerViewController, context: Context) {}
-    
-    func makeCoordinator() -> Coordinator {
-        return Coordinator(self)
-    }
-    
-    class Coordinator: NSObject, PHPickerViewControllerDelegate {
-        let parent: PhotoPicker
-        
-        init(_ parent: PhotoPicker) {
-            self.parent = parent
-        }
-        
-        func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-            picker.dismiss(animated: true)
-            
-            for result in results {
-                if result.itemProvider.canLoadObject(ofClass: UIImage.self) {
-                    result.itemProvider.loadObject(ofClass: UIImage.self) { image, error in
-                        if let image = image as? UIImage {
-                            DispatchQueue.main.async {
-                                self.parent.selectedImages.append(image)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 
 #Preview {
     AddPinModal(latitude: 37.7749, longitude: -122.4194) // 예시 위도와 경도 값
