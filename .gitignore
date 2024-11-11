@@ -91,6 +91,7 @@ playground.xcworkspace
 .env.local
 .env.production
 .env.*.local
+Mapping/Config.xcconfig
 
 # 예시 프로젝트에서 테스트 관련
 ####################
