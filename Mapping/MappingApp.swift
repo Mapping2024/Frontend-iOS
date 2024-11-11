@@ -14,9 +14,11 @@ struct MappingApp: App {
     @StateObject private var userManager = UserManager()
     
     init() {
-        // Kakao SDK 초기화
-        KakaoSDK.initSDK(appKey: "a34cfc6091e7f408f953597d0eba7a19")
-    }
+            // Kakao SDK 초기화
+            if let kakaoNativeKey = Bundle.main.object(forInfoDictionaryKey: "API_KEY") as? String {
+                KakaoSDK.initSDK(appKey: kakaoNativeKey)
+            }
+        }
     
     var body: some Scene {
         WindowGroup {
@@ -24,7 +26,7 @@ struct MappingApp: App {
                 .environmentObject(userManager)  // UserManager를 환경 객체로 설정
                 .onOpenURL(perform: { url in
                 if (AuthApi.isKakaoTalkLoginUrl(url)) {
-                    //AuthController.handleOpenUrl(url: url)
+                    AuthController.handleOpenUrl(url: url)
                 }
             })
         }
