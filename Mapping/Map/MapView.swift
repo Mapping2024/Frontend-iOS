@@ -118,6 +118,7 @@ struct MapView: View {
                                 }.disabled(true)
                             }
                             ProfileImageView()
+                                .frame(width:50, height:50)
                         }
                     }
                     .padding()

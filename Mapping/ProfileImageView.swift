@@ -31,7 +31,6 @@ struct ProfileImageView: View {
                         Image(systemName: "person.circle.fill")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 50)
                             .foregroundStyle(Color.gray)
                             .background(Circle().fill(Color.white))
                             .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
@@ -49,7 +48,6 @@ struct ProfileImageView: View {
                                     image
                                         .resizable()
                                         .scaledToFill()
-                                        .frame(width: 50, height: 50)
                                         .clipShape(Circle())
                                         .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
                                     
@@ -57,7 +55,6 @@ struct ProfileImageView: View {
                                     Image(systemName: "person.circle.fill") // 실패 시 기본 아이콘 표시
                                         .resizable()
                                         .scaledToFit()
-                                        .frame(width: 50)
                                         .foregroundStyle(Color.skyBlue)
                                         .background(Circle().fill(Color.black))
                                         .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
@@ -73,7 +70,6 @@ struct ProfileImageView: View {
                                 Image(systemName: "person.circle.fill")
                                     .resizable()
                                     .scaledToFit()
-                                    .frame(width: 50)
                                     .foregroundStyle(Color.skyBlue)
                                     .background(Circle().fill(Color.white))
                                     .shadow(color: .black.opacity(0.15), radius: 8, y: 2)

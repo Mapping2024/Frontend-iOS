@@ -15,13 +15,13 @@ struct MyInfoView: View {
                     Label("프로필", systemImage: "person")) {
             HStack() {
                 ProfileImageView()
-                    .frame(width: 40, height: 40)
+                    .frame(width: 50, height: 50)
                 //.padding(.leading)
                 if userManager.isLoggedIn, let userInfo = userManager.userInfo {
                     HStack{
                         Text("\(userInfo.nickname)님")
                             .font(.title2)
-                            .padding([.vertical, .leading])
+                            .padding(.leading)
                         Spacer()
                         NavigationLink(destination: ChangeMyInfoView()){
                             Text("프로필 변경")
@@ -32,6 +32,7 @@ struct MyInfoView: View {
                                     RoundedRectangle(cornerRadius: 10)
                                         .stroke(Color.blue, lineWidth: 2)
                                 )
+                                .padding()
                         }
                     }
                 } else {
