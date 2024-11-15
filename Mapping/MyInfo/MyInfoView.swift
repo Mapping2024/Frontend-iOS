@@ -9,6 +9,7 @@ import SwiftUI
 
 struct MyInfoView: View {
     @EnvironmentObject var userManager: UserManager
+    @Environment(\.presentationMode) var presentationMode
     
     var body: some View {
         GroupBox(label:
@@ -39,6 +40,7 @@ struct MyInfoView: View {
                     Spacer()
                     HStack {
                         Button(action: {
+                            presentationMode.wrappedValue.dismiss()
                             userManager.kakaoLogin()
                         }){
                             Text("카카오로 로그인 하기")

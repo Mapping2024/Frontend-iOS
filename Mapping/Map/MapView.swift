@@ -14,7 +14,6 @@ struct MapView: View {
     
     @State private var currentLatitude: Double?
     @State private var currentLongitude: Double?
-    @State private var navigateToMyInfo = false // MyInfoView로 이동을 위한 상태 변수
     
     var body: some View {
         NavigationStack {
@@ -110,10 +109,7 @@ struct MapView: View {
                                 }.disabled(true)
                             }
                             
-                            // ProfileImageView를 누르면 MyInfoView로 이동하는 링크 추가
-                            Button(action: {
-                                navigateToMyInfo = true
-                            }) {
+                            NavigationLink(destination: MyInfoView()) {
                                 ProfileImageView()
                                     .frame(width: 50, height: 50)
                             }
@@ -121,9 +117,6 @@ struct MapView: View {
                     }
                     .padding()
                 }
-            }
-            .navigationDestination(isPresented: $navigateToMyInfo) {
-                MyInfoView()
             }
         }
         .onAppear {
