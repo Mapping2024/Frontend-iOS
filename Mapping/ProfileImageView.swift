@@ -35,13 +35,7 @@ struct ProfileImageView: View {
                                 .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
                             
                         case .failure:
-                            Image(systemName: "person.circle.fill") // 실패 시 기본 아이콘 표시
-                                .resizable()
-                                .scaledToFit()
-                                .foregroundStyle(Color.skyBlue)
-                                .background(Circle().fill(Color.black))
-                                .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
-                            
+                            ProgressView()
                         @unknown default:
                             EmptyView()
                         }
