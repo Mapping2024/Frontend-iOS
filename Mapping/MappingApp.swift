@@ -26,7 +26,7 @@ struct MappingApp: App {
                 .environmentObject(userManager)  // UserManager를 환경 객체로 설정
                 .onOpenURL(perform: { url in
                 if (AuthApi.isKakaoTalkLoginUrl(url)) {
-                    AuthController.handleOpenUrl(url: url)
+                   _ = AuthController.handleOpenUrl(url: url)
                 }
             })
         }
