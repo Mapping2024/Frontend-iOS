@@ -63,7 +63,7 @@ playground.xcworkspace
 *.swiftdoc
 *.swiftsourceinfo
 *.xcodeproj/*
-*.xcassets
+# *.xcassets
 
 # 앱 번들 관련
 ####################
