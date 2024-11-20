@@ -21,7 +21,7 @@ class UserManager: ObservableObject {
     func login(accessTokenKakao: String) {
         self.accessTokenKakao = accessTokenKakao
         self.isLoggedIn = true
-        fetchUserInfo()  // 로그인 시 백엔드에서 사용자 정보 가져옴
+        fristLogin() // 로그인 시 백엔드에서 사용자 정보 가져옴
     }
     
     func logout() {
@@ -54,7 +54,7 @@ class UserManager: ObservableObject {
         }
     }
     
-    func fetchUserInfo() {
+    func fristLogin() {
         let url = "https://api.mapping.kro.kr/api/v2/member/login"
         let parameters: [String: String] = ["accessToken": accessTokenKakao]
         
@@ -71,10 +71,10 @@ class UserManager: ObservableObject {
                                     profileImage: userData.profileImage,
                                     role: userData.role
                                 )
-                                self.accessToken = userData.tokens.accessToken
-                                self.refreshToken = userData.tokens.refreshToken
-                                print(self.accessToken)
-                                //print(self.userInfo?.profileImage)
+                                if let token = userData.tokens {
+                                    self.accessToken = token.accessToken
+                                    self.refreshToken = token.refreshToken
+                                }
                             }
                         }
                     } else {
@@ -82,6 +82,72 @@ class UserManager: ObservableObject {
                     }
                 case .failure(let error):
                     print("Error fetching user info: \(error)")
+                }
+            }
+    }
+    
+    func fetchUserInfo() {
+        let url = "https://api.mapping.kro.kr/api/v2/member/user-info"
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(accessToken)"
+        ]
+        
+        AF.request(url, method: .get, headers: headers)
+            .responseDecodable(of: UserInfoResponse.self) { response in
+                switch response.result {
+                case .success(let data):
+                    if data.status == 200, data.success {
+                        if let userData = data.data {
+                            DispatchQueue.main.async {
+                                self.userInfo = UserInfo(
+                                    socialId: userData.socialId,
+                                    nickname: userData.nickname,
+                                    profileImage: userData.profileImage,
+                                    role: userData.role
+                                )
+                                print(self.accessToken)
+                                print("refresh token: \(self.refreshToken)")
+                            }
+                        }
+                    } else {
+                        print("Failed to fetch user info: \(data.message)")
+                    }
+                case .failure(let error):
+                    print("Error fetching user info: \(error)")
+                }
+            }
+    }
+    
+    func expiredAccessToken() {
+        let url = "https://api.mapping.kro.kr/api/v2/member/token-reissue"
+        let headers: HTTPHeaders = [
+            "Authorization-Refresh": "Bearer \(self.refreshToken)"
+        ]
+        
+        AF.request(url, method: .get, headers: headers)
+            .response { response in
+                guard let httpResponse = response.response else {
+                    print("No response received")
+                    //self.logout() // 로그아웃 처리
+                    return
+                }
+
+                if httpResponse.statusCode == 200 {
+                    print(httpResponse)
+                    if let newAccessToken = httpResponse.headers["Authorization"]
+                        {
+                        DispatchQueue.main.async {
+                            self.accessToken = newAccessToken
+                            //self.refreshToken = newRefreshToken
+                            print("Token reissued successfully \(self.accessToken)")
+                        }
+                    } else {
+                        print("Missing tokens in response headers")
+                        //self.logout() // 로그아웃 처리
+                    }
+                } else {
+                    print("Failed to reissue token, status code: \(httpResponse.statusCode)")
+                    self.logout() // 로그아웃 처리
                 }
             }
     }
