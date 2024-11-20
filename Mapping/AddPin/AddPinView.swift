@@ -33,7 +33,7 @@ struct AddPinView: View {
                 .onAppear {
                     locationManager.requestLocation()
                 }
-                .onChange(of: locationManager.userLocation) { newLocation in
+                .onChange(of:locationManager.userLocation) { oldLocation, newLocation in
                     if let newLocation = newLocation {
                         region.center = newLocation.coordinate
                     }

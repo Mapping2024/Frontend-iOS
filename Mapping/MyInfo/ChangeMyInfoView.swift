@@ -148,11 +148,10 @@ struct ChangeMyInfoView: View {
             if let imageData = selectedImage.jpegData(compressionQuality: 0.5) {
                 multipartFormData.append(imageData, withName: "image", fileName: uniqueFileName, mimeType: "image/png")
             }
-        }, to: url, method: .patch, headers: headers).responseJSON { response in
-            
+        }, to: url, method: .patch, headers: headers).response { response in
             switch response.result {
             case .success(let data):
-                if let jsonResponse = data as? [String: Any] {
+                if let data = data, let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
                     print("응답 JSON: \(jsonResponse)")
                     if let status = jsonResponse["status"] as? Int, status == 200 {
                         uploadSuccess = true
@@ -169,17 +168,17 @@ struct ChangeMyInfoView: View {
             }
         }
     }
-    
+
     func updateNickname() {
         let url = "https://api.mapping.kro.kr/api/v2/member/modify-nickname?nickname=\(newNickname)"
         let headers: HTTPHeaders = [
             "Authorization": "Bearer \(userManager.accessToken)"
         ]
         
-        AF.request(url, method: .patch, headers: headers).responseJSON { response in
+        AF.request(url, method: .patch, headers: headers).response { response in
             switch response.result {
             case .success(let data):
-                if let jsonResponse = data as? [String: Any] {
+                if let data = data, let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
                     print("응답 JSON: \(jsonResponse)")
                     if let status = jsonResponse["status"] as? Int, status == 200 {
                         uploadSuccess = true

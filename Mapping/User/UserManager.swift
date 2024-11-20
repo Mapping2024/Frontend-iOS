@@ -87,6 +87,8 @@ class UserManager: ObservableObject {
     }
     
     func fetchUserInfo() {
+        print(self.accessToken)
+        print("refresh token: \(self.refreshToken)")
         let url = "https://api.mapping.kro.kr/api/v2/member/user-info"
         let headers: HTTPHeaders = [
             "Authorization": "Bearer \(accessToken)"
@@ -105,8 +107,6 @@ class UserManager: ObservableObject {
                                     profileImage: userData.profileImage,
                                     role: userData.role
                                 )
-                                print(self.accessToken)
-                                print("refresh token: \(self.refreshToken)")
                             }
                         }
                     } else {
