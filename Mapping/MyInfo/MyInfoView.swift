@@ -14,10 +14,9 @@ struct MyInfoView: View {
     var body: some View {
         GroupBox(label:
                     Label("프로필", systemImage: "person")) {
-            HStack() {
+            HStack{
                 ProfileImageView()
                     .frame(width: 50, height: 50)
-                //.padding(.leading)
                 if userManager.isLoggedIn, let userInfo = userManager.userInfo {
                     HStack{
                         Text("\(userInfo.nickname)님")
@@ -27,11 +26,11 @@ struct MyInfoView: View {
                         NavigationLink(destination: ChangeMyInfoView()){
                             Text("프로필 변경")
                                 .padding(7)
-                                .background(Color.white) // 원하는 백그라운드 색상 지정
+                                .background(Color("cWhite")) // 원하는 백그라운드 색상 지정
                                 .cornerRadius(10) // 백그라운드에 모서리 곡선 적용
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 10)
-                                        .stroke(Color.blue, lineWidth: 2)
+                                        .stroke(Color("cBlue"), lineWidth: 2)
                                 )
                                 .padding()
                         }
@@ -45,11 +44,11 @@ struct MyInfoView: View {
                         }){
                             Text("카카오로 로그인 하기")
                                 .padding(7)
-                                .background(Color.white)
+                                .background(Color("cWhite"))
                                 .cornerRadius(10)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 10)
-                                        .stroke(Color.blue, lineWidth: 2)
+                                        .stroke(Color("cBlue"), lineWidth: 2)
                                 )
                         }
                         .padding()
@@ -76,6 +75,10 @@ struct MyInfoView: View {
                     .cornerRadius(10)
             }
             .padding(.horizontal)
+            
+            Button(action: {userManager.expiredAccessToken()}) {
+                Text("토큰 재발급")
+            }
         }
         Spacer()
     }

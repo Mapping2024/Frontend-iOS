@@ -27,83 +27,95 @@ struct ChangeMyInfoView: View {
             Divider()
             
             // 프로필 사진 영역
-            HStack{
-                Group {
-                    if let selectedImage = selectedImage.first {
-                        Image(uiImage: selectedImage)
-                            .resizable()
-                            .frame(width: 150, height: 150)
-                            .clipShape(Circle())
-                            .overlay(Circle().stroke(Color.blue, lineWidth: 2))
-                    } else {
-                        ProfileImageView()
-                            .frame(width: 150, height: 150)
-                            .overlay(Circle().stroke(Color.blue, lineWidth: 2))
+            GroupBox{
+                HStack{
+                    Group {
+                        if let selectedImage = selectedImage.first {
+                            Image(uiImage: selectedImage)
+                                .resizable()
+                                .frame(width: 150, height: 150)
+                                .clipShape(Circle())
+                                .overlay(Circle().stroke(Color.blue, lineWidth: 2))
+                        } else {
+                            ProfileImageView()
+                                .frame(width: 150, height: 150)
+                                .overlay(Circle().stroke(Color.blue, lineWidth: 2))
+                        }
+                    }
+                    Spacer()
+                    Button(action: {
+                        isPickerPresented = true
+                    }) {
+                        Text("사진 선택")
+                            .padding(7)
+                            .background(Color.blue) // 원하는 백그라운드 색상 지정
+                            .cornerRadius(10)// 백그라운드에 모서리 곡선 적용
+                            .foregroundStyle(.white)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color.blue, lineWidth: 2)
+                            )
+                    }
+                    .padding(.leading)
+                }
+                .padding()
+                
+                // 프로필 사진 업데이트 버튼
+                if selectedImage.first != nil {
+                    Button(action: {
+                        uploadProfileImage()
+                    }) {
+                        Text("프로필 사진 업데이트")
+                            .padding(7)
+                            .background(Color("cWhite")) // 원하는 백그라운드 색상 지정
+                            .cornerRadius(10) // 백그라운드에 모서리 곡선 적용
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color.blue, lineWidth: 2)
+                            )
                     }
                 }
-                .padding(.leading)
-                Spacer()
-                Button(action: {
-                    isPickerPresented = true
-                }) {
-                    Text("사진 선택")
-                        .padding(7)
-                        .background(Color.blue) // 원하는 백그라운드 색상 지정
-                        .cornerRadius(10)// 백그라운드에 모서리 곡선 적용
-                        .foregroundStyle(.white)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color.blue, lineWidth: 2)
-                        )
-                }
-                .padding(.trailing)
             }
             .padding()
             
-            // 프로필 사진 업데이트 버튼
-            if selectedImage.first != nil {
-                Button(action: {
-                    uploadProfileImage()
-                }) {
-                    Text("프로필 사진 업데이트")
-                        .padding(7)
-                        .background(Color.white) // 원하는 백그라운드 색상 지정
-                        .cornerRadius(10) // 백그라운드에 모서리 곡선 적용
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color.blue, lineWidth: 2)
-                        )
-                }
-            }
-            Divider()
-                .padding()
             // 닉네임 변경 입력 필드 및 버튼
-            HStack{
-                if let nickname = userManager.userInfo?.nickname {
-                    TextField("\(nickname)", text: $newNickname)
-                        .padding()
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                } else {
-                    EmptyView()
+            GroupBox{
+                HStack{
+                    if let nickname = userManager.userInfo?.nickname {
+                        TextField("\(nickname)", text: $newNickname)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.gray, lineWidth: 2) // 테두리 색상과 두께
+                            )
+                    } else {
+                        TextField("", text: $newNickname)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.gray, lineWidth: 2) // 테두리 색상과 두께
+                            )
+                    }
+                    
+                    Spacer()
+                    
+                    Button(action: {
+                        updateNickname()
+                    }) {
+                        Text("닉네임 변경")
+                            .padding(7)
+                            .background(Color.green) // 원하는 백그라운드 색상 지정
+                            .cornerRadius(10) // 백그라운드에 모서리 곡선 적용
+                            .foregroundStyle(.white)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color.green, lineWidth: 2)
+                            )
+                    }.padding(.leading)
                 }
-                
-                Spacer()
-                
-                Button(action: {
-                    updateNickname()
-                }) {
-                    Text("닉네임 변경")
-                        .padding(7)
-                        .background(Color.green) // 원하는 백그라운드 색상 지정
-                        .cornerRadius(10) // 백그라운드에 모서리 곡선 적용
-                        .foregroundStyle(.white)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color.green, lineWidth: 2)
-                        )
-                }.padding(.trailing)
+                .padding(.vertical)
             }
-            .padding()
+            .padding(.horizontal)
         }
         .sheet(isPresented: $isPickerPresented) {
             PhotoPicker(selectedImages: $selectedImage, selectionLimit: 1)

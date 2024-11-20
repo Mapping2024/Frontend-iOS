@@ -30,5 +30,5 @@ struct UserData: Codable {
     let nickname: String
     let profileImage: String?
     let role: String
-    let tokens: Tokens
+    let tokens: Tokens?
 }
