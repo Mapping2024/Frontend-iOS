@@ -11,8 +11,8 @@ struct ContentView: View {
     @EnvironmentObject var userManager: UserManager
     
     var body: some View {
-        MapView()
-    }
+            MapView()
+        }
 }
 
 #Preview {
