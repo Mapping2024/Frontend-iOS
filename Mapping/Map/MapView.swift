@@ -3,149 +3,125 @@ import MapKit
 import Alamofire
 
 struct MapView: View {
+    @State private var position: MapCameraPosition = .userLocation(fallback: .automatic)// 카메라 시점 설정
     @EnvironmentObject var userManager: UserManager
-    @StateObject private var locationManager = LocationManager()
-    @State private var selectedPinID: Int? = nil
-    @State private var memoLocations: [MemoLocation] = []
-    @State private var region = MKCoordinateRegion(
-        center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
-        span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
-    )
+    @State private var locationManager = LocationManager.shared
     
-    @State private var currentLatitude: Double?
-    @State private var currentLongitude: Double?
+    @State private var query: String = ""
+    @State private var selectedDetent: PresentationDetent = .fraction(0.15)
+    @State private var mapItems :[Item] = []
+    @State private var selectedMapItem: Int?
+    @State private var isMyInfo: Bool = false
     
-    var body: some View {
-        NavigationStack {
-            ZStack(alignment: .bottom) {
-                Map(coordinateRegion: $region, interactionModes: .all ,showsUserLocation: true, annotationItems: memoLocations) { memo in
-                    MapAnnotation(coordinate: CLLocationCoordinate2D(latitude: memo.lat, longitude: memo.lng)) {
-                        VStack {
-                            if (memo.category == "쓰레기통") {
-                                Image(systemName: "trash.circle.fill")
-                                    .font(.title)
-                                    .foregroundStyle(Color.black)
-                                    .background(Circle().fill(Color.white))
-                            } else if(memo.category == "공용 화장실") {
-                                Image(systemName: "toilet.circle.fill")
-                                    .font(.title)
-                                    .foregroundStyle(Color.blue)
-                                    .background(Circle().fill(Color.white))
-                            } else if (memo.category == "흡연장") {
-                                Image(systemName: "smoke.circle.fill")
-                                    .font(.title)
-                                    .foregroundStyle(Color.gray)
-                                    .background(Circle().fill(Color.white))
-                            } else {
-                                Image(systemName: "mappin.circle.fill")
-                                    .font(.title)
-                                    .foregroundStyle(Color.yellow)
-                                    .background(Circle().fill(Color.white))
-                            }
-                            Text(memo.title)
-                                .font(.caption)
-                        }
-                        .onTapGesture {
-                            selectedPinID = memo.id
-                        }
-                    }
-                }
-                .ignoresSafeArea(.all)
-                .onAppear {
-                    locationManager.requestLocation()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                        fetchMemoLocations()
-                    }
-                }
-                .onChange(of: locationManager.userLocation) { oldLocation, newLocation in
-                    if let newLocation = newLocation {
-                        region.center = newLocation.coordinate
-                        currentLatitude = newLocation.coordinate.latitude
-                        currentLongitude = newLocation.coordinate.longitude
-                    }
-                }
-                .mapControls {
-                    MapUserLocationButton()
-                    MapCompass()
-                    MapScaleView()
-                }
-                .sheet(isPresented: Binding<Bool>(
-                    get: { selectedPinID != nil },
-                    set: { newValue in
-                        if !newValue {
-                            selectedPinID = nil
-                        }
-                    })
-                ) {
-                    if let pinId = selectedPinID {
-                        MemoDetailView(id: pinId)
-                            .presentationDetents([.medium, .large])
-                    }
-                }
-                
-                VStack {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        VStack {
-                            if userManager.isLoggedIn {
-                                NavigationLink(destination: AddPinView()) {
-                                    Image(systemName: "mappin.and.ellipse.circle.fill")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 50)
-                                        .background(Circle().fill(Color.white))
-                                        .foregroundStyle(Color.skyBlue)
-                                        .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
-                                }
-                            } else {
-                                Button(action: {}) {
-                                    Image(systemName: "mappin.and.ellipse.circle.fill")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 50)
-                                        .background(Circle().fill(Color.gray))
-                                        .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
-                                }.disabled(true)
-                            }
-                            
-                            NavigationLink(destination: MyInfoView()) {
-                                ProfileImageView()
-                                    .frame(width: 50, height: 50)
-                            }
-                        }
-                    }
-                    .padding()
-                }
-            }
-        }
-        .onAppear {
-            if userManager.isLoggedIn && userManager.userInfo == nil {
-                userManager.fetchUserInfo()
-            }
+    @State private var locationData: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 0, longitude: 0) // 기본값 설정
+    
+    private func matching() async {
+        do {
+            mapItems = try await MemoMatching(location: locationData, accessToken: userManager.accessToken)
+            print(mapItems)
+        } catch {
+            mapItems = []
+            print(error.localizedDescription)
         }
     }
     
-    private func fetchMemoLocations() {
-        guard let lat = currentLatitude, let lng = currentLongitude else {
-            print("위치 정보가 아직 없습니다.")
-            return
+    private func categoryImage(for category: String) -> String {
+        switch category {
+        case "공용 화장실":
+            return "toilet.fill"
+        case "쓰레기통":
+            return "trash.fill"
+        case "흡연장":
+            return "smoke.fill"
+        default:
+            return "mappin"
         }
-        let accessToken = userManager.accessToken
-        let headers: HTTPHeaders = ["Authorization": "Bearer \(accessToken)"]
-        let url = "https://api.mapping.kro.kr/api/v2/memo/total?lat=\(lat)&lng=\(lng)&km=5"
-        
-        AF.request(url, method: .get, headers: headers).responseDecodable(of: MemoResponse.self) { response in
-            switch response.result {
-            case .success(let memoResponse):
-                if memoResponse.success {
-                    self.memoLocations = memoResponse.data
-                } else {
-                    print("Failed to fetch memo locations: \(memoResponse.message)")
+    }
+    
+    private func categoryColor(for category: String) -> Color {
+        switch category {
+        case "공용 화장실":
+            return .blue
+        case "쓰레기통":
+            return .red
+        case "흡연장":
+            return .gray
+        default:
+            return .yellow
+        }
+    }
+    
+    var body: some View {
+            ZStack(alignment: .top) {
+                Map(position: $position, selection: $selectedMapItem) {
+                    ForEach(mapItems, id: \.self) { mapItem in
+                        Marker(mapItem.title,systemImage: categoryImage(for: mapItem.category) , coordinate: mapItem.location)
+                            .tint(categoryColor(for: mapItem.category))
+                            .tag(mapItem.id)
+                    }
+                    UserAnnotation() // 내 위치 표현
                 }
-            case .failure(let error):
-                print("Error fetching memo locations: \(error)")
+                .sheet(isPresented: .constant(true), content: {
+                        VStack{
+                            HStack {
+                                TextField("Search", text: $query)
+                                    .textFieldStyle(.roundedBorder)
+                                    .padding()
+                                    .onSubmit {
+                                        // code fired when you return in TextField
+                                    }
+                                Spacer()
+                                
+                                Button(action: {isMyInfo.toggle()}) {
+                                    ProfileImageView()
+                                        .frame(width: 50, height: 50)
+                                }
+                                .padding(.trailing)
+                                .sheet(isPresented: $isMyInfo, content: {
+                                    NavigationView {
+                                        MyInfoView()
+                                    }
+                                    .presentationDragIndicator(.visible)
+                                })
+                            }
+                            .padding(.vertical)
+                            Spacer()
+                        }
+                        .presentationDetents([.fraction(0.15), .medium, .large], selection: $selectedDetent) // fraction:커스텀 높이
+                        .presentationDragIndicator(.visible) // 드래그할 수 있는게 표시된다.
+                        .interactiveDismissDisabled() // 사용자가 직업 없애는걸 막아준다.
+                        .presentationBackgroundInteraction(.enabled(upThrough: .medium)) // 중간 위로부터는 시트 뒤에 있는 배경과 상호작용이 가능해진다.
+                    })
+                .onChange(of: locationManager.region, { oldValue, newValue in
+                    position = .region(locationManager.region) // 내 위치가 바뀌면 지도 시선 위치를 변경해준다.
+                    if let location = position.region?.center {
+                        locationData = location
+                        Task {
+                            await matching()
+                        }
+                    }
+                })
+                .mapControls({
+                    MapUserLocationButton()
+                    MapCompass()
+                    MapScaleView()
+                })
             }
+            .onAppear {
+                        if userManager.isLoggedIn && userManager.userInfo == nil {
+                            userManager.fetchUserInfo()
+                        }
+                    }
+        }
+    }
+
+
+extension MKCoordinateRegion: @retroactive Equatable {
+    public static func == (lhs: MKCoordinateRegion, rhs: MKCoordinateRegion) -> Bool {
+        if lhs.center.latitude == rhs.center.latitude && lhs.span.latitudeDelta == rhs.span.latitudeDelta && lhs.span.longitudeDelta == rhs.span.longitudeDelta {
+            return true
+        } else {
+            return false
         }
     }
 }
@@ -155,17 +131,3 @@ struct MapView: View {
         .environmentObject(UserManager())
 }
 
-struct MemoLocation: Identifiable, Decodable {
-    let id: Int
-    let title: String
-    let category: String
-    let lat: Double
-    let lng: Double
-}
-
-struct MemoResponse: Decodable {
-    let status: Int
-    let success: Bool
-    let message: String
-    let data: [MemoLocation]
-}
