@@ -1,24 +1,13 @@
-//
-//  MemoDetailView.swift
-//  Mapping
-//
-//  Created by 김민정 on 11/3/24.
-//
-
 import SwiftUI
-import Alamofire
-
-import SwiftUI
-import Alamofire
 
 struct MemoDetailView: View {
     @EnvironmentObject var userManager: UserManager
-    var id: Int
+    @Binding var id: Int?
     @State private var memoDetail: MemoDetail?
     @State private var isLoading = true
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading) {
             if let detail = memoDetail {
                 HStack {
                     Text(detail.title)
@@ -47,6 +36,7 @@ struct MemoDetailView: View {
                         .font(.headline)
                         .padding(.top)
                 }
+                .padding(.top)
                 
                 Divider()
                 
@@ -116,38 +106,44 @@ struct MemoDetailView: View {
         }
         .padding()
         .onAppear {
-            delayFetch()
-        }
-    }
-    
-    private func delayFetch() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            fetchMemoDetail()
-        }
-    }
-    
-    private func fetchMemoDetail() {
-        let accessToken = userManager.accessToken
-        let headers: HTTPHeaders = ["Authorization": "Bearer \(accessToken)"]
-        let url = "https://api.mapping.kro.kr/api/v2/memo/detail?memoId=\(id)"
-        
-        AF.request(url, headers: headers)
-            .responseDecodable(of: MemoDetailResponse.self) { response in
-                switch response.result {
-                case .success(let memoDetailResponse):
-                    if memoDetailResponse.success {
-                        self.memoDetail = memoDetailResponse.data
-                    } else {
-                        print("Failed to fetch memo detail: \(memoDetailResponse.message)")
-                    }
-                case .failure(let error):
-                    print("Error fetching memo detail: \(error)")
-                }
-                self.isLoading = false
+            Task {
+                await fetchMemoDetail()
             }
+        }.onChange(of: id) { oldId, newId in
+            id = newId
+            Task {
+                await fetchMemoDetail()
+            }
+        }
+    }
+    
+    private func fetchMemoDetail() async {
+        guard let id = id else { return }
+        let urlString = "https://api.mapping.kro.kr/api/v2/memo/detail?memoId=\(id)"
+        guard let url = URL(string: urlString) else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue("Bearer \(userManager.accessToken)", forHTTPHeaderField: "Authorization")
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                throw URLError(.badServerResponse)
+            }
+            
+            let decodedResponse = try JSONDecoder().decode(MemoDetailResponse.self, from: data)
+            if decodedResponse.success {
+                memoDetail = decodedResponse.data
+            } else {
+                print("Failed to fetch memo detail: \(decodedResponse.message)")
+            }
+        } catch {
+            print("Error fetching memo detail: \(error)")
+        }
+        isLoading = false
     }
 }
-
 
 // 응답 전체 구조체
 struct MemoDetailResponse: Decodable {
@@ -171,6 +167,6 @@ struct MemoDetail: Decodable {
 }
 
 #Preview {
-    MemoDetailView(id: 3)
+    MemoDetailView(id: .constant(2))
         .environmentObject(UserManager())
 }
