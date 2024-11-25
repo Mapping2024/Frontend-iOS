@@ -68,13 +68,14 @@ struct MapView: View {
                         .tag(mapItem.id)
                 }
                 UserAnnotation() // 내 위치 표현
-            }
+            } //mainmodal
             .sheet(isPresented: .constant(true), content: {
                 VStack{
                     switch displayMode {
                     case .main:
                         SearchBarView(query: $query, isMyInfo: $isMyInfo)
-                        PinAddButton(isPinAdd: $isPinAdd, update: $update)
+                        if userManager.isLoggedIn && userManager.userInfo != nil {
+                            PinAddButton(isPinAdd: $isPinAdd, update: $update)}
                     case .detail:
                         MemoDetailView(id: $selectedMemoId)
                     }
@@ -115,11 +116,10 @@ struct MapView: View {
             }
         })
         .onAppear {
-            print(UserManager().accessToken)
-            print(UserManager().isLoggedIn)
-            print(UserManager().refreshToken)
             if userManager.isLoggedIn && userManager.userInfo == nil {
                 userManager.fetchUserInfo()
+                print(userManager.accessToken)
+                print(userManager.refreshToken)
             }
         }
     }

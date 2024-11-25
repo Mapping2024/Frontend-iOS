@@ -87,6 +87,7 @@ class UserManager: ObservableObject {
     }
     
     func fetchUserInfo() {
+        if !isLoggedIn { return }
         let url = "https://api.mapping.kro.kr/api/v2/member/user-info"
         let headers: HTTPHeaders = [
             "Authorization": "Bearer \(accessToken)"
@@ -94,30 +95,47 @@ class UserManager: ObservableObject {
         
         AF.request(url, method: .get, headers: headers)
             .responseDecodable(of: UserInfoResponse.self) { response in
-                switch response.result {
-                case .success(let data):
-                    if data.status == 200, data.success {
-                        if let userData = data.data {
-                            DispatchQueue.main.async {
-                                self.userInfo = UserInfo(
-                                    socialId: userData.socialId,
-                                    nickname: userData.nickname,
-                                    profileImage: userData.profileImage,
-                                    role: userData.role
-                                )
+                // 먼저 응답 상태 코드 확인
+                if let httpResponse = response.response {
+                    switch httpResponse.statusCode {
+                    case 200:
+                        // 성공적인 응답 처리
+                        print("Request successful (200): Data fetched successfully.")
+                        if let data = response.value {
+                            if data.status == 200, data.success {
+                                if let userData = data.data {
+                                    DispatchQueue.main.async {
+                                        self.userInfo = UserInfo(
+                                            socialId: userData.socialId,
+                                            nickname: userData.nickname,
+                                            profileImage: userData.profileImage,
+                                            role: userData.role
+                                        )
+                                    }
+                                }
+                            } else {
+                                print("Failed to fetch user info: \(data.message)")
                             }
                         }
-                    } else if data.status == 401 {
-                        self.expiredAccessToken()
-                        self.fetchUserInfo()
-                    } else {
-                        print("Failed to fetch user info: \(data.message)")
+                        
+                    case 401:
+                        // 401 에러 처리: 토큰 만료나 권한 문제로 처리
+                        print("Request failed (401): Unauthorized - Token may be expired.")
+                        // 토큰 재발급 처리를 위한 로직을 추가하거나 로그아웃 등을 처리
+                        self.expiredAccessToken()  // 예시로 토큰 재발급 처리 호출
+                    default:
+                        // 기타 상태 코드 처리
+                        print("Request failed with status code: \(httpResponse.statusCode)")
                     }
-                case .failure(let error):
+                }
+                
+                // 실패 결과 처리 (디코딩 에러 등)
+                if let error = response.error {
                     print("Error fetching user info: \(error)")
                 }
             }
     }
+
     
     func expiredAccessToken() {
         let url = "https://api.mapping.kro.kr/api/v2/member/token-reissue"

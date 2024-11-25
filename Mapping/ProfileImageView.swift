@@ -5,7 +5,6 @@ struct ProfileImageView: View {
     
     // 프로필 이미지 URL 추출 로직을 외부로 분리
     private var profileImageURL: URL? {
-        userManager.fetchUserInfo() // 토큰 유효성 확인 및 재발급
         guard let profileImage = userManager.userInfo?.profileImage,
               let url = URL(string: profileImage) else {
             return nil
