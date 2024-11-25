@@ -117,6 +117,7 @@ struct MapView: View {
         .onAppear {
             print(UserManager().accessToken)
             print(UserManager().isLoggedIn)
+            print(UserManager().refreshToken)
             if userManager.isLoggedIn && userManager.userInfo == nil {
                 userManager.fetchUserInfo()
             }
