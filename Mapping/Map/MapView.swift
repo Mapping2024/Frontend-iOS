@@ -12,12 +12,13 @@ struct MapView: View {
     @State private var position: MapCameraPosition = .userLocation(fallback: .automatic)// 카메라 시점 설정
     @EnvironmentObject var userManager: UserManager
     @State private var locationManager = LocationManager.shared
+    @State var update: Bool = false
     
     @State private var query: String = ""
-
     @State private var mapItems :[Item] = []
     @State private var selectedMemoId: Int?
     @State private var isMyInfo: Bool = false
+    @State private var isPinAdd: Bool = false
     @State private var displayMode: DisplayMode = .main
     
     @State private var locationData: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 0, longitude: 0) // 기본값 설정
@@ -73,6 +74,7 @@ struct MapView: View {
                     switch displayMode {
                     case .main:
                         SearchBarView(query: $query, isMyInfo: $isMyInfo)
+                        PinAddButton(isPinAdd: $isPinAdd, update: $update)
                     case .detail:
                         MemoDetailView(id: $selectedMemoId)
                     }
@@ -102,6 +104,14 @@ struct MapView: View {
                 displayMode = .detail
             } else {
                 displayMode = .main
+            }
+        })
+        .onChange(of: update, {oldValue, newValue in
+            if update {
+                Task{
+                    await matching()
+                }
+                update = false
             }
         })
         .onAppear {

@@ -15,7 +15,6 @@ struct ChangeMyInfoView: View {
     @State private var isPickerPresented = false
     @State private var uploadSuccessText: String? = nil
     @State private var uploadSuccess = false
-    
     @State private var newNickname: String = ""
     
     var body: some View {
