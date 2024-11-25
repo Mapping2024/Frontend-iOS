@@ -134,6 +134,7 @@ struct ChangeMyInfoView: View {
     }
     
     func uploadProfileImage() {
+        userManager.fetchUserInfo() // 토큰 유효성 확인 및 재발급
         guard let selectedImage = selectedImage.first else { return }
         
         let url = "https://api.mapping.kro.kr/api/v2/member/modify-profile-image"
@@ -169,6 +170,7 @@ struct ChangeMyInfoView: View {
     }
 
     func updateNickname() {
+        userManager.fetchUserInfo() // 토큰 유효성 확인 및 재발급
         let url = "https://api.mapping.kro.kr/api/v2/member/modify-nickname?nickname=\(newNickname)"
         let headers: HTTPHeaders = [
             "Authorization": "Bearer \(userManager.accessToken)"

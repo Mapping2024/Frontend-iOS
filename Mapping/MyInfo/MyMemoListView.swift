@@ -72,6 +72,7 @@ struct MyMemoListView: View {
     }
     
     private func fetchMyMemo() {
+        userManager.fetchUserInfo() // 토큰 유효성 확인 및 재발급
         let accessToken = userManager.accessToken
         let headers: HTTPHeaders = ["Authorization": "Bearer \(accessToken)"]
         let url = "https://api.mapping.kro.kr/api/v2/memo/my-memo"
