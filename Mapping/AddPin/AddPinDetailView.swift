@@ -1,10 +1,3 @@
-//
-//  PinMakeModal.swift
-//  Mapping
-//
-//  Created by 김민정 on 11/2/24.
-//
-
 import SwiftUI
 import Alamofire
 import PhotosUI
@@ -18,20 +11,23 @@ enum PinCategory: String, CaseIterable, Identifiable {
     var id: String { self.rawValue }
 }
 
-struct AddPinModal: View {
+struct AddPinDetailView: View {
     @EnvironmentObject var userManager: UserManager
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
+    @Binding var backFlag: Bool
     @State private var pinName: String = ""
     @State private var pinDescription: String = ""
     @State private var selectedCategory: PinCategory = .other
     @State private var selectedImages: [UIImage] = []
     @State private var isPickerPresented = false
+    @State private var uploadSuccessText: String? = nil
+    @State private var uploadSuccess = false
     
     var latitude: Double
     var longitude: Double
     
     var body: some View {
-        NavigationView {
+        Group{
             Form {
                 Section(header: Text("제목")) {
                     TextField("핀 이름", text: $pinName)
@@ -69,20 +65,25 @@ struct AddPinModal: View {
                 }
             }
             .navigationTitle("핀 생성하기")
-            .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(
-                leading: Button(action: {
-                    presentationMode.wrappedValue.dismiss()
-                }) {
-                    Image(systemName: "xmark")
-                },
                 trailing: Button("생성") {
                     createPin()
-                }
+                }.disabled(pinName.isEmpty || pinDescription.isEmpty)
             )
             .sheet(isPresented: $isPickerPresented) {
                 PhotoPicker(selectedImages: $selectedImages, selectionLimit: 5)
             }
+        }
+        .alert(isPresented: $uploadSuccess) {
+            Alert(
+                title: Text("\(uploadSuccessText!)"),
+                message: nil,
+                dismissButton: .default(Text("확인")){
+                    dismiss()
+                    backFlag = true
+                }
+            )
+            
         }
     }
     
@@ -116,14 +117,17 @@ struct AddPinModal: View {
         }, to: fullURL, headers: headers).response { response in
             switch response.result {
             case .success:
+                uploadSuccess = true
+                uploadSuccessText = "핀 생성 완료"
                 if let data = response.data, let responseString = String(data: data, encoding: .utf8) {
                     print("요청 성공: \(responseString)")
                 } else {
                     print("요청 성공: 데이터 없음")
                 }
-                presentationMode.wrappedValue.dismiss()
                 
             case .failure(let error):
+                uploadSuccess = true
+                uploadSuccessText = "핀 생성 오류 다시 한번 시도해 주세요"
                 if let data = response.data, let responseString = String(data: data, encoding: .utf8) {
                     print("요청 실패: \(error)\n응답 내용: \(responseString)")
                 } else {
@@ -135,6 +139,6 @@ struct AddPinModal: View {
 }
 
 #Preview {
-    AddPinModal(latitude: 37.7749, longitude: -122.4194) // 예시 위도와 경도 값
+    AddPinDetailView(backFlag: .constant(false), latitude: 37.7749, longitude: -122.4194) // 예시 위도와 경도 값
         .environmentObject(UserManager())
 }
