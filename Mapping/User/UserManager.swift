@@ -31,7 +31,7 @@ class UserManager: ObservableObject {
         self.userInfo = nil
         self.isLoggedIn = false
     }
-
+    
     func kakaoLogin() {
         if UserApi.isKakaoTalkLoginAvailable() {
             UserApi.shared.loginWithKakaoTalk { (oauthToken, error) in
@@ -107,6 +107,9 @@ class UserManager: ObservableObject {
                                 )
                             }
                         }
+                    } else if data.status == 401 {
+                        self.expiredAccessToken()
+                        self.fetchUserInfo()
                     } else {
                         print("Failed to fetch user info: \(data.message)")
                     }
@@ -126,22 +129,22 @@ class UserManager: ObservableObject {
             .response { response in
                 guard let httpResponse = response.response else {
                     print("No response received")
-                    //self.logout() // 로그아웃 처리
+                    self.logout() // 로그아웃 처리
                     return
                 }
-
+                
                 if httpResponse.statusCode == 200 {
                     print(httpResponse)
-                    if let newAccessToken = httpResponse.headers["Authorization"]
-                        {
+                    if let newAccessToken = httpResponse.headers["authorization"], let newRefreshToken = httpResponse.headers["authorization-refresh"]
+                    {
                         DispatchQueue.main.async {
-                            self.accessToken = newAccessToken
-                            //self.refreshToken = newRefreshToken
-                            print("Token reissued successfully \(self.accessToken)")
+                            self.accessToken = newAccessToken.replacingOccurrences(of: "Bearer ", with: "")
+                            self.refreshToken = newRefreshToken.replacingOccurrences(of: "Bearer ", with: "")
+                            print("Token reissued successfully ")
                         }
                     } else {
                         print("Missing tokens in response headers")
-                        //self.logout() // 로그아웃 처리
+                        self.logout() // 로그아웃 처리
                     }
                 } else {
                     print("Failed to reissue token, status code: \(httpResponse.statusCode)")

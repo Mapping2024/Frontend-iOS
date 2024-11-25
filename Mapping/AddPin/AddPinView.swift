@@ -1,10 +1,3 @@
-//
-//  AddPinView.swift
-//  Mapping
-//
-//  Created by 김민정 on 11/6/24.
-//
-
 import SwiftUI
 import MapKit
 

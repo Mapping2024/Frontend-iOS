@@ -75,10 +75,6 @@ struct MyInfoView: View {
                         .cornerRadius(10)
                 }
                 .padding(.horizontal)
-                
-                Button(action: {userManager.expiredAccessToken()}) {
-                    Text("토큰 재발급")
-                }
             }
             Spacer()
         }

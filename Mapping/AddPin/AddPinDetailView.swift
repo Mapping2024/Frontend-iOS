@@ -88,6 +88,7 @@ struct AddPinDetailView: View {
     }
     
     func createPin() {
+        userManager.fetchUserInfo() // 토큰 유효성 확인 및 재발급
         let url = "https://api.mapping.kro.kr/api/v2/memo/new"
         
         let parameters: [String: String] = [

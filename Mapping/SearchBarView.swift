@@ -23,7 +23,7 @@ struct SearchBarView: View {
                 
                 Button(action: {isMyInfo.toggle()}) {
                     ProfileImageView()
-                        .frame(width: 50, height: 50)
+                        .frame(width: 40, height: 40)
                 }
                 .padding(.trailing)
                 .sheet(isPresented: $isMyInfo, content: {
@@ -39,5 +39,5 @@ struct SearchBarView: View {
 }
 
 //#Preview {
-//    SearchBarView()
+//    SearchBarView(query: .constant("init"), isMyInfo: .constant(false))
 //}
