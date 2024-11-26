@@ -10,6 +10,7 @@ import SwiftUI
 struct SearchBarView: View {
     @Binding var query: String
     @Binding var isMyInfo: Bool
+    @Binding var category: String
     
     var body: some View {
         HStack {
@@ -34,7 +35,7 @@ struct SearchBarView: View {
             })
         }
         .padding(.top)
-        CategoryView()
+        CategoryView(category: $category)
         Spacer()
     }
 }

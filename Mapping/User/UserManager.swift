@@ -159,6 +159,7 @@ class UserManager: ObservableObject {
                             self.accessToken = newAccessToken.replacingOccurrences(of: "Bearer ", with: "")
                             self.refreshToken = newRefreshToken.replacingOccurrences(of: "Bearer ", with: "")
                             print("Token reissued successfully ")
+                            self.fetchUserInfo()
                         }
                     } else {
                         print("Missing tokens in response headers")

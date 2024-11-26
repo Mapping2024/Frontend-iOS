@@ -7,15 +7,16 @@ enum DisplayMode {
     case detail
 }
 
-
 struct MapView: View {
-    @State private var position: MapCameraPosition = .userLocation(fallback: .automatic)// 카메라 시점 설정
+    @State private var position: MapCameraPosition = .userLocation(fallback: .automatic) // 카메라 시점 설정
     @EnvironmentObject var userManager: UserManager
     @State private var locationManager = LocationManager.shared
     @State var update: Bool = false
+    @State var category: String = "전체"
     
     @State private var query: String = ""
-    @State private var mapItems :[Item] = []
+    @State private var mapItems: [Item] = []
+    @State private var filteredMapItems: [Item] = [] // 필터링된 데이터를 저장할 변수
     @State private var selectedMemoId: Int?
     @State private var isMyInfo: Bool = false
     @State private var isPinAdd: Bool = false
@@ -26,10 +27,19 @@ struct MapView: View {
     private func matching() async {
         do {
             mapItems = try await MemoMatching(location: locationData, accessToken: userManager.accessToken)
-            //print(mapItems)
+            applyFilter() // 필터 적용
         } catch {
             mapItems = []
+            filteredMapItems = []
             print(error.localizedDescription)
+        }
+    }
+    
+    private func applyFilter() {
+        if category == "전체" {
+            filteredMapItems = mapItems
+        } else {
+            filteredMapItems = mapItems.filter { $0.category == category }
         }
     }
     
@@ -62,31 +72,32 @@ struct MapView: View {
     var body: some View {
         ZStack(alignment: .top) {
             Map(position: $position, selection: $selectedMemoId) {
-                ForEach(mapItems, id: \.self) { mapItem in
-                    Marker(mapItem.title,systemImage: categoryImage(for: mapItem.category) , coordinate: mapItem.location)
+                ForEach(filteredMapItems, id: \.self) { mapItem in // 필터링된 데이터를 사용
+                    Marker(mapItem.title, systemImage: categoryImage(for: mapItem.category), coordinate: mapItem.location)
                         .tint(categoryColor(for: mapItem.category))
                         .tag(mapItem.id)
                 }
                 UserAnnotation() // 내 위치 표현
-            } //mainmodal
+            }
             .sheet(isPresented: .constant(true), content: {
-                VStack{
+                VStack {
                     switch displayMode {
                     case .main:
-                        SearchBarView(query: $query, isMyInfo: $isMyInfo)
+                        SearchBarView(query: $query, isMyInfo: $isMyInfo, category: $category)
                         if userManager.isLoggedIn && userManager.userInfo != nil {
-                            PinAddButton(isPinAdd: $isPinAdd, update: $update)}
+                            PinAddButton(isPinAdd: $isPinAdd, update: $update)
+                        }
                     case .detail:
                         MemoDetailView(id: $selectedMemoId)
                     }
                 }
                 .presentationDetents([.fraction(0.15), .medium, .large])
-                .presentationDragIndicator(.visible) // 드래그할 수 있는게 표시된다.
-                .interactiveDismissDisabled() // 사용자가 직업 없애는걸 막아준다.
-                .presentationBackgroundInteraction(.enabled(upThrough: .medium)) // 중간 위로부터는 시트 뒤에 있는 배경과 상호작용이 가능해진다.
+                .presentationDragIndicator(.visible)
+                .interactiveDismissDisabled()
+                .presentationBackgroundInteraction(.enabled(upThrough: .medium))
             })
             .onChange(of: locationManager.region, { oldValue, newValue in
-                position = .region(locationManager.region) // 내 위치가 바뀌면 지도 시선 위치를 변경해준다.
+                position = .region(locationManager.region) // 내 위치가 바뀌면 지도 시선 위치를 변경
                 if let location = position.region?.center {
                     locationData = location
                     Task {
@@ -101,19 +112,18 @@ struct MapView: View {
             })
         }
         .onChange(of: selectedMemoId, { oldValue, newValue in
-            if selectedMemoId != nil {
-                displayMode = .detail
-            } else {
-                displayMode = .main
-            }
+            displayMode = (selectedMemoId != nil) ? .detail : .main
         })
-        .onChange(of: update, {oldValue, newValue in
+        .onChange(of: update, { oldValue, newValue in
             if update {
-                Task{
+                Task {
                     await matching()
                 }
                 update = false
             }
+        })
+        .onChange(of: category, { oldValue, newValue in
+            applyFilter() // 카테고리가 변경될 때 필터링 적용
         })
         .onAppear {
             if userManager.isLoggedIn && userManager.userInfo == nil {
@@ -125,15 +135,11 @@ struct MapView: View {
     }
 }
 
-
 extension MKCoordinateRegion: @retroactive Equatable {
-    
     public static func == (lhs: MKCoordinateRegion, rhs: MKCoordinateRegion) -> Bool {
-        if lhs.center.latitude == rhs.center.latitude && lhs.span.latitudeDelta == rhs.span.latitudeDelta && lhs.span.longitudeDelta == rhs.span.longitudeDelta {
-            return true
-        } else {
-            return false
-        }
+        lhs.center.latitude == rhs.center.latitude &&
+        lhs.span.latitudeDelta == rhs.span.latitudeDelta &&
+        lhs.span.longitudeDelta == rhs.span.longitudeDelta
     }
 }
 
@@ -141,4 +147,3 @@ extension MKCoordinateRegion: @retroactive Equatable {
     MapView()
         .environmentObject(UserManager())
 }
-
