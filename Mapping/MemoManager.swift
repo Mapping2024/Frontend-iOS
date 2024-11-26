@@ -10,7 +10,6 @@ func MemoMatching(location: CLLocationCoordinate2D, accessToken: String) async t
     let headers: HTTPHeaders = ["Authorization": "Bearer \(accessToken)"]
     let url = "https://api.mapping.kro.kr/api/v2/memo/total?lat=\(lat)&lng=\(lng)&km=5"
 
-    // Alamofire 요청을 async 방식으로 변환
     return try await withCheckedThrowingContinuation { continuation in
         AF.request(url, method: .get, headers: headers).responseDecodable(of: MemoResponse.self) { response in
             switch response.result {
