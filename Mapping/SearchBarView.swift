@@ -34,7 +34,6 @@ struct SearchBarView: View {
                 .presentationDragIndicator(.visible)
             })
         }
-        .padding(.top)
         CategoryView(category: $category)
         Spacer()
     }

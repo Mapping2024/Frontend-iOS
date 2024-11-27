@@ -52,7 +52,7 @@ struct MapView: View {
         case "흡연장":
             return "smoke.fill"
         default:
-            return "mappin"
+            return "star.fill"
         }
     }
     
