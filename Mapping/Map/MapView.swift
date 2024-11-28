@@ -85,11 +85,8 @@ struct MapView: View {
                     switch displayMode {
                     case .main:
                         SearchBarView(query: $query, isMyInfo: $isMyInfo)
-                        CategoryView(category: $category)
+                        CategoryView(category: $category, isPinAdd: $isPinAdd, update: $update)
                         Spacer()
-                        if userManager.isLoggedIn && userManager.userInfo != nil && selectedDetent != .small {
-                                PinAddButton(isPinAdd: $isPinAdd, update: $update)
-                        }
                     case .detail:
                         MemoDetailView(id: $selectedMemoId, size: $selectedDetent)
                         Spacer()

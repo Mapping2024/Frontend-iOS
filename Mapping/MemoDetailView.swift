@@ -8,11 +8,8 @@ struct MemoDetailView: View {
     @State private var isLoading = true
     
     var body: some View {
-        if size == .small {
-            Spacer().frame(minHeight: 30)
-        } else {
-            Spacer().frame(minHeight: 15, maxHeight: 15)
-        }
+        Spacer().frame(minHeight: 15, maxHeight: 15)
+
         VStack(alignment: .leading) {
             if let detail = memoDetail {
                 HStack {

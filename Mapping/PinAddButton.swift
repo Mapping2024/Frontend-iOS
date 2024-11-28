@@ -13,15 +13,15 @@ struct PinAddButton: View {
     
     var body: some View {
         Button(action:{isPinAdd.toggle()}){
-            Text("핀 추가하기")
-                .padding(7)
-                .background(Color.blue) // 원하는 백그라운드 색상 지정
-                .cornerRadius(10)// 백그라운드에 모서리 곡선 적용
-                .foregroundStyle(.white)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(Color.blue, lineWidth: 2)
-                )
+            HStack{
+                Image(systemName: "mappin.and.ellipse")
+                Text("핀 생성")
+                    .font(.caption)
+            }
+            .padding(10)
+            .background(Color.yellow) // 원하는 백그라운드 색상 지정
+            .cornerRadius(8)// 백그라운드에 모서리 곡선 적용
+            .foregroundStyle(.white)
         }
         .sheet(isPresented: $isPinAdd, content: {
             NavigationView {
