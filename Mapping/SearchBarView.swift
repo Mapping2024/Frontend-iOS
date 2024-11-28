@@ -10,35 +10,34 @@ import SwiftUI
 struct SearchBarView: View {
     @Binding var query: String
     @Binding var isMyInfo: Bool
-    @Binding var category: String
     
     var body: some View {
-        HStack {
-            TextField("Search", text: $query)
-                .textFieldStyle(.roundedBorder)
-                .padding()
-                .onSubmit {
-                    // code fired when you return in TextField
+        Spacer().frame(minHeight: 13, maxHeight: 13)
+            HStack {
+                Spacer()
+                TextField("Search", text: $query)
+                    .textFieldStyle(.roundedBorder)
+                    .onSubmit {
+                        // code fired when you return in TextField
+                    }
+                Spacer()
+                
+                Button(action: {isMyInfo.toggle()}) {
+                    ProfileImageView()
+                        .frame(width: 40, height: 40)
                 }
-            Spacer()
-            
-            Button(action: {isMyInfo.toggle()}) {
-                ProfileImageView()
-                    .frame(width: 40, height: 40)
+                .sheet(isPresented: $isMyInfo, content: {
+                    NavigationStack {
+                        MyInfoView()
+                    }
+                    .presentationDragIndicator(.visible)
+                })
+                Spacer()
             }
-            .padding(.trailing)
-            .sheet(isPresented: $isMyInfo, content: {
-                NavigationView {
-                    MyInfoView()
-                }
-                .presentationDragIndicator(.visible)
-            })
         }
-        CategoryView(category: $category)
-        Spacer()
     }
-}
 
-//#Preview {
-//    SearchBarView(query: .constant("init"), isMyInfo: .constant(false))
-//}
+
+#Preview {
+    SearchBarView(query: .constant("Coffe"), isMyInfo: .constant (false)).environmentObject(UserManager())
+}

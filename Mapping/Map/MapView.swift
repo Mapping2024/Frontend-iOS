@@ -13,6 +13,7 @@ struct MapView: View {
     @State private var locationManager = LocationManager.shared
     @State var update: Bool = false
     @State var category: String = "전체"
+    @State private var selectedDetent: PresentationDetent = .small
     
     @State private var query: String = ""
     @State private var mapItems: [Item] = []
@@ -83,15 +84,18 @@ struct MapView: View {
                 VStack {
                     switch displayMode {
                     case .main:
-                        SearchBarView(query: $query, isMyInfo: $isMyInfo, category: $category)
-                        if userManager.isLoggedIn && userManager.userInfo != nil {
-                            PinAddButton(isPinAdd: $isPinAdd, update: $update)
+                        SearchBarView(query: $query, isMyInfo: $isMyInfo)
+                        CategoryView(category: $category)
+                        Spacer()
+                        if userManager.isLoggedIn && userManager.userInfo != nil && selectedDetent != .small {
+                                PinAddButton(isPinAdd: $isPinAdd, update: $update)
                         }
                     case .detail:
-                        MemoDetailView(id: $selectedMemoId)
+                        MemoDetailView(id: $selectedMemoId, size: $selectedDetent)
+                        Spacer()
                     }
                 }
-                .presentationDetents([.fraction(0.15), .medium, .large])
+                .presentationDetents([.small, .medium, .large], selection: $selectedDetent)
                 .presentationDragIndicator(.visible)
                 .interactiveDismissDisabled()
                 .presentationBackgroundInteraction(.enabled(upThrough: .medium))
@@ -114,7 +118,7 @@ struct MapView: View {
         .onChange(of: selectedMemoId, { oldValue, newValue in
             displayMode = (selectedMemoId != nil) ? .detail : .main
         })
-        .onChange(of: update, { oldValue, newValue in
+        .onChange(of: update, { oldValue, newValue in // 핀 추가후 지도 업데이트
             if update {
                 Task {
                     await matching()
@@ -122,14 +126,12 @@ struct MapView: View {
                 update = false
             }
         })
-        .onChange(of: category, { oldValue, newValue in
+        .onChange(of: category, { oldValue, newValue in // 카테고리 변경시 지도 업데이트
             applyFilter() // 카테고리가 변경될 때 필터링 적용
         })
         .onAppear {
             if userManager.isLoggedIn && userManager.userInfo == nil {
                 userManager.fetchUserInfo()
-                print(userManager.accessToken)
-                print(userManager.refreshToken)
             }
         }
     }
@@ -141,6 +143,10 @@ extension MKCoordinateRegion: @retroactive Equatable {
         lhs.span.latitudeDelta == rhs.span.latitudeDelta &&
         lhs.span.longitudeDelta == rhs.span.longitudeDelta
     }
+}
+
+extension PresentationDetent {
+    static let small = Self.fraction(0.15)
 }
 
 #Preview {

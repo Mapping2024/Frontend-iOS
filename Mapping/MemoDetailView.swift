@@ -3,17 +3,25 @@ import SwiftUI
 struct MemoDetailView: View {
     @EnvironmentObject var userManager: UserManager
     @Binding var id: Int?
+    @Binding var size: PresentationDetent
     @State private var memoDetail: MemoDetail?
     @State private var isLoading = true
     
     var body: some View {
+        if size == .small {
+            Spacer().frame(minHeight: 30)
+        } else {
+            Spacer().frame(minHeight: 15, maxHeight: 15)
+        }
         VStack(alignment: .leading) {
             if let detail = memoDetail {
                 HStack {
-                    Text(detail.title)
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .padding(.top)
+                    VStack(alignment: .leading){
+                        Text(detail.title)
+                            .font(.title)
+                            .fontWeight(.bold)
+                        Text("날짜").font(.caption2)
+                    }
                     Spacer()
                     if let profileImageUrl = detail.profileImage {
                         AsyncImage(url: URL(string: profileImageUrl)) { image in
@@ -21,7 +29,6 @@ struct MemoDetailView: View {
                                 .resizable()
                                 .frame(width: 40, height: 40)
                                 .clipShape(Circle())
-                                .padding(.top)
                         } placeholder: {
                             Image(systemName: "person.circle.fill")
                                 .font(.title)
@@ -29,14 +36,11 @@ struct MemoDetailView: View {
                     } else {
                         Image(systemName: "person.circle.fill")
                             .font(.title)
-                            .padding(.top)
                     }
                     
-                    Text(detail.nickname)
+                    Text("\(detail.nickname)님")
                         .font(.headline)
-                        .padding(.top)
                 }
-                .padding(.top)
                 
                 Divider()
                 
@@ -44,50 +48,53 @@ struct MemoDetailView: View {
                     .font(.body)
                 
                 if let images = detail.images, !images.isEmpty {
-                    if images.count == 1 {
-                        AsyncImage(url: URL(string: images[0])) { phase in
-                            switch phase {
-                            case .empty:
-                                ProgressView()
-                            case .success(let image):
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .cornerRadius(8)
-                            case .failure:
-                                Image(systemName: "photo")
-                                    .resizable()
-                                    .foregroundColor(.gray)
-                            @unknown default:
-                                EmptyView()
+                    Group{
+                        if images.count == 1 {
+                            AsyncImage(url: URL(string: images[0])) { phase in
+                                switch phase {
+                                case .empty:
+                                    ProgressView()
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .cornerRadius(8)
+                                case .failure:
+                                    Image(systemName: "photo")
+                                        .resizable()
+                                        .foregroundColor(.gray)
+                                @unknown default:
+                                    EmptyView()
+                                }
                             }
-                        }
-                    } else {
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 10) {
-                                ForEach(images, id: \.self) { imageUrl in
-                                    AsyncImage(url: URL(string: imageUrl)) { phase in
-                                        switch phase {
-                                        case .empty:
-                                            ProgressView()
-                                        case .success(let image):
-                                            image
-                                                .resizable()
-                                                .frame(width: 200, height: 150)
-                                                .cornerRadius(8)
-                                        case .failure:
-                                            Image(systemName: "photo")
-                                                .resizable()
-                                                .foregroundColor(.gray)
-                                        @unknown default:
-                                            EmptyView()
+                        } else {
+                            ScrollView(.horizontal, showsIndicators: true) {
+                                HStack(spacing: 10) {
+                                    ForEach(images, id: \.self) { imageUrl in
+                                        AsyncImage(url: URL(string: imageUrl)) { phase in
+                                            switch phase {
+                                            case .empty:
+                                                ProgressView()
+                                            case .success(let image):
+                                                image
+                                                    .resizable()
+                                                    .frame(width: 200, height: 150)
+                                                    .cornerRadius(8)
+                                            case .failure:
+                                                Image(systemName: "photo")
+                                                    .resizable()
+                                                    .foregroundColor(.gray)
+                                            @unknown default:
+                                                EmptyView()
+                                                
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
-                        .frame(height: 150)
                     }
+                    .frame(width: size == .small ? 0 : nil, height: size == .small ? 0 : nil)
                 }
                 
                 HStack {
@@ -104,7 +111,7 @@ struct MemoDetailView: View {
                     .foregroundColor(.red)
             }
         }
-        .padding()
+        .padding(.horizontal)
         .onAppear {
             Task {
                 await fetchMemoDetail()
@@ -167,6 +174,6 @@ struct MemoDetail: Decodable {
 }
 
 #Preview {
-    MemoDetailView(id: .constant(2))
+    MemoDetailView(id: .constant(2), size: .constant(.medium))
         .environmentObject(UserManager())
 }
