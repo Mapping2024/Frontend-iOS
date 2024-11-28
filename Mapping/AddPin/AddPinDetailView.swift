@@ -35,10 +35,7 @@ struct AddPinDetailView: View {
                 
                 Section(header: Text("내용")) {
                     TextEditor( text: $pinDescription)
-                        .overlay(alignment: .topLeading) {
-                            Text("핀 내용 ")
-                                .foregroundStyle(pinDescription.isEmpty ? Color(.systemGray3) : .clear)
-                        }
+                        .frame(height: 100)
                 }
                 
                 Section(header: Text("카테고리")) {
