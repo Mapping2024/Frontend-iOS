@@ -19,9 +19,9 @@ struct PinAddButton: View {
                     .font(.caption)
             }
             .padding(10)
-            .background(Color.yellow) // 원하는 백그라운드 색상 지정
+            .background(Color.cYellow) // 원하는 백그라운드 색상 지정
             .cornerRadius(8)// 백그라운드에 모서리 곡선 적용
-            .foregroundStyle(.white)
+            .foregroundStyle(Color.cWhite)
         }
         .sheet(isPresented: $isPinAdd, content: {
             NavigationView {

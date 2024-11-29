@@ -33,9 +33,9 @@ struct CategoryView: View {
                             }
                         }
                         .padding(10)
-                        .background(category == key ? Color.blue : Color.gray.opacity(0.3))
+                        .background(category == key ? Color.cBlue : Color.gray)
                         .cornerRadius(8)
-                        .foregroundStyle(category == key ? .white : .black)
+                        .foregroundStyle(Color.cWhite)
                     })
                 }
                 Spacer()
