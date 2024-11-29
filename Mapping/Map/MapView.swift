@@ -129,6 +129,7 @@ struct MapView: View {
         .onAppear {
             if userManager.isLoggedIn && userManager.userInfo == nil {
                 userManager.fetchUserInfo()
+                print(userManager.accessToken)
             }
         }
     }
