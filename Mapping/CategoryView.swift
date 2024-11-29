@@ -41,6 +41,7 @@ struct CategoryView: View {
                 Spacer()
             }
         }
+        Spacer()
     }
 }
 

@@ -12,7 +12,7 @@ struct SearchBarView: View {
     @Binding var isMyInfo: Bool
     
     var body: some View {
-        Spacer().frame(minHeight: 13, maxHeight: 13)
+        //Spacer().frame(minHeight: 13, maxHeight: 13)
             HStack {
                 Spacer()
                 TextField("Search", text: $query)
@@ -34,6 +34,7 @@ struct SearchBarView: View {
                 })
                 Spacer()
             }
+            .padding(.top, 13)
         }
     }
 
