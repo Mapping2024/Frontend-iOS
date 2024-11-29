@@ -1,7 +1,10 @@
 import SwiftUI
 
 struct CategoryView: View {
+    @EnvironmentObject var userManager: UserManager
     @Binding var category: String
+    @Binding var isPinAdd: Bool
+    @Binding var update: Bool
     let CategoryOptions: [(String, String)] = [
         ("전체", "mappin"),
         ("흡연장", "smoke.fill"),
@@ -14,6 +17,9 @@ struct CategoryView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(alignment: .center) {
                 Spacer()
+                if userManager.isLoggedIn && userManager.userInfo != nil {
+                    PinAddButton(isPinAdd: $isPinAdd, update: $update)
+                }
                 ForEach(CategoryOptions, id: \.0) { key, value in
                     Button(action: {
                         category = key
@@ -27,9 +33,9 @@ struct CategoryView: View {
                             }
                         }
                         .padding(10)
-                        .background(category == key ? Color.blue : Color.gray.opacity(0.3))
+                        .background(category == key ? Color.cBlue : Color.gray)
                         .cornerRadius(8)
-                        .foregroundStyle(category == key ? .white : .black)
+                        .foregroundStyle(Color.cWhite)
                     })
                 }
                 Spacer()
@@ -39,6 +45,8 @@ struct CategoryView: View {
 }
 
 #Preview {
-    CategoryView(category: .constant("전체"))
+    CategoryView(category: .constant("전체"), isPinAdd: .constant(false), update: .constant(false))
+        .environmentObject(UserManager())
+    
 }
 

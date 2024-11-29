@@ -6,13 +6,14 @@ struct MemoDetailView: View {
     @Binding var size: PresentationDetent
     @State private var memoDetail: MemoDetail?
     @State private var isLoading = true
+    @State private var isRefresh: Bool = false
+    // 좋아요 버튼 애니메이션 상태
+    @State private var isAnimatingLike: Bool = false
+    @State private var isAnimatingHate: Bool = false
     
     var body: some View {
-        if size == .small {
-            Spacer().frame(minHeight: 30)
-        } else {
-            Spacer().frame(minHeight: 15, maxHeight: 15)
-        }
+        Spacer().frame(minHeight: 15, maxHeight: 15)
+        
         VStack(alignment: .leading) {
             if let detail = memoDetail {
                 HStack {
@@ -31,11 +32,15 @@ struct MemoDetailView: View {
                                 .clipShape(Circle())
                         } placeholder: {
                             Image(systemName: "person.circle.fill")
-                                .font(.title)
+                                .resizable() // 크기 조정을 가능하게 만듦
+                                .aspectRatio(contentMode: .fit) // 비율 유지
+                                .frame(width: 40, height: 40) // 원하는 크기로 설정
                         }
                     } else {
                         Image(systemName: "person.circle.fill")
-                            .font(.title)
+                            .resizable() // 크기 조정을 가능하게 만듦
+                            .aspectRatio(contentMode: .fit) // 비율 유지
+                            .frame(width: 40, height: 40) // 원하는 크기로 설정
                     }
                     
                     Text("\(detail.nickname)님")
@@ -98,10 +103,52 @@ struct MemoDetailView: View {
                 }
                 
                 HStack {
-                    Text("👍 \(detail.likeCnt)")
-                    Text("👎 \(detail.hateCnt)")
+                    Button(action: {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            isAnimatingLike = true
+                        }
+                        LikeHateService.likePost(postId: detail.id, accessToken: userManager.accessToken) { result in
+                            switch result {
+                            case .success:
+                                print("Successfully liked the post.")
+                                isRefresh = true
+                            case .failure(let error):
+                                print("Failed to like the post: \(error)")
+                            }
+                            // 애니메이션 복구
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                isAnimatingLike = false
+                            }
+                        }
+                    }) {
+                        Text("👍 \(detail.likeCnt)")
+                            .scaleEffect(isAnimatingLike ? 1.5 : 1.0) // 크기 애니메이션
+                    }
+                    
+                    Button(action: {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            isAnimatingHate = true
+                        }
+                        LikeHateService.hatePost(postId: detail.id, accessToken: userManager.accessToken) { result in
+                            switch result {
+                            case .success:
+                                print("Successfully hated the post.")
+                                isRefresh = true
+                            case .failure(let error):
+                                print("Failed to hate the post: \(error)")
+                            }
+                            // 애니메이션 복구
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                isAnimatingHate = false
+                            }
+                        }
+                    }) {
+                        Text("👎 \(detail.hateCnt)")
+                            .scaleEffect(isAnimatingHate ? 1.5 : 1.0) // 크기 애니메이션
+                    }
                 }
-                .font(.caption)
+                .font(.subheadline)
+                .foregroundStyle(Color.cBlack)
                 
                 Spacer()
             } else if isLoading {
@@ -120,6 +167,14 @@ struct MemoDetailView: View {
             id = newId
             Task {
                 await fetchMemoDetail()
+            }
+        }
+        .onChange(of: isRefresh){ oldValue, newValue in
+            if newValue {
+                Task {
+                    await fetchMemoDetail()
+                }
+                isRefresh = false
             }
         }
     }
