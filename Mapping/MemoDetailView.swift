@@ -21,7 +21,9 @@ struct MemoDetailView: View {
                         Text(detail.title)
                             .font(.title)
                             .fontWeight(.bold)
-                        Text("날짜").font(.caption2)
+                        if let datePart = detail.date.split(separator: ":").first {
+                            Text(datePart).font(.caption2).foregroundStyle(.secondary)
+                        }
                     }
                     Spacer()
                     if let profileImageUrl = detail.profileImage {
@@ -219,6 +221,7 @@ struct MemoDetail: Decodable {
     let id: Int
     let title: String
     let content: String
+    let date: String
     let likeCnt: Int
     let hateCnt: Int
     let images: [String]?
