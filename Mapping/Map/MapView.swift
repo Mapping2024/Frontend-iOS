@@ -81,15 +81,13 @@ struct MapView: View {
                 UserAnnotation() // 내 위치 표현
             }
             .sheet(isPresented: .constant(true), content: {
-                VStack {
+                Group {
                     switch displayMode {
                     case .main:
                         SearchBarView(query: $query, isMyInfo: $isMyInfo)
                         CategoryView(category: $category, isPinAdd: $isPinAdd, update: $update)
-                        Spacer()
                     case .detail:
                         MemoDetailView(id: $selectedMemoId, size: $selectedDetent)
-                        Spacer()
                     }
                 }
                 .presentationDetents([.small, .medium, .large], selection: $selectedDetent)
@@ -144,7 +142,7 @@ extension MKCoordinateRegion: @retroactive Equatable {
 }
 
 extension PresentationDetent {
-    static let small = Self.fraction(0.15)
+    static let small = Self.fraction(0.18)
 }
 
 #Preview {

@@ -11,9 +11,9 @@ struct MemoDetailView: View {
     @State private var isAnimatingLike: Bool = false
     @State private var isAnimatingHate: Bool = false
     
+    @State private var cachedImages: [String: Image] = [:]
+    
     var body: some View {
-        Spacer().frame(minHeight: 15, maxHeight: 15)
-        
         VStack(alignment: .leading) {
             if let detail = memoDetail {
                 HStack {
@@ -21,7 +21,9 @@ struct MemoDetailView: View {
                         Text(detail.title)
                             .font(.title)
                             .fontWeight(.bold)
-                        Text("날짜").font(.caption2)
+                        if let datePart = detail.date.split(separator: ":").first {
+                            Text(datePart).font(.caption2).foregroundStyle(.secondary)
+                        }
                     }
                     Spacer()
                     if let profileImageUrl = detail.profileImage {
@@ -52,54 +54,34 @@ struct MemoDetailView: View {
                 Text(detail.content)
                     .font(.body)
                 
-                if let images = detail.images, !images.isEmpty {
-                    Group{
-                        if images.count == 1 {
-                            AsyncImage(url: URL(string: images[0])) { phase in
-                                switch phase {
-                                case .empty:
-                                    ProgressView()
-                                case .success(let image):
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                        .cornerRadius(8)
-                                case .failure:
-                                    Image(systemName: "photo")
-                                        .resizable()
-                                        .foregroundColor(.gray)
-                                @unknown default:
-                                    EmptyView()
-                                }
-                            }
-                        } else {
-                            ScrollView(.horizontal, showsIndicators: true) {
-                                HStack(spacing: 10) {
-                                    ForEach(images, id: \.self) { imageUrl in
-                                        AsyncImage(url: URL(string: imageUrl)) { phase in
-                                            switch phase {
-                                            case .empty:
-                                                ProgressView()
-                                            case .success(let image):
-                                                image
-                                                    .resizable()
-                                                    .frame(width: 200, height: 150)
-                                                    .cornerRadius(8)
-                                            case .failure:
-                                                Image(systemName: "photo")
-                                                    .resizable()
-                                                    .foregroundColor(.gray)
-                                            @unknown default:
-                                                EmptyView()
-                                                
-                                            }
-                                        }
+                if size != .small, let images = detail.images, !images.isEmpty {
+                    if images.count > 1 {
+                        ScrollView(.horizontal, showsIndicators: true) {
+                            HStack(alignment: .center, spacing: 10) {
+                                ForEach(images, id: \.self) { url in
+                                    if let cachedImage = cachedImages[url] {
+                                        cachedImage
+                                            .resizable()
+                                            .frame(width: 200, height: 150)
+                                            .cornerRadius(8)
                                     }
                                 }
                             }
                         }
+                    } else {
+                        HStack(alignment: .center, spacing: 10) {
+                            Spacer()
+                            ForEach(images, id: \.self) { url in
+                                if let cachedImage = cachedImages[url] {
+                                    cachedImage
+                                        .resizable()
+                                        .frame(width: 200, height: 150)
+                                        .cornerRadius(8)
+                                }
+                            }
+                            Spacer()
+                        }
                     }
-                    .frame(width: size == .small ? 0 : nil, height: size == .small ? 0 : nil)
                 }
                 
                 HStack {
@@ -177,6 +159,9 @@ struct MemoDetailView: View {
                 isRefresh = false
             }
         }
+        .padding(.top, 13)
+        
+        Spacer()
     }
     
     private func fetchMemoDetail() async {
@@ -197,6 +182,13 @@ struct MemoDetailView: View {
             let decodedResponse = try JSONDecoder().decode(MemoDetailResponse.self, from: data)
             if decodedResponse.success {
                 memoDetail = decodedResponse.data
+                
+                // 이미지 미리 로드
+                if let images = decodedResponse.data.images {
+                    for imageUrl in images {
+                        loadImage(from: imageUrl)
+                    }
+                }
             } else {
                 print("Failed to fetch memo detail: \(decodedResponse.message)")
             }
@@ -204,6 +196,23 @@ struct MemoDetailView: View {
             print("Error fetching memo detail: \(error)")
         }
         isLoading = false
+    }
+    
+    private func loadImage(from url: String) {
+        guard cachedImages[url] == nil else { return } // 이미 캐싱된 경우 로드하지 않음
+        
+        Task {
+            do {
+                guard let imageUrl = URL(string: url) else { return }
+                let (data, _) = try await URLSession.shared.data(from: imageUrl)
+                if let uiImage = UIImage(data: data) {
+                    let image = Image(uiImage: uiImage)
+                    cachedImages[url] = image
+                }
+            } catch {
+                print("Failed to load image: \(error)")
+            }
+        }
     }
 }
 
@@ -219,6 +228,7 @@ struct MemoDetail: Decodable {
     let id: Int
     let title: String
     let content: String
+    let date: String
     let likeCnt: Int
     let hateCnt: Int
     let images: [String]?
@@ -229,6 +239,6 @@ struct MemoDetail: Decodable {
 }
 
 #Preview {
-    MemoDetailView(id: .constant(2), size: .constant(.medium))
+    MemoDetailView(id: .constant(9), size: .constant(.medium))
         .environmentObject(UserManager())
 }
