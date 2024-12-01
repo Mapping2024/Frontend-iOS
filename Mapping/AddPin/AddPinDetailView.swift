@@ -35,7 +35,7 @@ struct AddPinDetailView: View {
                 
                 Section(header: Text("내용")) {
                     TextEditor( text: $pinDescription)
-                        .frame(height: 100)
+                        .frame(minHeight: 100)
                 }
                 
                 Section(header: Text("카테고리")) {
@@ -61,7 +61,7 @@ struct AddPinDetailView: View {
                     }
                 }
             }
-            .navigationTitle("핀 생성하기")
+            .navigationBarTitle(Text("핀 생성하기"), displayMode: .inline)
             .navigationBarItems(
                 trailing: Button("생성") {
                     createPin()

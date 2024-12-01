@@ -51,8 +51,15 @@ struct MemoDetailView: View {
                 
                 Divider()
                 
-                Text(detail.content)
-                    .font(.body)
+                if size != .small {
+                    ScrollView(.vertical, showsIndicators: true){
+                        Text(detail.content)
+                            .font(.body)
+                    }
+                } else {
+                    Text(detail.content)
+                        .font(.body)
+                }
                 
                 if size != .small, let images = detail.images, !images.isEmpty {
                     if images.count > 1 {
@@ -132,7 +139,6 @@ struct MemoDetailView: View {
                 .font(.subheadline)
                 .foregroundStyle(Color.cBlack)
                 
-                Spacer()
             } else if isLoading {
                 ProgressView("Loading...")
             } else {
@@ -159,9 +165,6 @@ struct MemoDetailView: View {
                 isRefresh = false
             }
         }
-        .padding(.top, 13)
-        
-        Spacer()
     }
     
     private func fetchMemoDetail() async {
@@ -239,6 +242,6 @@ struct MemoDetail: Decodable {
 }
 
 #Preview {
-    MemoDetailView(id: .constant(9), size: .constant(.medium))
+    MemoDetailView(id: .constant(3), size: .constant(.medium))
         .environmentObject(UserManager())
 }

@@ -92,6 +92,7 @@ struct MapView: View {
                 }
                 .presentationDetents([.small, .medium, .large], selection: $selectedDetent)
                 .presentationDragIndicator(.visible)
+                .padding(.vertical)
                 .interactiveDismissDisabled()
                 .presentationBackgroundInteraction(.enabled(upThrough: .medium))
             })
@@ -142,7 +143,7 @@ extension MKCoordinateRegion: @retroactive Equatable {
 }
 
 extension PresentationDetent {
-    static let small = Self.fraction(0.18)
+    static let small = Self.fraction(0.19)
 }
 
 #Preview {
