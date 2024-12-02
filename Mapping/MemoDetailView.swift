@@ -46,7 +46,7 @@ struct MemoDetailView: View {
                     }
                     
                     Text("\(detail.nickname)님")
-                        .font(.headline)
+                        .font(.subheadline)
                 }
                 
                 Divider()

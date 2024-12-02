@@ -15,10 +15,18 @@ struct MyMemoDetailView: View {
                     ProgressView("Loading...")
                 } else if let detail = memoDetail {
                     // 제목과 작성자 정보
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text(detail.title)
-                            .font(.title)
-                            .fontWeight(.bold)
+                    HStack(spacing: 10) {
+                        VStack(alignment: .leading){
+                            Text(detail.title)
+                                .font(.title)
+                                .fontWeight(.bold)
+                            if let datePart = detail.date.split(separator: ":").first {
+                                Text(datePart)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        Spacer()
                         
                         HStack {
                             AsyncImage(url: URL(string: detail.profileImage ?? "")) { image in
@@ -33,24 +41,19 @@ struct MyMemoDetailView: View {
                                     .clipShape(Circle())
                                     .foregroundColor(.gray)
                             }
-                            
-                            VStack(alignment: .leading) {
-                                Text(detail.nickname)
-                                    .font(.headline)
-                                if let datePart = detail.date.split(separator: ":").first {
-                                    Text(datePart)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
+                            Text(detail.nickname)
+                                .font(.subheadline)
                         }
                     }
                     
                     Divider()
                     
                     // 본문 내용
-                    Text(detail.content)
-                        .font(.body)
+                    ScrollView(.vertical, showsIndicators: true){
+                        Text(detail.content)
+                            .font(.body)
+                    }
+                    
                     
                     Divider()
                     
@@ -64,29 +67,30 @@ struct MyMemoDetailView: View {
                             .font(.headline)
                             .foregroundColor(.gray)
                     }
-                    
-                    // 삭제 버튼
-                    Button(action: deleteMemo) {
-                        HStack {
-                            Image(systemName: "trash")
-                            Text("Delete Memo")
-                        }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.red)
-                        .cornerRadius(10)
-                    }
-                    .padding(.top)
-                    .disabled(isDeleting)
                 } else {
                     Text("Failed to load memo details.")
                         .foregroundColor(.red)
                 }
             }
             .padding()
-            .navigationTitle("Memo Detail")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitle(Text("상세보기"), displayMode: .inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Menu {
+                        if let memo = memoDetail {
+                            NavigationLink(destination: MyMemoEditView(memo: memo)) {
+                                    Label("수정", systemImage: "pencil")
+                                }
+                        }
+                        Button(action: {deleteMemo()}) {
+                            Label("핀 삭제", systemImage: "trash")
+                        }
+                    } label: {
+                        Label("edit", systemImage: "ellipsis.circle")
+                            .labelStyle(.titleAndIcon)
+                    }
+                }
+            }
             .onAppear(perform: fetchMemoDetail)
             Spacer()
         }
