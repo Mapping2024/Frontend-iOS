@@ -12,31 +12,29 @@ struct SearchBarView: View {
     @Binding var isMyInfo: Bool
     
     var body: some View {
-        //Spacer().frame(minHeight: 13, maxHeight: 13)
-            HStack {
-                Spacer()
-                TextField("Search", text: $query)
-                    .textFieldStyle(.roundedBorder)
-                    .onSubmit {
-                        // code fired when you return in TextField
-                    }
-                Spacer()
-                
-                Button(action: {isMyInfo.toggle()}) {
-                    ProfileImageView()
-                        .frame(width: 40, height: 40)
+        HStack {
+            Spacer()
+            TextField("Search", text: $query)
+                .textFieldStyle(.roundedBorder)
+                .onSubmit {
+                    // code fired when you return in TextField
                 }
-                .sheet(isPresented: $isMyInfo, content: {
-                    NavigationStack {
-                        MyInfoView()
-                    }
-                    .presentationDragIndicator(.visible)
-                })
-                Spacer()
+            Spacer()
+            
+            Button(action: {isMyInfo.toggle()}) {
+                ProfileImageView()
+                    .frame(width: 40, height: 40)
             }
-            .padding(.top, 13)
+            .sheet(isPresented: $isMyInfo, content: {
+                NavigationStack {
+                    MyInfoView()
+                }
+                .presentationDragIndicator(.visible)
+            })
+            Spacer()
         }
     }
+}
 
 
 #Preview {

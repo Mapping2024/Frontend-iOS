@@ -58,7 +58,8 @@ struct MyInfoView: View {
                 }
             }
                         .padding()
-                        .navigationBarItems(leading: Text("내 정보").font(.title), trailing: Button(action: {userManager.logout()}) {
+                        .navigationBarTitle(Text("내 정보"), displayMode: .inline)
+                        .navigationBarItems(trailing: Button(action: {userManager.logout()}) {
                             Image(systemName: "rectangle.portrait.and.arrow.forward")
                         }
                             .disabled(!userManager.isLoggedIn))

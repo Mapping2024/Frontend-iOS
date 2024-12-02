@@ -15,50 +15,51 @@ struct MyMemoListView: View {
     var body: some View {
         NavigationStack {
             List(myMemo) { memo in
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack{
-                        VStack(alignment: .leading){
-                            Text(memo.title)
-                                .font(.headline)
-                                .foregroundColor(.primary)
-                            
-                            Text(memo.content)
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                                .lineLimit(2) // 줄 수 제한
-                        }
-                        Spacer()
-                        if memo.images.first != nil {
-                            AsyncImage(url: URL(string: memo.images.first!)) { image in
-                                image.resizable()
-                            } placeholder: {
-                                ProgressView()
+                NavigationLink(destination: MyMemoDetailView(id: memo.id)) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack{
+                            VStack(alignment: .leading){
+                                Text(memo.title)
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+                                
+                                Text(memo.content)
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                    .lineLimit(2) // 줄 수 제한
                             }
-                            .frame(width: 50,height: 50)
-                            .cornerRadius(10)
-                            //.padding(.horizontal)
+                            Spacer()
+                            if memo.images.first != nil {
+                                AsyncImage(url: URL(string: memo.images.first!)) { image in
+                                    image.resizable()
+                                } placeholder: {
+                                    ProgressView()
+                                }
+                                .frame(width: 50,height: 50)
+                                .cornerRadius(10)
+                            }
                         }
-                    }
-                    HStack {
-                        Text("\(memo.category)")
+                        HStack {
+                            Text("\(memo.category)")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                            
+                            Spacer()
+                            
+                            HStack {
+                                HStack {
+                                    Image(systemName: "hand.thumbsup.fill")
+                                    Text("\(memo.likeCnt)")
+                                }
+                                
+                                HStack {
+                                    Image(systemName: "hand.thumbsdown.fill")
+                                    Text("\(memo.hateCnt)")
+                                }
+                            }
                             .font(.caption)
                             .foregroundColor(.gray)
-                        
-                        Spacer()
-                        
-                        HStack {
-                            HStack {
-                                Image(systemName: "hand.thumbsup.fill")
-                                Text("\(memo.likeCnt)")
-                            }
-                            
-                            HStack {
-                                Image(systemName: "hand.thumbsdown.fill")
-                                Text("\(memo.hateCnt)")
-                            }
                         }
-                        .font(.caption)
-                        .foregroundColor(.gray)
                     }
                 }
             }
