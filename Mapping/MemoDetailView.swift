@@ -12,6 +12,8 @@ struct MemoDetailView: View {
     @State private var isAnimatingHate: Bool = false
     
     @State private var cachedImages: [String: Image] = [:]
+    @State private var isPhotoViewerPresented = false
+    @State private var selectedImage: Image? = nil
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -71,6 +73,15 @@ struct MemoDetailView: View {
                                             .resizable()
                                             .frame(width: 200, height: 150)
                                             .cornerRadius(8)
+                                            .onTapGesture {
+                                                if let cachedImage = cachedImages[url] {
+                                                    print("Image selected: \(url)")
+                                                    selectedImage = cachedImage
+                                                    isPhotoViewerPresented = true
+                                                } else {
+                                                    print("Cached image not found for URL: \(url)")
+                                                }
+                                            }
                                     }
                                 }
                             }
@@ -84,6 +95,15 @@ struct MemoDetailView: View {
                                         .resizable()
                                         .frame(width: 200, height: 150)
                                         .cornerRadius(8)
+                                        .onTapGesture {
+                                            if let cachedImage = cachedImages[url] {
+                                                print("Image selected: \(url)")
+                                                selectedImage = cachedImage
+                                                isPhotoViewerPresented = true
+                                            } else {
+                                                print("Cached image not found for URL: \(url)")
+                                            }
+                                        }
                                 }
                             }
                             Spacer()

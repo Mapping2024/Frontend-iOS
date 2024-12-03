@@ -13,6 +13,9 @@ struct MyMemoEditView: View {
     @State private var uploadSuccess = false
     @State private var uploadSuccessText: String? = nil
     
+    @State private var isPhotoViewerPresented = false
+    @State private var selectedImage: Image? = nil
+    
     var memo: MemoDetail
     
     init(memo: MemoDetail) {
@@ -94,6 +97,10 @@ struct MyMemoEditView: View {
                                                                 .resizable()
                                                                 .frame(width: 150, height: 150)
                                                                 .cornerRadius(8)
+                                                                .onTapGesture {
+                                                                    selectedImage = image
+                                                                    isPhotoViewerPresented = true
+                                                                }
                                                         case .failure:
                                                             ProgressView()
                                                         @unknown default:
@@ -155,6 +162,11 @@ struct MyMemoEditView: View {
                         )
                     }
                 }
+                .fullScreenCover(isPresented: $isPhotoViewerPresented) {
+                            if let selectedImage = selectedImage {
+                                PhotoView(image: selectedImage, isPresented: $isPhotoViewerPresented)
+                            }
+                        }
                 .sheet(isPresented: $isPickerPresented) {
                     PhotoPicker(selectedImages: $newImages, selectionLimit: 5)
                 }
