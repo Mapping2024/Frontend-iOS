@@ -13,6 +13,9 @@ struct MyMemoEditView: View {
     @State private var uploadSuccess = false
     @State private var uploadSuccessText: String? = nil
     
+    @State private var isPhotoViewerPresented = false
+    @State private var selectedImageURL: String?
+    
     var memo: MemoDetail
     
     init(memo: MemoDetail) {
@@ -94,6 +97,9 @@ struct MyMemoEditView: View {
                                                                 .resizable()
                                                                 .frame(width: 150, height: 150)
                                                                 .cornerRadius(8)
+                                                                .onTapGesture {
+                                                                    selectedImageURL = url
+                                                                }
                                                         case .failure:
                                                             ProgressView()
                                                         @unknown default:
@@ -153,6 +159,16 @@ struct MyMemoEditView: View {
                                 dismiss()
                             }
                         )
+                    }
+                }
+                .fullScreenCover(isPresented: $isPhotoViewerPresented) {
+                            if let selectedImageURL = selectedImageURL {
+                                PhotoView(imageURL: selectedImageURL, isPresented: $isPhotoViewerPresented)
+                            }
+                        }
+                .onChange(of: selectedImageURL) { oldValue, newValue in
+                    if newValue != nil {
+                        isPhotoViewerPresented = true
                     }
                 }
                 .sheet(isPresented: $isPickerPresented) {

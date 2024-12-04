@@ -12,6 +12,8 @@ struct MemoDetailView: View {
     @State private var isAnimatingHate: Bool = false
     
     @State private var cachedImages: [String: Image] = [:]
+    @State private var isPhotoViewerPresented = false
+    @State private var selectedImageURL: String?
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -71,6 +73,12 @@ struct MemoDetailView: View {
                                             .resizable()
                                             .frame(width: 200, height: 150)
                                             .cornerRadius(8)
+                                            .onTapGesture {
+                                                selectedImageURL = nil // 초기화
+                                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                                        selectedImageURL = url // 새 URL로 설정
+                                                    }
+                                            }
                                     }
                                 }
                             }
@@ -84,6 +92,12 @@ struct MemoDetailView: View {
                                         .resizable()
                                         .frame(width: 200, height: 150)
                                         .cornerRadius(8)
+                                        .onTapGesture {
+                                            selectedImageURL = nil // 초기화
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                                    selectedImageURL = url // 새 URL로 설정
+                                                }
+                                        }
                                 }
                             }
                             Spacer()
@@ -163,6 +177,16 @@ struct MemoDetailView: View {
                     await fetchMemoDetail()
                 }
                 isRefresh = false
+            }
+        }
+        .fullScreenCover(isPresented: $isPhotoViewerPresented) {
+            if let selectedImageURL {
+                PhotoView(imageURL: selectedImageURL, isPresented: $isPhotoViewerPresented)
+            }
+        }
+        .onChange(of: selectedImageURL) { oldValue, newValue in
+            if newValue != nil {
+                isPhotoViewerPresented = true
             }
         }
     }
