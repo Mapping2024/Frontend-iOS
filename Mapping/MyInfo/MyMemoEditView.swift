@@ -14,7 +14,7 @@ struct MyMemoEditView: View {
     @State private var uploadSuccessText: String? = nil
     
     @State private var isPhotoViewerPresented = false
-    @State private var selectedImage: Image? = nil
+    @State private var selectedImageURL: String?
     
     var memo: MemoDetail
     
@@ -98,8 +98,7 @@ struct MyMemoEditView: View {
                                                                 .frame(width: 150, height: 150)
                                                                 .cornerRadius(8)
                                                                 .onTapGesture {
-                                                                    selectedImage = image
-                                                                    isPhotoViewerPresented = true
+                                                                    selectedImageURL = url
                                                                 }
                                                         case .failure:
                                                             ProgressView()
@@ -163,10 +162,15 @@ struct MyMemoEditView: View {
                     }
                 }
                 .fullScreenCover(isPresented: $isPhotoViewerPresented) {
-                            if let selectedImage = selectedImage {
-                                PhotoView(image: selectedImage, isPresented: $isPhotoViewerPresented)
+                            if let selectedImageURL = selectedImageURL {
+                                PhotoView(imageURL: selectedImageURL, isPresented: $isPhotoViewerPresented)
                             }
                         }
+                .onChange(of: selectedImageURL) { oldValue, newValue in
+                    if newValue != nil {
+                        isPhotoViewerPresented = true
+                    }
+                }
                 .sheet(isPresented: $isPickerPresented) {
                     PhotoPicker(selectedImages: $newImages, selectionLimit: 5)
                 }

@@ -13,7 +13,7 @@ struct MemoDetailView: View {
     
     @State private var cachedImages: [String: Image] = [:]
     @State private var isPhotoViewerPresented = false
-    @State private var selectedImage: Image? = nil
+    @State private var selectedImageURL: String?
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -74,13 +74,7 @@ struct MemoDetailView: View {
                                             .frame(width: 200, height: 150)
                                             .cornerRadius(8)
                                             .onTapGesture {
-                                                if let cachedImage = cachedImages[url] {
-                                                    print("Image selected: \(url)")
-                                                    selectedImage = cachedImage
-                                                    isPhotoViewerPresented = true
-                                                } else {
-                                                    print("Cached image not found for URL: \(url)")
-                                                }
+                                                selectedImageURL = url // URL 설정
                                             }
                                     }
                                 }
@@ -96,13 +90,7 @@ struct MemoDetailView: View {
                                         .frame(width: 200, height: 150)
                                         .cornerRadius(8)
                                         .onTapGesture {
-                                            if let cachedImage = cachedImages[url] {
-                                                print("Image selected: \(url)")
-                                                selectedImage = cachedImage
-                                                isPhotoViewerPresented = true
-                                            } else {
-                                                print("Cached image not found for URL: \(url)")
-                                            }
+                                            selectedImageURL = url // URL 설정
                                         }
                                 }
                             }
@@ -183,6 +171,16 @@ struct MemoDetailView: View {
                     await fetchMemoDetail()
                 }
                 isRefresh = false
+            }
+        }
+        .fullScreenCover(isPresented: $isPhotoViewerPresented) {
+            if let selectedImageURL {
+                PhotoView(imageURL: selectedImageURL, isPresented: $isPhotoViewerPresented)
+            }
+        }
+        .onChange(of: selectedImageURL) { oldValue, newValue in
+            if newValue != nil {
+                isPhotoViewerPresented = true
             }
         }
     }
