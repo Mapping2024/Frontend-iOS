@@ -74,7 +74,10 @@ struct MemoDetailView: View {
                                             .frame(width: 200, height: 150)
                                             .cornerRadius(8)
                                             .onTapGesture {
-                                                selectedImageURL = url // URL 설정
+                                                selectedImageURL = nil // 초기화
+                                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                                        selectedImageURL = url // 새 URL로 설정
+                                                    }
                                             }
                                     }
                                 }
@@ -90,7 +93,10 @@ struct MemoDetailView: View {
                                         .frame(width: 200, height: 150)
                                         .cornerRadius(8)
                                         .onTapGesture {
-                                            selectedImageURL = url // URL 설정
+                                            selectedImageURL = nil // 초기화
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                                    selectedImageURL = url // 새 URL로 설정
+                                                }
                                         }
                                 }
                             }
