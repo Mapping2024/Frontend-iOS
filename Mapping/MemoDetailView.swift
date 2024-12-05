@@ -47,7 +47,7 @@ struct MemoDetailView: View {
                             .frame(width: 40, height: 40) // 원하는 크기로 설정
                     }
                     
-                    Text("\(detail.nickname)님")
+                    Text("\(detail.nickname)")
                         .font(.subheadline)
                 }
                 
@@ -256,6 +256,8 @@ struct MemoDetail: Decodable {
     let title: String
     let content: String
     let date: String
+    let lat: Double
+    let lng: Double
     let likeCnt: Int
     let hateCnt: Int
     let images: [String]?

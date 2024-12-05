@@ -20,7 +20,7 @@ struct MyInfoView: View {
                         .frame(width: 50, height: 50)
                     if userManager.isLoggedIn, let userInfo = userManager.userInfo {
                         HStack{
-                            Text("\(userInfo.nickname)님")
+                            Text("\(userInfo.nickname)")
                                 .font(.title2)
                                 .padding(.leading)
                             Spacer()
