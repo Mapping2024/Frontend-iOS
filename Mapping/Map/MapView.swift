@@ -52,6 +52,8 @@ struct MapView: View {
             return "trash.fill"
         case "흡연장":
             return "smoke.fill"
+        case "붕어빵":
+            return "fish.fill"
         default:
             return "star.fill"
         }
@@ -65,6 +67,8 @@ struct MapView: View {
             return .red
         case "흡연장":
             return .gray
+        case "붕어빵":
+            return .orange
         default:
             return .yellow
         }
@@ -84,7 +88,7 @@ struct MapView: View {
                 Group {
                     switch displayMode {
                     case .main:
-                        SearchBarView(query: $query, isMyInfo: $isMyInfo)
+                        SearchBarView(query: $query, isMyInfo: $isMyInfo, update: $update)
                         CategoryView(category: $category, isPinAdd: $isPinAdd, update: $update)
                     case .detail:
                         MemoDetailView(id: $selectedMemoId, size: $selectedDetent)
@@ -126,6 +130,9 @@ struct MapView: View {
             applyFilter() // 카테고리가 변경될 때 필터링 적용
         })
         .onAppear {
+            Task {
+                await matching()
+            }
             if userManager.isLoggedIn && userManager.userInfo == nil {
                 userManager.fetchUserInfo()
                 print(userManager.accessToken)

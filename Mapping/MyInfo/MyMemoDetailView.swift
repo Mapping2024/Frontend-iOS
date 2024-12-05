@@ -1,5 +1,5 @@
 import SwiftUI
-
+import MapKit
 struct MyMemoDetailView: View {
     let id: Int
     @State private var memoDetail: MemoDetail?
@@ -7,6 +7,9 @@ struct MyMemoDetailView: View {
     @State private var isDeleting = false
     @EnvironmentObject var userManager: UserManager
     @Environment(\.dismiss) var dismiss // 삭제 후 화면 닫기용
+    
+    @State private var isPhotoViewerPresented = false
+    @State private var selectedImageURL: String?
     
     var body: some View {
         NavigationStack {
@@ -50,24 +53,52 @@ struct MyMemoDetailView: View {
                     
                     // 본문 내용
                     ScrollView(.vertical, showsIndicators: true){
-                        Text(detail.content)
-                            .font(.body)
-                    }
-                    
-                    
-                    Divider()
-                    
-                    // 지도 표시 (예: 사각형 플레이스홀더)
-                    ZStack {
-                        Rectangle()
-                            .foregroundColor(.gray.opacity(0.3))
+                        VStack(alignment: .leading){
+                            Text(detail.content)
+                                .font(.body)
+                            Map {
+                                Marker("",coordinate: CLLocationCoordinate2D(latitude: detail.lat, longitude: detail.lng))
+                            }
                             .frame(height: 200)
                             .cornerRadius(10)
-                        Text("지도 정보 표시 예정")
-                            .font(.headline)
-                            .foregroundColor(.gray)
+                            
+                            if let images = detail.images, !images.isEmpty {
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack {
+                                        ForEach(images, id: \.self) { url in
+                                            VStack {
+                                                if let image = URL(string: url){
+                                                    AsyncImage(url: image) { phase in
+                                                        switch phase {
+                                                        case .empty:
+                                                            ProgressView() // 로딩 중 표시
+                                                        case .success(let image):
+                                                            image
+                                                                .resizable()
+                                                                .frame(width: 150, height: 150)
+                                                                .cornerRadius(8)
+                                                                .onTapGesture {
+                                                                    selectedImageURL = nil // 초기화
+                                                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                                                        selectedImageURL = url
+                                                                    }
+                                                                }
+                                                        case .failure:
+                                                            ProgressView()
+                                                        @unknown default:
+                                                            EmptyView()
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
-                } else {
+                }
+                else {
                     Text("Failed to load memo details.")
                         .foregroundColor(.red)
                 }
@@ -79,8 +110,8 @@ struct MyMemoDetailView: View {
                     Menu {
                         if let memo = memoDetail {
                             NavigationLink(destination: MyMemoEditView(memo: memo)) {
-                                    Label("수정", systemImage: "pencil")
-                                }
+                                Label("수정", systemImage: "pencil")
+                            }
                         }
                         Button(action: {deleteMemo()}) {
                             Label("핀 삭제", systemImage: "trash")
@@ -93,6 +124,16 @@ struct MyMemoDetailView: View {
             }
             .onAppear(perform: fetchMemoDetail)
             Spacer()
+        }
+        .fullScreenCover(isPresented: $isPhotoViewerPresented) {
+                    if let selectedImageURL = selectedImageURL {
+                        PhotoView(imageURL: selectedImageURL, isPresented: $isPhotoViewerPresented)
+                    }
+                }
+        .onChange(of: selectedImageURL) { oldValue, newValue in
+            if newValue != nil {
+                isPhotoViewerPresented = true
+            }
         }
     }
     

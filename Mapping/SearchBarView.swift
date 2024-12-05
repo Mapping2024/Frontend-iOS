@@ -10,6 +10,7 @@ import SwiftUI
 struct SearchBarView: View {
     @Binding var query: String
     @Binding var isMyInfo: Bool
+    @Binding var update: Bool
     
     var body: some View {
         HStack {
@@ -28,6 +29,8 @@ struct SearchBarView: View {
             .sheet(isPresented: $isMyInfo, content: {
                 NavigationStack {
                     MyInfoView()
+                }.onDisappear {
+                    update = true
                 }
                 .presentationDragIndicator(.visible)
             })
@@ -38,5 +41,5 @@ struct SearchBarView: View {
 
 
 #Preview {
-    SearchBarView(query: .constant("Coffe"), isMyInfo: .constant (false)).environmentObject(UserManager())
+    SearchBarView(query: .constant("Coffe"), isMyInfo: .constant (false), update: .constant(false)).environmentObject(UserManager())
 }

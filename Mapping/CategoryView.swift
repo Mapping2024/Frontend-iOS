@@ -10,6 +10,7 @@ struct CategoryView: View {
         ("흡연장", "smoke.fill"),
         ("쓰레기통", "trash.fill"),
         ("공용 화장실", "toilet.fill"),
+        ("붕어빵","fish.fill"),
         ("기타", "star.fill")
     ]
 
