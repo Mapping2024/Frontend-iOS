@@ -1,5 +1,6 @@
 import SwiftUI
 import Alamofire
+//import PhotosUI
 
 struct MyMemoEditView: View {
     @Environment(\.dismiss) var dismiss
@@ -7,14 +8,12 @@ struct MyMemoEditView: View {
     @State private var title: String
     @State private var content: String
     @State private var category: String
+    @State private var images: [String]?
     @State private var deleteImageUrls: [String] = []
     @State private var newImages: [UIImage] = []
     @State private var isPickerPresented = false
     @State private var uploadSuccess = false
     @State private var uploadSuccessText: String? = nil
-    
-    @State private var isPhotoViewerPresented = false
-    @State private var selectedImageURL: String?
     
     var memo: MemoDetail
     
@@ -22,178 +21,103 @@ struct MyMemoEditView: View {
         self.memo = memo
         _title = State(initialValue: memo.title)
         _content = State(initialValue: memo.content)
-        _category = State(initialValue: "기타")
+        _category = State(initialValue: memo.category)
+        _images = State(initialValue: memo.images)
     }
     
     var body: some View {
-        NavigationStack{
-            ScrollView(.vertical, showsIndicators: true) {
-                VStack {
-                    // 제목 입력
-                    GroupBox {
-                        VStack(alignment: .leading) {
-                            Text("제목")
-                                .font(.headline)
-                            TextField("제목을 입력하세요", text: $title)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(Color.gray, lineWidth: 1)
-                                )
-                        }
-                        .padding()
-                        
-                        // 내용 입력
-                        VStack(alignment: .leading) {
-                            Text("내용")
-                                .font(.headline)
-                            TextEditor(text: $content)
-                                .frame(minHeight: 100, maxHeight: 250)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(Color.gray, lineWidth: 1)
-                                )
-                        }
-                        .padding()
+        Group {
+            Form {
+                Section(header: Text("제목")) {
+                    TextField("제목을 입력하세요", text: $title)
+                }
+                
+                Section(header: Text("내용")) {
+                    TextEditor(text: $content)
+                        .frame(minHeight: 100)
+                }
+                
+                Section(header: Text("카테고리")) {
+                    Picker("카테고리 선택", selection: $category) {
+                        Text("기타").tag("기타")
+                        Text("흡연장").tag("흡연장")
+                        Text("쓰레기통").tag("쓰레기통")
+                        Text("공용 화장실").tag("공용 화장실")
                     }
-                    
-                    // 카테고리 입력
-                    GroupBox {
-                        VStack(alignment: .leading) {
-                            Text("카테고리")
-                                .font(.headline)
-                            Picker("카테고리",selection: $category) {
-                                Text("기타").tag("기타")
-                                Text("흡연장").tag("흡연장")
-                                Text("쓰레기통").tag("쓰레기통")
-                                Text("공용 화장실").tag("공용 화장실")
-                            }
-                            .frame(maxWidth: .infinity)
-                            .pickerStyle(.menu)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color.gray, lineWidth: 1)
-                            )
-                        }
-                        .padding()
-                    }
-                    // 기존 이미지와 삭제 버튼
-                    GroupBox {
-                        VStack(alignment: .leading) {
-                            Text("기존 이미지")
-                                .font(.headline)
-                            if let images = memo.images, !images.isEmpty {
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack {
-                                        ForEach(images, id: \.self) { url in
-                                            VStack {
-                                                if let image = URL(string: url){
-                                                    AsyncImage(url: image) { phase in
-                                                        switch phase {
-                                                        case .empty:
-                                                            ProgressView() // 로딩 중 표시
-                                                        case .success(let image):
-                                                            image
-                                                                .resizable()
-                                                                .frame(width: 150, height: 150)
-                                                                .cornerRadius(8)
-                                                                .onTapGesture {
-                                                                    selectedImageURL = nil // 초기화
-                                                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                                                            selectedImageURL = url // 새 URL로 설정
-                                                                        }
-                                                                }
-                                                        case .failure:
-                                                            ProgressView()
-                                                        @unknown default:
-                                                            EmptyView()
-                                                        }
-                                                    }
-                                                }
-                                                Button(action: {
-                                                    deleteImageUrls.append(url)
-                                                    print(deleteImageUrls)
-                                                }) {
-                                                    Text("삭제")
-                                                        .font(.caption)
-                                                        .foregroundColor(.red)
-                                                }
+                    .pickerStyle(MenuPickerStyle())
+                }
+                
+                Section(header: Text("기존 이미지")) {
+                    if let images = images, !images.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack {
+                                ForEach(Array(images.enumerated()), id: \.offset) { index, url in
+                                    VStack {
+                                        AsyncImage(url: URL(string: url)) { phase in
+                                            switch phase {
+                                            case .success(let image):
+                                                image
+                                                    .resizable()
+                                                    .frame(width: 100, height: 100)
+                                                    .cornerRadius(10)
+                                            default:
+                                                ProgressView()
                                             }
                                         }
-                                    }
-                                }
-                            } else {
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    Text("첨부된 이미지가 없습니다.")
-                                        .foregroundColor(.secondary)
-                                        .frame(maxWidth: .infinity)
-                                }
-                            }
-                        }
-                        .padding()
-                        
-                        VStack(alignment: .leading) {
-                            Text("새로운 이미지 추가")
-                                .font(.headline)
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack {
-                                    ForEach(newImages, id: \.self) { image in
-                                        Image(uiImage: image)
-                                            .resizable()
-                                            .frame(width: 100, height: 100)
-                                            .cornerRadius(8)
-                                    }
-                                    Button(action: {
-                                        isPickerPresented = true
-                                    }) {
-                                        Image(systemName: "plus.circle")
-                                            .font(.largeTitle)
-                                            .foregroundColor(.blue)
+                                        Button("삭제") {
+                                            self.images?.remove(at: index) // 인덱스를 사용하여 삭제
+                                            deleteImageUrls.append(url) // 삭제된 URL 추가
+                                        }
+                                        .font(.caption)
+                                        .foregroundColor(.red)
                                     }
                                 }
                             }
                         }
-                        .padding()
-                    }
-                    .alert(isPresented: $uploadSuccess) {
-                        Alert(
-                            title: Text(uploadSuccessText ?? ""),
-                            dismissButton: .default(Text("확인")) {
-                                dismiss()
-                            }
-                        )
+                    } else {
+                        Text("첨부된 이미지가 없습니다.")
+                            .foregroundColor(.secondary)
                     }
                 }
-                .fullScreenCover(isPresented: $isPhotoViewerPresented) {
-                            if let selectedImageURL = selectedImageURL {
-                                PhotoView(imageURL: selectedImageURL, isPresented: $isPhotoViewerPresented)
+                
+                Section(header: Text("새로운 이미지 추가")) {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack {
+                            ForEach(newImages, id: \.self) { image in
+                                Image(uiImage: image)
+                                    .resizable()
+                                    .frame(width: 100, height: 100)
+                                    .cornerRadius(10)
+                            }
+                            Button("사진 선택") {
+                                isPickerPresented = true
                             }
                         }
-                .onChange(of: selectedImageURL) { oldValue, newValue in
-                    if newValue != nil {
-                        isPhotoViewerPresented = true
                     }
                 }
-                .sheet(isPresented: $isPickerPresented) {
-                    PhotoPicker(selectedImages: $newImages, selectionLimit: 5)
-                }
-                .padding()
+            }
+            .navigationBarTitle("메모 수정하기", displayMode: .inline)
+            .navigationBarItems(
+                trailing: Button("저장") {
+                    updateMemo()
+                }.disabled(title.isEmpty || content.isEmpty)
+            )
+            .sheet(isPresented: $isPickerPresented) {
+                PhotoPicker(selectedImages: $newImages, selectionLimit: 5)
             }
         }
-        .navigationBarTitle(Text("메모 수정하기"), displayMode: .inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: {
-                    updateMemo()
-                }) {
-                    Text("저장")
+        .alert(isPresented: $uploadSuccess) {
+            Alert(
+                title: Text(uploadSuccessText ?? ""),
+                dismissButton: .default(Text("확인")) {
+                    dismiss()
                 }
-            }
+            )
         }
     }
     
     func updateMemo() {
-        userManager.fetchUserInfo() // 토큰 유효성 확인
+        userManager.fetchUserInfo()
         let url = "https://api.mapping.kro.kr/api/v2/memo/update/\(memo.id)"
         let headers: HTTPHeaders = [
             "Authorization": "Bearer \(userManager.accessToken)",
@@ -219,7 +143,7 @@ struct MyMemoEditView: View {
             case .success(let data):
                 if let data = data, let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                    let status = jsonResponse["status"] as? Int, status == 200 {
-                    uploadSuccessText = "메모 수정 완료!"
+                    uploadSuccessText = "메모 수정 완료."
                     uploadSuccess = true
                 } else {
                     print("오류 발생: 서버 응답 오류")
