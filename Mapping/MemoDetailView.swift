@@ -258,6 +258,7 @@ struct MemoDetail: Decodable {
     let date: String
     let lat: Double
     let lng: Double
+    let category: String
     let likeCnt: Int
     let hateCnt: Int
     let images: [String]?
