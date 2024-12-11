@@ -53,14 +53,11 @@ struct MapView: View {
                 .presentationBackgroundInteraction(.enabled(upThrough: .medium))
             })
             .onChange(of: locationManager.region, { oldValue, newValue in
-                position = .region(locationManager.region) // 내 위치가 바뀌면 지도 시선 위치를 변경
+                position = .region(locationManager.region)
                 if let location = position.region?.center {
-                    locationData = location
-                    Task {
-                        await matching()
-                    }
+                    locationData = location //현재 위치를 저장 나중에 보낼 수 있음
                 }
-            }) // 현재위치 기반에서 바뀌기 때문에 필요 없어질 수 도 있음
+            })
             .mapControls({
                 MapUserLocationButton()
                 MapCompass()
@@ -86,9 +83,12 @@ struct MapView: View {
                 userManager.fetchUserInfo()
                 print(userManager.accessToken)
             }
+            Task {
+                await matching()
+            }
         }
         .onMapCameraChange { context in
-            visibleRegion = context.region.center
+            visibleRegion = context.region.center // 내 위치가 바뀌면 지도 시선 위치를 변경
             Task {
                 await matching()
             }
