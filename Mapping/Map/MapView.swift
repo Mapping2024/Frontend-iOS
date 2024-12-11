@@ -11,6 +11,7 @@ struct MapView: View {
     @State private var position: MapCameraPosition = .userLocation(fallback: .automatic) // 카메라 시점 설정
     @EnvironmentObject var userManager: UserManager
     @State private var locationManager = LocationManager.shared
+    @State private var visibleRegion: CLLocationCoordinate2D? // 카메라 시점
     @State var update: Bool = false
     @State var category: String = "전체"
     @State private var selectedDetent: PresentationDetent = .small
@@ -25,9 +26,79 @@ struct MapView: View {
     
     @State private var locationData: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 0, longitude: 0) // 기본값 설정
     
+    var body: some View {
+        ZStack(alignment: .top) {
+            Map(position: $position, selection: $selectedMemoId) {
+                ForEach(filteredMapItems, id: \.self) { mapItem in // 필터링된 데이터를 사용
+                    Marker(mapItem.title, systemImage: categoryImage(for: mapItem.category), coordinate: mapItem.location)
+                        .tint(categoryColor(for: mapItem.category))
+                        .tag(mapItem.id)
+                }
+                UserAnnotation() // 내 위치 표현
+            }
+            .sheet(isPresented: .constant(true), content: {
+                Group {
+                    switch displayMode {
+                    case .main:
+                        SearchBarView(query: $query, isMyInfo: $isMyInfo, update: $update)
+                        CategoryView(category: $category, isPinAdd: $isPinAdd, update: $update)
+                    case .detail:
+                        MemoDetailView(id: $selectedMemoId, size: $selectedDetent)
+                    }
+                }
+                .presentationDetents([.small, .medium, .large], selection: $selectedDetent)
+                .presentationDragIndicator(.visible)
+                .padding(.vertical)
+                .interactiveDismissDisabled()
+                .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+            })
+            .onChange(of: locationManager.region, { oldValue, newValue in
+                position = .region(locationManager.region)
+                if let location = position.region?.center {
+                    locationData = location //현재 위치를 저장 나중에 보낼 수 있음
+                }
+            })
+            .mapControls({
+                MapUserLocationButton()
+                MapCompass()
+                MapScaleView()
+            })
+        }
+        .onChange(of: selectedMemoId, { oldValue, newValue in
+            displayMode = (selectedMemoId != nil) ? .detail : .main
+        })
+        .onChange(of: update, { oldValue, newValue in // 핀 추가후 지도 업데이트
+            if update {
+                Task {
+                    await matching()
+                }
+                update = false
+            }
+        })
+        .onChange(of: category, { oldValue, newValue in // 카테고리 변경시 지도 업데이트
+            applyFilter() // 카테고리가 변경될 때 필터링 적용
+        })
+        .onAppear {
+            if userManager.isLoggedIn && userManager.userInfo == nil {
+                userManager.fetchUserInfo()
+                print(userManager.accessToken)
+            }
+            Task {
+                await matching()
+            }
+        }
+        .onMapCameraChange { context in
+            visibleRegion = context.region.center // 내 위치가 바뀌면 지도 시선 위치를 변경
+            Task {
+                await matching()
+            }
+        }
+    }
+    
     private func matching() async {
+        
         do {
-            mapItems = try await MemoMatching(location: locationData, accessToken: userManager.accessToken)
+            mapItems = try await MemoMatching(location: visibleRegion!, accessToken: userManager.accessToken)
             applyFilter() // 필터 적용
         } catch {
             mapItems = []
@@ -71,72 +142,6 @@ struct MapView: View {
             return .orange
         default:
             return .yellow
-        }
-    }
-    
-    var body: some View {
-        ZStack(alignment: .top) {
-            Map(position: $position, selection: $selectedMemoId) {
-                ForEach(filteredMapItems, id: \.self) { mapItem in // 필터링된 데이터를 사용
-                    Marker(mapItem.title, systemImage: categoryImage(for: mapItem.category), coordinate: mapItem.location)
-                        .tint(categoryColor(for: mapItem.category))
-                        .tag(mapItem.id)
-                }
-                UserAnnotation() // 내 위치 표현
-            }
-            .sheet(isPresented: .constant(true), content: {
-                Group {
-                    switch displayMode {
-                    case .main:
-                        SearchBarView(query: $query, isMyInfo: $isMyInfo, update: $update)
-                        CategoryView(category: $category, isPinAdd: $isPinAdd, update: $update)
-                    case .detail:
-                        MemoDetailView(id: $selectedMemoId, size: $selectedDetent)
-                    }
-                }
-                .presentationDetents([.small, .medium, .large], selection: $selectedDetent)
-                .presentationDragIndicator(.visible)
-                .padding(.vertical)
-                .interactiveDismissDisabled()
-                .presentationBackgroundInteraction(.enabled(upThrough: .medium))
-            })
-            .onChange(of: locationManager.region, { oldValue, newValue in
-                position = .region(locationManager.region) // 내 위치가 바뀌면 지도 시선 위치를 변경
-                if let location = position.region?.center {
-                    locationData = location
-                    Task {
-                        await matching()
-                    }
-                }
-            })
-            .mapControls({
-                MapUserLocationButton()
-                MapCompass()
-                MapScaleView()
-            })
-        }
-        .onChange(of: selectedMemoId, { oldValue, newValue in
-            displayMode = (selectedMemoId != nil) ? .detail : .main
-        })
-        .onChange(of: update, { oldValue, newValue in // 핀 추가후 지도 업데이트
-            if update {
-                Task {
-                    await matching()
-                }
-                update = false
-            }
-        })
-        .onChange(of: category, { oldValue, newValue in // 카테고리 변경시 지도 업데이트
-            applyFilter() // 카테고리가 변경될 때 필터링 적용
-        })
-        .onAppear {
-            Task {
-                await matching()
-            }
-            if userManager.isLoggedIn && userManager.userInfo == nil {
-                userManager.fetchUserInfo()
-                print(userManager.accessToken)
-            }
         }
     }
 }

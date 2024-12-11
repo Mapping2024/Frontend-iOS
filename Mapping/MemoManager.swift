@@ -8,7 +8,7 @@ func MemoMatching(location: CLLocationCoordinate2D, accessToken: String) async t
     let lng = location.longitude
 
     let headers: HTTPHeaders = ["Authorization": "Bearer \(accessToken)"]
-    let url = "https://api.mapping.kro.kr/api/v2/memo/total?lat=\(lat)&lng=\(lng)&km=5"
+    let url = "https://api.mapping.kro.kr/api/v2/memo/total?lat=\(lat)&lng=\(lng)&km=1"
 
     return try await withCheckedThrowingContinuation { continuation in
         AF.request(url, method: .get, headers: headers).responseDecodable(of: MemoResponse.self) { response in
