@@ -16,6 +16,7 @@ struct AddPinDetailView: View {
     @EnvironmentObject var userManager: UserManager
     @Environment(\.dismiss) private var dismiss
     @Binding var backFlag: Bool
+    @State private var privateCheck: Bool = false
     @State private var pinName: String = ""
     @State private var pinDescription: String = ""
     @State private var selectedCategory: PinCategory = .other
@@ -46,6 +47,10 @@ struct AddPinDetailView: View {
                         }
                     }
                     .pickerStyle(MenuPickerStyle())
+                }
+                
+                Section(header: Text("개인 메모")) {
+                    Toggle("개인 메모", isOn: $privateCheck)
                 }
                 
                 Section(header: Text("사진")) {
@@ -94,6 +99,7 @@ struct AddPinDetailView: View {
             "content": pinDescription,
             "lat": "\(latitude)",
             "lng": "\(longitude)",
+            "isPublic": "\(privateCheck)",
             "category": selectedCategory.rawValue
         ]
         
