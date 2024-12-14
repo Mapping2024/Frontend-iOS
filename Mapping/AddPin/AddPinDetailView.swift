@@ -16,7 +16,7 @@ struct AddPinDetailView: View {
     @EnvironmentObject var userManager: UserManager
     @Environment(\.dismiss) private var dismiss
     @Binding var backFlag: Bool
-    @State private var secret: Bool = true
+    @State private var secret: Bool = false
     @State private var pinName: String = ""
     @State private var pinDescription: String = ""
     @State private var selectedCategory: PinCategory = .other

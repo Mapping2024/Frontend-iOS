@@ -47,6 +47,8 @@ struct MemoData: Identifiable, Decodable {
     let category: String
     let lat: Double
     let lng: Double
+    let certified: Bool
+    let secret: Bool
 }
 
 struct MemoResponse: Decodable {

@@ -24,7 +24,12 @@ struct MemoDetailView: View {
                             .font(.title)
                             .fontWeight(.bold)
                         if let datePart = detail.date.split(separator: ":").first {
-                            Text(datePart).font(.caption2).foregroundStyle(.secondary)
+                            HStack{
+                                Text(datePart).font(.caption2).foregroundStyle(.secondary)
+                                if detail.certified {
+                                    Image(systemName: "checkmark.seal.fill").font(.caption2).foregroundStyle(.secondary)
+                                }
+                            }
                         }
                     }
                     Spacer()
@@ -263,6 +268,9 @@ struct MemoDetail: Decodable {
     let hateCnt: Int
     let images: [String]?
     let myMemo: Bool
+    let myLike: Bool
+    let myHate: Bool
+    let certified: Bool
     let authorId: Int
     let nickname: String
     let profileImage: String?
