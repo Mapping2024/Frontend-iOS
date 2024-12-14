@@ -48,7 +48,7 @@ struct AddPinView: View {
         .navigationBarItems(
             trailing: Group {
                 if let coordinate = pinCoordinate {
-                    NavigationLink(destination: AddPinDetailView(backFlag: $backFlag, latitude: coordinate.latitude, longitude: coordinate.longitude)
+                    NavigationLink(destination: AddPinDetailView(backFlag: $backFlag, latitude: coordinate.latitude, longitude: coordinate.longitude, currentLocation: locationManager.region.center)
                         .onDisappear {
                             removePin()
                             if backFlag {

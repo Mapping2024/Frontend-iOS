@@ -16,6 +16,7 @@ struct AddPinDetailView: View {
     @EnvironmentObject var userManager: UserManager
     @Environment(\.dismiss) private var dismiss
     @Binding var backFlag: Bool
+    @State private var secret: Bool = true
     @State private var pinName: String = ""
     @State private var pinDescription: String = ""
     @State private var selectedCategory: PinCategory = .other
@@ -26,6 +27,7 @@ struct AddPinDetailView: View {
     
     var latitude: Double
     var longitude: Double
+    var currentLocation: CLLocationCoordinate2D
     
     var body: some View {
         Group{
@@ -46,6 +48,10 @@ struct AddPinDetailView: View {
                         }
                     }
                     .pickerStyle(MenuPickerStyle())
+                }
+                
+                Section(header: Text("개인 메모")) {
+                    Toggle("프라이빗 설정", isOn: $secret)
                 }
                 
                 Section(header: Text("사진")) {
@@ -88,13 +94,16 @@ struct AddPinDetailView: View {
     func createPin() {
         userManager.fetchUserInfo() // 토큰 유효성 확인 및 재발급
         let url = "https://api.mapping.kro.kr/api/v2/memo/new"
-        
+
         let parameters: [String: String] = [
             "title": pinName,
             "content": pinDescription,
             "lat": "\(latitude)",
             "lng": "\(longitude)",
-            "category": selectedCategory.rawValue
+            "category": selectedCategory.rawValue,
+            "secret": "\(secret)",
+            "currentLat": "\(currentLocation.latitude)",
+            "currentLng": "\(currentLocation.longitude)"
         ]
         
         let headers: HTTPHeaders = [
@@ -138,6 +147,6 @@ struct AddPinDetailView: View {
 }
 
 #Preview {
-    AddPinDetailView(backFlag: .constant(false), latitude: 37.7749, longitude: -122.4194) // 예시 위도와 경도 값
+    AddPinDetailView(backFlag: .constant(false), latitude: 37.7749, longitude: -122.4194, currentLocation: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)) // 예시 위도와 경도 값
         .environmentObject(UserManager())
 }
