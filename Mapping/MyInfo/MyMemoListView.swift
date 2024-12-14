@@ -47,6 +47,9 @@ struct MyMemoListView: View {
                             Spacer()
                             
                             HStack {
+                                if(memo.secret){
+                                    Image(systemName: "parkingsign")
+                                }
                                 HStack {
                                     Image(systemName: "hand.thumbsup.fill")
                                     Text("\(memo.likeCnt)")
@@ -83,7 +86,6 @@ struct MyMemoListView: View {
             case .success(let memoResponse):
                 if memoResponse.success {
                     self.myMemo = memoResponse.data
-                    //print("Successfully fetched memo locations: \(memoResponse.data)")
                 } else {
                     print("Failed to fetch memo locations: \(memoResponse.message)")
                 }
@@ -102,6 +104,7 @@ struct MyMemo: Identifiable, Decodable {
     let likeCnt: Int
     let hateCnt: Int
     let images: [String]
+    let secret: Bool
 }
 
 struct MyMemoResponse: Decodable {

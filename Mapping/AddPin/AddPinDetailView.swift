@@ -16,7 +16,7 @@ struct AddPinDetailView: View {
     @EnvironmentObject var userManager: UserManager
     @Environment(\.dismiss) private var dismiss
     @Binding var backFlag: Bool
-    @State private var privateCheck: Bool = false
+    @State private var secret: Bool = true
     @State private var pinName: String = ""
     @State private var pinDescription: String = ""
     @State private var selectedCategory: PinCategory = .other
@@ -51,7 +51,7 @@ struct AddPinDetailView: View {
                 }
                 
                 Section(header: Text("개인 메모")) {
-                    Toggle("프라이빗 설정", isOn: $privateCheck)
+                    Toggle("프라이빗 설정", isOn: $secret)
                 }
                 
                 Section(header: Text("사진")) {
@@ -94,14 +94,14 @@ struct AddPinDetailView: View {
     func createPin() {
         userManager.fetchUserInfo() // 토큰 유효성 확인 및 재발급
         let url = "https://api.mapping.kro.kr/api/v2/memo/new"
-        
+
         let parameters: [String: String] = [
             "title": pinName,
             "content": pinDescription,
             "lat": "\(latitude)",
             "lng": "\(longitude)",
             "category": selectedCategory.rawValue,
-            "isPublic": "\(privateCheck)",
+            "secret": "\(secret)",
             "currentLat": "\(currentLocation.latitude)",
             "currentLng": "\(currentLocation.longitude)"
         ]
