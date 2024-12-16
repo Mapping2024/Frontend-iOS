@@ -122,7 +122,7 @@ struct MemoDetailView: View {
                         withAnimation(.easeInOut(duration: 0.2)) {
                             isAnimatingLike = true
                         }
-                        LikeHateService.likePost(postId: detail.id, accessToken: userManager.accessToken) { result in
+                        LikeHateService.likePost(id: detail.id, accessToken: userManager.accessToken) { result in
                             switch result {
                             case .success:
                                 print("Successfully liked the post.")
@@ -144,7 +144,7 @@ struct MemoDetailView: View {
                         withAnimation(.easeInOut(duration: 0.2)) {
                             isAnimatingHate = true
                         }
-                        LikeHateService.hatePost(postId: detail.id, accessToken: userManager.accessToken) { result in
+                        LikeHateService.hatePost(id: detail.id, accessToken: userManager.accessToken) { result in
                             switch result {
                             case .success:
                                 print("Successfully hated the post.")

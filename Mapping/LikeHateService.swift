@@ -1,14 +1,18 @@
 import Foundation
 
 struct LikeHateService {
-    static let baseURL = "https://api.mapping.kro.kr/api/v2/memo"
+    static let baseURL = "https://api.mapping.kro.kr/api/v2/"
     
-    static func likePost(postId: Int, accessToken: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        sendRequest(endpoint: "/like/\(postId)", accessToken: accessToken, completion: completion)
+    static func likePost(id: Int, accessToken: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        sendRequest(endpoint: "memo/like/\(id)", accessToken: accessToken, completion: completion)
     }
 
-    static func hatePost(postId: Int, accessToken: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        sendRequest(endpoint: "/hate/\(postId)", accessToken: accessToken, completion: completion)
+    static func hatePost(id: Int, accessToken: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        sendRequest(endpoint: "memo/hate/\(id)", accessToken: accessToken, completion: completion)
+    }
+    
+    static func likeComment(id: Int, accessToken: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        sendRequest(endpoint: "comment/like/\(id)", accessToken: accessToken, completion: completion)
     }
     
     private static func sendRequest(endpoint: String, accessToken: String, completion: @escaping (Result<Void, Error>) -> Void) {
