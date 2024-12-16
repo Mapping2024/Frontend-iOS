@@ -24,7 +24,12 @@ struct MemoDetailView: View {
                             .font(.title)
                             .fontWeight(.bold)
                         if let datePart = detail.date.split(separator: ":").first {
-                            Text(datePart).font(.caption2).foregroundStyle(.secondary)
+                            HStack{
+                                Text(datePart).font(.caption2).foregroundStyle(.secondary)
+                                if detail.certified {
+                                    Image(systemName: "checkmark.seal.fill")
+                                }
+                            }
                         }
                     }
                     Spacer()
@@ -105,12 +110,19 @@ struct MemoDetailView: View {
                     }
                 }
                 
+                Spacer()
+                
+                if size == .large {
+                    Divider()
+                    CommentView(memoId: detail.id)
+                }
+                
                 HStack {
                     Button(action: {
                         withAnimation(.easeInOut(duration: 0.2)) {
                             isAnimatingLike = true
                         }
-                        LikeHateService.likePost(postId: detail.id, accessToken: userManager.accessToken) { result in
+                        LikeHateService.likePost(id: detail.id, accessToken: userManager.accessToken) { result in
                             switch result {
                             case .success:
                                 print("Successfully liked the post.")
@@ -132,7 +144,7 @@ struct MemoDetailView: View {
                         withAnimation(.easeInOut(duration: 0.2)) {
                             isAnimatingHate = true
                         }
-                        LikeHateService.hatePost(postId: detail.id, accessToken: userManager.accessToken) { result in
+                        LikeHateService.hatePost(id: detail.id, accessToken: userManager.accessToken) { result in
                             switch result {
                             case .success:
                                 print("Successfully hated the post.")
@@ -263,6 +275,9 @@ struct MemoDetail: Decodable {
     let hateCnt: Int
     let images: [String]?
     let myMemo: Bool
+    let myLike: Bool
+    let myHate: Bool
+    let certified: Bool
     let authorId: Int
     let nickname: String
     let profileImage: String?

@@ -95,6 +95,8 @@ struct MyMemoDetailView: View {
                                     }
                                 }
                             }
+                            // 이미지 종료 댓글 들어가는곳
+                            
                         }
                     }
                 }
