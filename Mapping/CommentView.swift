@@ -8,6 +8,8 @@ struct CommentView: View {
     @State private var isLoading: Bool = true
     @State var update: Bool = false
     
+    @State private var editingCommentId: Int? = nil // 수정 중인 댓글의 ID
+    
     var body: some View {
         VStack(alignment: .leading) {
             if isLoading {
@@ -28,96 +30,62 @@ struct CommentView: View {
                         VStack(spacing: 16) {
                             ForEach(comments) { comment in
                                 VStack(spacing: 8) {
-                                    HStack(alignment: .top) {
-                                        if let profileImageUrl = comment.profileImageUrl {
-                                            AsyncImage(url: URL(string: profileImageUrl)) { image in
-                                                image
-                                                    .resizable()
-                                                    .frame(width: 40, height: 40)
-                                                    .clipShape(Circle())
-                                            } placeholder: {
-                                                Image(systemName: "person.circle.fill")
-                                                    .resizable()
-                                                    .frame(width: 40, height: 40)
+                                    if editingCommentId == comment.id {
+                                        CommentEditView()
+                                    } else {
+                                        // 일반 댓글 UI
+                                        HStack(alignment: .top) {
+                                            if let profileImageUrl = comment.profileImageUrl {
+                                                AsyncImage(url: URL(string: profileImageUrl)) { image in
+                                                    image
+                                                        .resizable()
+                                                        .frame(width: 40, height: 40)
+                                                        .clipShape(Circle())
+                                                } placeholder: {
+                                                    Image(systemName: "person.circle.fill")
+                                                        .resizable()
+                                                        .frame(width: 40, height: 40)
+                                                }
                                             }
-                                        } else {
-                                            Image(systemName: "person.circle.fill")
-                                                .resizable()
-                                                .frame(width: 40, height: 40)
-                                        }
-                                        
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            HStack {
-                                                Text(comment.nickname)
-                                                    .font(.headline)
-                                                
-                                                ForEach(0..<comment.rating, id: \.self) { _ in
-                                                    Image(systemName: "star.fill")
-                                                        .foregroundColor(.yellow)
-                                                    .font(.caption2)                       }
-                                                
-                                                Spacer()
-                                                
-                                                //if userManager.isLoggedIn, userManager.userInfo?.nickname == //comment.nickname {
-                                                    Menu{
-                                                        Button("수정"){
-                                                            print("modify")
+                                            
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                HStack {
+                                                    Text(comment.nickname)
+                                                        .font(.headline)
+                                                    
+                                                    ForEach(0..<comment.rating, id: \.self) { _ in
+                                                        Image(systemName: "star.fill")
+                                                            .foregroundColor(.yellow)
+                                                            .font(.caption2)
+                                                    }
+                                                    
+                                                    Spacer()
+                                                    
+                                                    // 수정 및 삭제 메뉴
+                                                    Menu {
+                                                        Button("수정") {
+                                                            // 수정 모드 진입
+                                                            editingCommentId = comment.id
+                                                            updatedCommentText = comment.comment
+                                                            updatedRating = comment.rating
                                                         }
-                                                        Button("삭제"){
+                                                        Button("삭제") {
                                                             deleteComment(id: comment.id)
                                                         }
                                                     } label: {
                                                         Image(systemName: "ellipsis")
                                                             .foregroundColor(.cBlack)
                                                     }
-                                            
-                                                //}
+                                                }
                                                 
-                                            }
-                                            Text(comment.comment)
-                                                .font(.body)
-                                            
-                                            HStack{
+                                                Text(comment.comment)
+                                                    .font(.body)
+                                                
                                                 Text(comment.updatedAt)
                                                     .font(.caption)
                                                     .foregroundColor(.gray)
-                                                
-                                                Spacer()
-                                                
-                                                Button(action: {
-                                                    if let index = comments.firstIndex(where: { $0.id == comment.id }) {
-                                                        withAnimation(.easeInOut(duration: 0.2)) {
-                                                            comments[index].isAnimatingLike = true
-                                                        }
-                                                        // 서버로 좋아요 요청
-                                                        LikeHateService.likeComment(id: comment.id, accessToken: userManager.accessToken) { result in
-                                                            DispatchQueue.main.async {
-                                                                switch result {
-                                                                case .success:
-                                                                    print("Successfully liked the post.")
-                                                                    fetchComments() // 데이터 새로고침
-                                                                case .failure(let error):
-                                                                    print("Failed to like the post: \(error)")
-                                                                }
-                                                                // 애니메이션 복구
-                                                                withAnimation(.easeInOut(duration: 0.2)) {
-                                                                    comments[index].isAnimatingLike = false
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }) {
-                                                    HStack(alignment: .bottom) {
-                                                        Text("👍 \(comment.likeCnt)")
-                                                            .scaleEffect(comment.isAnimatingLike == true ? 1.5 : 1.0) // 크기 애니메이션
-                                                            .animation(.easeInOut(duration: 0.2), value: comment.isAnimatingLike)
-                                                            .font(.caption)
-                                                            .foregroundColor(.cBlack)
-                                                    }
-                                                }
                                             }
                                         }
-                                        Spacer()
                                     }
                                     
                                     Divider()
@@ -142,8 +110,60 @@ struct CommentView: View {
         })
     }
     
+    private func updateComment(id: Int) {
+        let urlString = "https://api.mapping.kro.kr/api/v2/comment/\(id)"
+        guard let url = URL(string: urlString) else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.addValue("Bearer \(userManager.accessToken)", forHTTPHeaderField: "Authorization")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let body: [String: Any] = [
+            "comment": updatedCommentText,
+            "rating": updatedRating
+        ]
+        
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        
+        Task {
+            do {
+                let (_, response) = try await URLSession.shared.data(for: request)
+                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                    throw URLError(.badServerResponse)
+                }
+                print("Comment updated successfully.")
+                editingCommentId = nil // 수정 모드 종료
+                fetchComments() // 댓글 데이터 새로고침
+            } catch {
+                print("Error updating comment: \(error)")
+            }
+        }
+    }
+    
+    private func deleteComment(id: Int) {
+        let urlString = "https://api.mapping.kro.kr/api/v2/comment/\(id)"
+        guard let url = URL(string: urlString) else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.addValue("Bearer \(userManager.accessToken)", forHTTPHeaderField: "Authorization")
+        
+        Task {
+            do {
+                let (_, response) = try await URLSession.shared.data(for: request)
+                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                    throw URLError(.badServerResponse)
+                }
+                print("Comment deleted successfully.")
+                fetchComments()
+            } catch {
+                print("Error deleting comment: \(error)")
+            }
+        }
+    }
+    
     private func fetchComments() {
-        userManager.fetchUserInfo()
         guard let url = URL(string: "https://api.mapping.kro.kr/api/v2/comment?memoId=\(memoId)") else { return }
         
         URLSession.shared.dataTask(with: url) { data, response, error in
@@ -165,30 +185,8 @@ struct CommentView: View {
             }
         }.resume()
     }
-    
-    private func deleteComment(id: Int) {
-        let urlString = "https://api.mapping.kro.kr/api/v2/comment/\(id)"
-        guard let url = URL(string: urlString) else { return }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "DELETE"
-        request.addValue("Bearer \(userManager.accessToken)", forHTTPHeaderField: "Authorization")
-        
-        Task {
-            do {
-                let (_, response) = try await URLSession.shared.data(for: request)
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                    throw URLError(.badServerResponse)
-                }
-                print("Memo deleted successfully.")
-                update = true
-            } catch {
-                print("Error deleting memo: \(error)")
-            }
-            
-        }
-    }
 }
+
 
 struct CommentResponse: Decodable {
     let status: Int
