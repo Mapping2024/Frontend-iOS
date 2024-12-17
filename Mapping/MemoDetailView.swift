@@ -204,6 +204,8 @@ struct MemoDetailView: View {
     }
     
     private func fetchMemoDetail() async {
+        userManager.fetchUserInfo()
+        
         guard let id = id else { return }
         let urlString = "https://api.mapping.kro.kr/api/v2/memo/detail?memoId=\(id)"
         guard let url = URL(string: urlString) else { return }
