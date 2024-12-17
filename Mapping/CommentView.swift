@@ -9,6 +9,7 @@ struct CommentView: View {
     @State var update: Bool = false
     
     @State private var editingCommentId: Int? = nil // 수정 중인 댓글의 ID
+
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -186,7 +187,6 @@ struct CommentView: View {
         }.resume()
     }
 }
-
 
 struct CommentResponse: Decodable {
     let status: Int
