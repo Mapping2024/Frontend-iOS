@@ -58,6 +58,32 @@ struct CommentView: View {
                                                 
                                                 Spacer()
                                                 
+                                                //if userManager.isLoggedIn, userManager.userInfo?.nickname == //comment.nickname {
+                                                    Menu{
+                                                        Button("수정"){
+                                                            print("modify")
+                                                        }
+                                                        Button("삭제"){
+                                                            deleteComment(id: comment.id)
+                                                        }
+                                                    } label: {
+                                                        Image(systemName: "ellipsis")
+                                                            .foregroundColor(.cBlack)
+                                                    }
+                                            
+                                                //}
+                                                
+                                            }
+                                            Text(comment.comment)
+                                                .font(.body)
+                                            
+                                            HStack{
+                                                Text(comment.updatedAt)
+                                                    .font(.caption)
+                                                    .foregroundColor(.gray)
+                                                
+                                                Spacer()
+                                                
                                                 Button(action: {
                                                     if let index = comments.firstIndex(where: { $0.id == comment.id }) {
                                                         withAnimation(.easeInOut(duration: 0.2)) {
@@ -81,20 +107,15 @@ struct CommentView: View {
                                                         }
                                                     }
                                                 }) {
-                                                    HStack {
+                                                    HStack(alignment: .bottom) {
                                                         Text("👍 \(comment.likeCnt)")
                                                             .scaleEffect(comment.isAnimatingLike == true ? 1.5 : 1.0) // 크기 애니메이션
                                                             .animation(.easeInOut(duration: 0.2), value: comment.isAnimatingLike)
+                                                            .font(.caption)
+                                                            .foregroundColor(.cBlack)
                                                     }
                                                 }
-
                                             }
-                                            Text(comment.comment)
-                                                .font(.body)
-                                            
-                                            Text(comment.updatedAt)
-                                                .font(.caption)
-                                                .foregroundColor(.gray)
                                         }
                                         Spacer()
                                     }
@@ -122,6 +143,7 @@ struct CommentView: View {
     }
     
     private func fetchComments() {
+        userManager.fetchUserInfo()
         guard let url = URL(string: "https://api.mapping.kro.kr/api/v2/comment?memoId=\(memoId)") else { return }
         
         URLSession.shared.dataTask(with: url) { data, response, error in
@@ -142,6 +164,29 @@ struct CommentView: View {
                 print("Failed to decode JSON: \(error)")
             }
         }.resume()
+    }
+    
+    private func deleteComment(id: Int) {
+        let urlString = "https://api.mapping.kro.kr/api/v2/comment/\(id)"
+        guard let url = URL(string: urlString) else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.addValue("Bearer \(userManager.accessToken)", forHTTPHeaderField: "Authorization")
+        
+        Task {
+            do {
+                let (_, response) = try await URLSession.shared.data(for: request)
+                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                    throw URLError(.badServerResponse)
+                }
+                print("Memo deleted successfully.")
+                update = true
+            } catch {
+                print("Error deleting memo: \(error)")
+            }
+            
+        }
     }
 }
 
