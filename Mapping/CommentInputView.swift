@@ -16,9 +16,22 @@ struct CommentInputView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack{
-                TextField("댓글을 입력하세요", text: $newComment)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+            
+            TextField("댓글을 입력하세요", text: $newComment)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+            
+            HStack {
+                ForEach(1...5, id: \.self) { star in
+                    Image(systemName: star <= rating ? "star.fill" : "star")
+                        .resizable()
+                        .frame(width: 20, height: 20)
+                        .foregroundColor(star <= rating ? .yellow : .gray)
+                        .onTapGesture {
+                            rating = star // 선택한 별점으로 설정
+                        }
+                }
+                
+                Spacer()
                 
                 Button(action: addComment) {
                     Text("등록")
@@ -28,18 +41,6 @@ struct CommentInputView: View {
                         .foregroundColor(.white)
                         .cornerRadius(8)
                 }
-                
-            }
-            HStack {
-                Text("별점 설정:")
-                Picker("별점", selection: $rating) {
-                    ForEach(1...5, id: \.self) { star in
-                        HStack {
-                            Text("\(star)점")
-                        }.tag(star)
-                    }
-                }
-                .pickerStyle(SegmentedPickerStyle())
             }
             
         }
@@ -66,14 +67,14 @@ struct CommentInputView: View {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("Bearer \(userManager.accessToken)", forHTTPHeaderField: "Authorization")
-
+        
         // URLSession으로 요청 전송
         URLSession.shared.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {
                 print("Failed to post comment: \(error?.localizedDescription ?? "Unknown error")")
                 return
             }
-
+            
             // 서버 응답 처리
             do {
                 let decodedResponse = try JSONDecoder().decode(CommentResponse.self, from: data)

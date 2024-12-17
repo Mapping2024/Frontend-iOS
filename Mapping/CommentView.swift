@@ -8,8 +8,9 @@ struct CommentView: View {
     @State private var isLoading: Bool = true
     @State var update: Bool = false
     
-    @State private var editingCommentId: Int? = nil // 수정 중인 댓글의 ID
-
+    @State var editingCommentId: Int = 0 // 수정 중인 댓글의 ID
+    @State var updatedCommentText: String = "" // 수정할 댓글 내용
+    @State var updatedRating: Int = 1 // 수정할 별점
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -22,7 +23,7 @@ struct CommentView: View {
                         .font(.body)
                         .foregroundColor(.gray)
                         .padding()
-                    if userManager.isLoggedIn {
+                    if userManager.isLoggedIn && editingCommentId == 0 {
                         Divider()
                         CommentInputView(memoId: memoId, update: $update)
                     }
@@ -32,7 +33,7 @@ struct CommentView: View {
                             ForEach(comments) { comment in
                                 VStack(spacing: 8) {
                                     if editingCommentId == comment.id {
-                                        CommentEditView()
+                                        CommentEditView(editingCommentId: $editingCommentId, editingComment: updatedCommentText, editingRating: updatedRating, update: $update)
                                     } else {
                                         // 일반 댓글 UI
                                         HStack(alignment: .top) {
@@ -95,7 +96,7 @@ struct CommentView: View {
                         }
                         .padding(.horizontal)
                         
-                        if userManager.isLoggedIn {
+                        if userManager.isLoggedIn && editingCommentId == 0 {
                             CommentInputView(memoId: memoId, update: $update)
                         }
                     }
@@ -109,37 +110,6 @@ struct CommentView: View {
                 update = false
             }
         })
-    }
-    
-    private func updateComment(id: Int) {
-        let urlString = "https://api.mapping.kro.kr/api/v2/comment/\(id)"
-        guard let url = URL(string: urlString) else { return }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "PATCH"
-        request.addValue("Bearer \(userManager.accessToken)", forHTTPHeaderField: "Authorization")
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        let body: [String: Any] = [
-            "comment": updatedCommentText,
-            "rating": updatedRating
-        ]
-        
-        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
-        
-        Task {
-            do {
-                let (_, response) = try await URLSession.shared.data(for: request)
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                    throw URLError(.badServerResponse)
-                }
-                print("Comment updated successfully.")
-                editingCommentId = nil // 수정 모드 종료
-                fetchComments() // 댓글 데이터 새로고침
-            } catch {
-                print("Error updating comment: \(error)")
-            }
-        }
     }
     
     private func deleteComment(id: Int) {
@@ -187,6 +157,7 @@ struct CommentView: View {
         }.resume()
     }
 }
+
 
 struct CommentResponse: Decodable {
     let status: Int
