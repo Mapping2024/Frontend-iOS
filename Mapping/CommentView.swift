@@ -83,9 +83,17 @@ struct CommentView: View {
                                                 Text(comment.comment)
                                                     .font(.body)
                                                 
-                                                Text(comment.updatedAt)
-                                                    .font(.caption)
-                                                    .foregroundColor(.gray)
+                                                HStack{
+                                                    Text(comment.updatedAt)
+                                                        .font(.caption)
+                                                        .foregroundColor(.gray)
+                                                    
+                                                    if comment.modify == true {
+                                                        Text("(수정됨)")
+                                                            .font(.caption)
+                                                            .foregroundColor(.gray)
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -171,6 +179,7 @@ struct Comment: Identifiable, Decodable {
     let comment: String
     let rating: Int
     let likeCnt: Int
+    let modify: Bool
     let nickname: String
     let profileImageUrl: String?
     let updatedAt: String
