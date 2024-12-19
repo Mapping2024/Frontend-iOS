@@ -93,6 +93,39 @@ struct CommentView: View {
                                                             .font(.caption)
                                                             .foregroundColor(.gray)
                                                     }
+                                                    Spacer()
+                                                    // 좋아요 버튼
+                                                    Button(action: {
+                                                        if let index = comments.firstIndex(where: { $0.id == comment.id }) {
+                                                            withAnimation(.easeInOut(duration: 0.2)) {
+                                                                comments[index].isAnimatingLike = true
+                                                            }
+                                                            // 서버로 좋아요 요청
+                                                            LikeHateService.likeComment(id: comment.id, accessToken: userManager.accessToken) { result in
+                                                                DispatchQueue.main.async {
+                                                                    switch result {
+                                                                    case .success:
+                                                                        print("Successfully liked the post.")
+                                                                        fetchComments() // 데이터 새로고침
+                                                                    case .failure(let error):
+                                                                        print("Failed to like the post: \(error)")
+                                                                    }
+                                                                    // 애니메이션 복구
+                                                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                                                        comments[index].isAnimatingLike = false
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }) {
+                                                        HStack(alignment: .bottom) {
+                                                            Text("👍 \(comment.likeCnt)")
+                                                                .scaleEffect(comment.isAnimatingLike == true ? 1.5 : 1.0) // 크기 애니메이션
+                                                                .animation(.easeInOut(duration: 0.2), value: comment.isAnimatingLike)
+                                                                .font(.caption)
+                                                                .foregroundColor(.cBlack)
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
