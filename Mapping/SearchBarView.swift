@@ -7,8 +7,6 @@ struct SearchBarView: View {
     @State var query: String = ""
     @State var isMyInfo: Bool = false
     
-    @State private var searchResults: [Item] = []
-    
     var body: some View {
         VStack {
             HStack {
@@ -33,7 +31,10 @@ struct SearchBarView: View {
                 Spacer()
             }
             
-            List(item.filter{$0.title.hasPrefix(query) || query == ""}, id: \.id) { result in
+            List(item.filter {
+                $0.title.lowercased().contains(query.lowercased()) || query.isEmpty
+            }
+                 , id: \.id) { result in
                 HStack {
                     Text(result.title)
                     Spacer()
@@ -45,7 +46,7 @@ struct SearchBarView: View {
                     selectedMemoId = result.id
                 }
             }
-            .scrollContentBackground(.hidden)
+                 .scrollContentBackground(.hidden)
         }
     }
 }
