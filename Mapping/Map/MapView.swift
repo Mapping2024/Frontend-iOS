@@ -38,7 +38,7 @@ struct MapView: View {
                 Group {
                     switch displayMode {
                     case .main:
-                        SearchBarView(update: $update, selectedMemoId: $selectedMemoId, item: mapItems)
+                        SearchBarView(update: $update, selectedMemoId: $selectedMemoId, item: $mapItems)
                         CategoryView(category: $category, isPinAdd: $isPinAdd, update: $update)
                     case .detail:
                         MemoDetailView(id: $selectedMemoId, size: $selectedDetent)
