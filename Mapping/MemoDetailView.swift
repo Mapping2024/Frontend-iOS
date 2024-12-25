@@ -27,7 +27,7 @@ struct MemoDetailView: View {
                             HStack{
                                 Text(datePart).font(.caption2).foregroundStyle(.secondary)
                                 if detail.certified {
-                                    Image(systemName: "checkmark.seal.fill")
+                                    Image(systemName: "checkmark.seal.fill").font(.caption2).foregroundStyle(.secondary)
                                 }
                             }
                         }

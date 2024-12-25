@@ -1,45 +1,53 @@
-//
-//  SearchBarView.swift
-//  Mapping
-//
-//  Created by 김민정 on 11/22/24.
-//
-
 import SwiftUI
 
 struct SearchBarView: View {
-    @Binding var query: String
-    @Binding var isMyInfo: Bool
     @Binding var update: Bool
+    @Binding var selectedMemoId: Int?
+    @Binding var item: [Item]
+    @State var query: String = ""
+    @State var isMyInfo: Bool = false
     
     var body: some View {
-        HStack {
-            Spacer()
-            TextField("Search", text: $query)
-                .textFieldStyle(.roundedBorder)
-                .onSubmit {
-                    // code fired when you return in TextField
+        VStack {
+            HStack {
+                Spacer()
+                TextField("Search", text: $query)
+                    .textFieldStyle(.roundedBorder)
+                
+                Spacer()
+                
+                Button(action: { isMyInfo.toggle() }) {
+                    ProfileImageView()
+                        .frame(width: 40, height: 40)
                 }
-            Spacer()
-            
-            Button(action: {isMyInfo.toggle()}) {
-                ProfileImageView()
-                    .frame(width: 40, height: 40)
+                .sheet(isPresented: $isMyInfo, content: {
+                    NavigationStack {
+                        MyInfoView()
+                    }.onDisappear {
+                        update = true
+                    }
+                    .presentationDragIndicator(.visible)
+                })
+                Spacer()
             }
-            .sheet(isPresented: $isMyInfo, content: {
-                NavigationStack {
-                    MyInfoView()
-                }.onDisappear {
-                    update = true
+            
+            List(item.filter {
+                $0.title.lowercased().contains(query.lowercased()) || query.isEmpty
+            }
+                 , id: \.id) { result in
+                HStack {
+                    Text(result.title)
+                    Spacer()
+                    Text(result.category).font(.caption)
                 }
-                .presentationDragIndicator(.visible)
-            })
-            Spacer()
+                .listRowBackground(Color.cLightGray)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    selectedMemoId = result.id
+                }
+            }
+                 .scrollContentBackground(.hidden)
         }
     }
 }
 
-
-#Preview {
-    SearchBarView(query: .constant("Coffe"), isMyInfo: .constant (false), update: .constant(false)).environmentObject(UserManager())
-}

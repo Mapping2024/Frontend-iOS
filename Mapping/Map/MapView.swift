@@ -16,11 +16,9 @@ struct MapView: View {
     @State var category: String = "전체"
     @State private var selectedDetent: PresentationDetent = .small
     
-    @State private var query: String = ""
     @State private var mapItems: [Item] = []
     @State private var filteredMapItems: [Item] = [] // 필터링된 데이터를 저장할 변수
     @State private var selectedMemoId: Int?
-    @State private var isMyInfo: Bool = false
     @State private var isPinAdd: Bool = false
     @State private var displayMode: DisplayMode = .main
     
@@ -40,7 +38,7 @@ struct MapView: View {
                 Group {
                     switch displayMode {
                     case .main:
-                        SearchBarView(query: $query, isMyInfo: $isMyInfo, update: $update)
+                        SearchBarView(update: $update, selectedMemoId: $selectedMemoId, item: $mapItems)
                         CategoryView(category: $category, isPinAdd: $isPinAdd, update: $update)
                     case .detail:
                         MemoDetailView(id: $selectedMemoId, size: $selectedDetent)
