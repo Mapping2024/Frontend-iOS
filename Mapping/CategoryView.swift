@@ -11,7 +11,8 @@ struct CategoryView: View {
         ("쓰레기통", "trash.fill"),
         ("공용 화장실", "toilet.fill"),
         ("붕어빵","fish.fill"),
-        ("기타", "star.fill")
+        ("기타", "star.fill"),
+        ("개인","person.fill")
     ]
 
     var body: some View {
@@ -22,22 +23,39 @@ struct CategoryView: View {
                     PinAddButton(isPinAdd: $isPinAdd, update: $update)
                 }
                 ForEach(CategoryOptions, id: \.0) { key, value in
-                    Button(action: {
-                        category = key
-                    }, label: {
-                        HStack {
-                            Image(systemName: value)
-                            if key == "공용 화장실" {
-                                Text("화장실").font(.caption)
-                            } else {
-                                Text(key).font(.caption)
-                            }
+                    if (key == "개인") {
+                       if userManager.isLoggedIn && userManager.userInfo != nil {
+                           Button(action: {
+                               category = key
+                           }, label: {
+                               HStack {
+                                   Image(systemName: value)
+                                   Text(key).font(.caption)
+                               }
+                               .padding(10)
+                               .background(category == key ? Color.cBlue : Color.gray)
+                               .cornerRadius(8)
+                               .foregroundStyle(Color.cWhite)
+                           })
                         }
-                        .padding(10)
-                        .background(category == key ? Color.cBlue : Color.gray)
-                        .cornerRadius(8)
-                        .foregroundStyle(Color.cWhite)
-                    })
+                    } else {
+                        Button(action: {
+                            category = key
+                        }, label: {
+                            HStack {
+                                Image(systemName: value)
+                                if key == "공용 화장실" {
+                                    Text("화장실").font(.caption)
+                                } else {
+                                    Text(key).font(.caption)
+                                }
+                            }
+                            .padding(10)
+                            .background(category == key ? Color.cBlue : Color.gray)
+                            .cornerRadius(8)
+                            .foregroundStyle(Color.cWhite)
+                        })
+                    }
                 }
                 Spacer()
             }
