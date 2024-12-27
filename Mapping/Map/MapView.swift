@@ -108,6 +108,8 @@ struct MapView: View {
     private func applyFilter() {
         if category == "전체" {
             filteredMapItems = mapItems
+        } else if(category == "개인") {
+            filteredMapItems = mapItems.filter{ $0.secret == true}
         } else {
             filteredMapItems = mapItems.filter { $0.category == category }
         }

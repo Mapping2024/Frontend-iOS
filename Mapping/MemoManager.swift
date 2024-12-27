@@ -21,7 +21,8 @@ func MemoMatching(location: CLLocationCoordinate2D, accessToken: String) async t
                             id: memoData.id,
                             title: memoData.title,
                             category: memoData.category,
-                            location: CLLocationCoordinate2D(latitude: memoData.lat, longitude: memoData.lng)
+                            location: CLLocationCoordinate2D(latitude: memoData.lat, longitude: memoData.lng),
+                            secret: memoData.secret
                         )
                         return mapItem
                     }
@@ -63,13 +64,15 @@ struct Item: Identifiable, Hashable, Equatable {
     let title: String
     let category: String
     let location: CLLocationCoordinate2D
+    let secret: Bool
     
     static func == (lhs: Item, rhs: Item) -> Bool {
             return lhs.id == rhs.id &&
                    lhs.title == rhs.title &&
                    lhs.category == rhs.category &&
                    lhs.location.latitude == rhs.location.latitude &&
-                   lhs.location.longitude == rhs.location.longitude
+                   lhs.location.longitude == rhs.location.longitude &&
+                   lhs.secret == rhs.secret
         }
     func hash(into hasher: inout Hasher) {
             hasher.combine(id)
@@ -77,5 +80,6 @@ struct Item: Identifiable, Hashable, Equatable {
             hasher.combine(category)
             hasher.combine(location.latitude)
             hasher.combine(location.longitude)
+            hasher.combine(secret)
         }
 }
