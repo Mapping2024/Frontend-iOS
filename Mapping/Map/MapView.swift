@@ -63,7 +63,18 @@ struct MapView: View {
             })
         }
         .onChange(of: selectedMemoId, { oldValue, newValue in
-            displayMode = (selectedMemoId != nil) ? .detail : .main
+            // `selectedMemoId` 변경 시 지도 중심 업데이트
+            if let id = selectedMemoId,
+               let selectedItem = mapItems.first(where: { $0.id == id }) {
+                let adjustedCenter = CLLocationCoordinate2D(
+                            latitude: selectedItem.location.latitude - 0.002,
+                            longitude: selectedItem.location.longitude
+                        )
+                        position = .region(MKCoordinateRegion(center: adjustedCenter, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)))
+                        displayMode = .detail // 상세 모드로 전환
+            } else {
+                displayMode = .main
+            }
         })
         .onChange(of: update, { oldValue, newValue in // 핀 추가후 지도 업데이트
             if update {
