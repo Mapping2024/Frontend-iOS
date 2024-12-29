@@ -1,10 +1,3 @@
-//
-//  UserManager.swift
-//  Mapping
-//
-//  Created by 김민정 on 11/2/24.
-//
-
 import SwiftUI
 import KakaoSDKAuth
 import KakaoSDKUser

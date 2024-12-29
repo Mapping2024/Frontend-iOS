@@ -1,10 +1,3 @@
-//
-//  CommentInputView.swift
-//  Mapping
-//
-//  Created by 김민정 on 12/17/24.
-//
-
 import SwiftUI
 
 struct CommentInputView: View {
