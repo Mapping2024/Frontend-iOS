@@ -1,10 +1,3 @@
-//
-//  UserInfo.swift
-//  Mapping
-//
-//  Created by 김민정 on 11/2/24.
-//
-
 struct UserInfo: Codable {
     let socialId: String
     let nickname: String
@@ -17,7 +10,6 @@ struct Tokens: Codable {
     let refreshToken: String
 }
 
-// 서버 응답 형식과 일치하는 구조체
 struct UserInfoResponse: Codable {
     let status: Int
     let success: Bool

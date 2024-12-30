@@ -1,24 +1,16 @@
-//
-//  MyMemoListView.swift
-//  Mapping
-//
-//  Created by 김민정 on 11/7/24.
-//
-
 import SwiftUI
-import Alamofire
 
 struct MyMemoListView: View {
     @EnvironmentObject var userManager: UserManager
-    @State private var myMemo: [MyMemo] = []
+    @StateObject private var viewModel = MyMemoListViewModel()
     
     var body: some View {
         NavigationStack {
-            List(myMemo) { memo in
+            List(viewModel.myMemo) { memo in
                 NavigationLink(destination: MyMemoDetailView(id: memo.id)) {
                     VStack(alignment: .leading, spacing: 8) {
-                        HStack{
-                            VStack(alignment: .leading){
+                        HStack {
+                            VStack(alignment: .leading) {
                                 Text(memo.title)
                                     .font(.headline)
                                     .foregroundColor(.primary)
@@ -26,16 +18,16 @@ struct MyMemoListView: View {
                                 Text(memo.content)
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
-                                    .lineLimit(2) // 줄 수 제한
+                                    .lineLimit(2)
                             }
                             Spacer()
-                            if memo.images.first != nil {
-                                AsyncImage(url: URL(string: memo.images.first!)) { image in
+                            if let imageUrl = memo.images.first, let url = URL(string: imageUrl) {
+                                AsyncImage(url: url) { image in
                                     image.resizable()
                                 } placeholder: {
                                     ProgressView()
                                 }
-                                .frame(width: 50,height: 50)
+                                .frame(width: 50, height: 50)
                                 .cornerRadius(10)
                             }
                         }
@@ -47,14 +39,13 @@ struct MyMemoListView: View {
                             Spacer()
                             
                             HStack {
-                                if(memo.secret){
+                                if memo.secret {
                                     Image(systemName: "parkingsign")
                                 }
                                 HStack {
                                     Image(systemName: "hand.thumbsup.fill")
                                     Text("\(memo.likeCnt)")
                                 }
-                                
                                 HStack {
                                     Image(systemName: "hand.thumbsdown.fill")
                                     Text("\(memo.hateCnt)")
@@ -68,50 +59,10 @@ struct MyMemoListView: View {
             }
             .navigationBarTitle("내 메모")
             .onAppear {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    fetchMyMemo()
-                }
+                viewModel.fetchMyMemo(userManager: userManager)
             }
         }
     }
-    
-    private func fetchMyMemo() {
-        userManager.fetchUserInfo() // 토큰 유효성 확인 및 재발급
-        let accessToken = userManager.accessToken
-        let headers: HTTPHeaders = ["Authorization": "Bearer \(accessToken)"]
-        let url = "https://api.mapping.kro.kr/api/v2/memo/my-memo"
-        
-        AF.request(url, method: .get, headers: headers).responseDecodable(of: MyMemoResponse.self) { response in
-            switch response.result {
-            case .success(let memoResponse):
-                if memoResponse.success {
-                    self.myMemo = memoResponse.data
-                } else {
-                    print("Failed to fetch memo locations: \(memoResponse.message)")
-                }
-            case .failure(let error):
-                print("Error fetching memo locations: \(error)")
-            }
-        }
-    }
-}
-
-struct MyMemo: Identifiable, Decodable {
-    let id: Int
-    let title: String
-    let content: String
-    let category: String
-    let likeCnt: Int
-    let hateCnt: Int
-    let images: [String]
-    let secret: Bool
-}
-
-struct MyMemoResponse: Decodable {
-    let status: Int
-    let success: Bool
-    let message: String
-    let data: [MyMemo]
 }
 
 #Preview {

@@ -1,10 +1,3 @@
-//
-//  CustomMapView.swift
-//  Mapping
-//
-//  Created by 김민정 on 11/3/24.
-//
-
 import SwiftUI
 import MapKit
 
