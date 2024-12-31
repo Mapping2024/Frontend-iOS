@@ -33,7 +33,12 @@ struct CommentView: View {
                             ForEach(comments) { comment in
                                 VStack(spacing: 8) {
                                     if editingCommentId == comment.id {
-                                        CommentEditView(editingCommentId: $editingCommentId, editingComment: updatedCommentText, editingRating: updatedRating, update: $update)
+                                        CommentEditView(
+                                            editingCommentId: $editingCommentId,
+                                            update: $update,
+                                            editingCommentString: comment.comment,
+                                            editingRating: comment.rating
+                                        )
                                     } else {
                                         // 일반 댓글 UI
                                         HStack(alignment: .top) {

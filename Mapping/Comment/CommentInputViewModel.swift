@@ -1,46 +1,10 @@
 import SwiftUI
 
-struct CommentInputView: View {
-    @EnvironmentObject var userManager: UserManager
-    @State private var newComment: String = ""
-    @State private var rating: Int = 5
-    let memoId: Int
-    @Binding var update: Bool
+class CommentInputViewModel: ObservableObject {
+    @Published var newComment: String = ""
+    @Published var rating: Int = 5
     
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            
-            TextField("댓글을 입력하세요", text: $newComment)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-            
-            HStack {
-                ForEach(1...5, id: \.self) { star in
-                    Image(systemName: star <= rating ? "star.fill" : "star")
-                        .resizable()
-                        .frame(width: 20, height: 20)
-                        .foregroundColor(star <= rating ? .yellow : .gray)
-                        .onTapGesture {
-                            rating = star // 선택한 별점으로 설정
-                        }
-                }
-                
-                Spacer()
-                
-                Button(action: addComment) {
-                    Text("등록")
-                        .padding(.horizontal)
-                        .padding(.vertical, 8)
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
-            }
-            
-        }
-        .padding(.horizontal)
-    }
-    
-    private func addComment() {
+    func addComment(memoId: Int, userManager: UserManager, completion: @escaping () -> Void) {
         // 필수 입력 확인
         guard !newComment.isEmpty else {
             print("댓글 내용이 비어 있습니다.")
@@ -62,7 +26,7 @@ struct CommentInputView: View {
         request.setValue("Bearer \(userManager.accessToken)", forHTTPHeaderField: "Authorization")
         
         // URLSession으로 요청 전송
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             guard let data = data, error == nil else {
                 print("Failed to post comment: \(error?.localizedDescription ?? "Unknown error")")
                 return
@@ -74,9 +38,9 @@ struct CommentInputView: View {
                 DispatchQueue.main.async {
                     if decodedResponse.success {
                         print("댓글이 성공적으로 추가되었습니다.")
-                        newComment = ""
-                        rating = 5
-                        update = true
+                        self?.newComment = ""
+                        self?.rating = 5
+                        completion()
                     } else {
                         print("댓글 추가 실패: \(decodedResponse.message)")
                     }
@@ -89,8 +53,4 @@ struct CommentInputView: View {
             }
         }.resume()
     }
-}
-
-#Preview {
-    CommentInputView(memoId: 1, update: .constant(false))
 }
