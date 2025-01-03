@@ -114,7 +114,7 @@ struct MemoDetailView: View {
                 
                 if size == .large {
                     Divider()
-                    CommentView(memoId: detail.id)
+                    CommentListView(memoId: detail.id)
                 }
                 
                 HStack {
