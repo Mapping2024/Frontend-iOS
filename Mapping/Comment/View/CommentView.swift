@@ -74,6 +74,7 @@ struct CommentView: View {
                         isShaking = true
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                             isShaking = false
+                            update = true
                         }
 
                         LikeHateService.likeComment(id: comment.id, accessToken: userManager.accessToken) { result in
@@ -81,7 +82,6 @@ struct CommentView: View {
                                 switch result {
                                 case .success:
                                     print("Successfully liked the post.")
-                                    update = true
                                     
                                 case .failure(let error):
                                     print("Failed to like the post: \(error)")

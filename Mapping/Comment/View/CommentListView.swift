@@ -38,7 +38,6 @@ struct CommentListView: View {
                                             editingRating: comment.rating
                                         )
                                     } else {
-                                        // 일반 댓글 UI
                                         CommentView(comment: comment, editingCommentId: $editingCommentId, update: $update)
                                     }
                                     
