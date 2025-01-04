@@ -1,5 +1,4 @@
 import SwiftUI
-import Alamofire
 import PhotosUI
 
 enum PinCategory: String, CaseIterable, Identifiable {
@@ -16,137 +15,76 @@ struct AddPinDetailView: View {
     @EnvironmentObject var userManager: UserManager
     @Environment(\.dismiss) private var dismiss
     @Binding var backFlag: Bool
-    @State private var secret: Bool = false
-    @State private var pinName: String = ""
-    @State private var pinDescription: String = ""
-    @State private var selectedCategory: PinCategory = .other
-    @State private var selectedImages: [UIImage] = []
-    @State private var isPickerPresented = false
-    @State private var uploadSuccessText: String? = nil
-    @State private var uploadSuccess = false
-    
-    var latitude: Double
-    var longitude: Double
-    var currentLocation: CLLocationCoordinate2D
-    
+
+    @StateObject private var viewModel: AddPinDetailViewModel
+
+    init(backFlag: Binding<Bool>, latitude: Double, longitude: Double, currentLocation: CLLocationCoordinate2D) {
+        self._backFlag = backFlag
+        self._viewModel = StateObject(
+            wrappedValue: AddPinDetailViewModel(latitude: latitude, longitude: longitude, currentLocation: currentLocation)
+        )
+    }
+
     var body: some View {
-        Group{
+        Group {
             Form {
                 Section(header: Text("제목")) {
-                    TextField("핀 이름", text: $pinName)
+                    TextField("핀 이름", text: $viewModel.pinName)
                 }
-                
+
                 Section(header: Text("내용")) {
-                    TextEditor( text: $pinDescription)
+                    TextEditor(text: $viewModel.pinDescription)
                         .frame(minHeight: 100)
                 }
-                
+
                 Section(header: Text("카테고리")) {
-                    Picker("카테고리 선택", selection: $selectedCategory) {
+                    Picker("카테고리 선택", selection: $viewModel.selectedCategory) {
                         ForEach(PinCategory.allCases) { category in
                             Text(category.rawValue).tag(category)
                         }
                     }
                     .pickerStyle(MenuPickerStyle())
                 }
-                
+
                 Section(header: Text("개인 메모")) {
-                    Toggle("프라이빗 설정", isOn: $secret)
+                    Toggle("프라이빗 설정", isOn: $viewModel.secret)
                 }
-                
+
                 Section(header: Text("사진")) {
-                    ForEach(selectedImages, id: \.self) { image in
+                    ForEach(viewModel.selectedImages, id: \.self) { image in
                         Image(uiImage: image)
                             .resizable()
                             .scaledToFit()
                             .frame(height: 200)
                             .cornerRadius(10)
                     }
-                    
+
                     Button("사진 선택") {
-                        isPickerPresented = true
+                        viewModel.isPickerPresented = true
                     }
                 }
             }
             .navigationBarTitle(Text("핀 생성하기"), displayMode: .inline)
             .navigationBarItems(
                 trailing: Button("생성") {
-                    createPin()
-                }.disabled(pinName.isEmpty || pinDescription.isEmpty)
+                    userManager.fetchUserInfo() // 토큰 유효성 확인 및 재발급
+                    viewModel.createPin(accessToken: userManager.accessToken)
+                }
+                .disabled(viewModel.pinName.isEmpty || viewModel.pinDescription.isEmpty)
             )
-            .sheet(isPresented: $isPickerPresented) {
-                PhotoPicker(selectedImages: $selectedImages, selectionLimit: 5)
+            .sheet(isPresented: $viewModel.isPickerPresented) {
+                PhotoPicker(selectedImages: $viewModel.selectedImages, selectionLimit: 5)
             }
-        }
-        .alert(isPresented: $uploadSuccess) {
-            Alert(
-                title: Text("\(uploadSuccessText!)"),
-                message: nil,
-                dismissButton: .default(Text("확인")){
-                    dismiss()
-                    backFlag = true
-                }
-            )
-            
-        }
-    }
-    
-    func createPin() {
-        userManager.fetchUserInfo() // 토큰 유효성 확인 및 재발급
-        let url = "https://api.mapping.kro.kr/api/v2/memo/new"
-
-        let parameters: [String: String] = [
-            "title": pinName,
-            "content": pinDescription,
-            "lat": "\(latitude)",
-            "lng": "\(longitude)",
-            "category": selectedCategory.rawValue,
-            "secret": "\(secret)",
-            "currentLat": "\(currentLocation.latitude)",
-            "currentLng": "\(currentLocation.longitude)"
-        ]
-        
-        let headers: HTTPHeaders = [
-            "Authorization": "Bearer \(userManager.accessToken)",
-            "Content-Type": "multipart/form-data"
-        ]
-        
-        let query = parameters.map { "\($0)=\($1)" }.joined(separator: "&")
-        let fullURL = "\(url)?\(query)"
-        
-        AF.upload(multipartFormData: { multipartFormData in
-            // 이미지 추가 (선택된 경우)
-            for (index, image) in selectedImages.enumerated() {
-                if let compressedImageData = image.jpegData(compressionQuality: 0.5) {  // 압축 품질 조절 (0.5)
-                    multipartFormData.append(compressedImageData, withName: "images", fileName: "image\(index).jpg", mimeType: "image/jpeg")
-                }
-            }
-            
-        }, to: fullURL, headers: headers).response { response in
-            switch response.result {
-            case .success:
-                uploadSuccess = true
-                uploadSuccessText = "핀 생성 완료"
-                if let data = response.data, let responseString = String(data: data, encoding: .utf8) {
-                    print("요청 성공: \(responseString)")
-                } else {
-                    print("요청 성공: 데이터 없음")
-                }
-                
-            case .failure(let error):
-                uploadSuccess = true
-                uploadSuccessText = "핀 생성 오류 다시 한번 시도해 주세요"
-                if let data = response.data, let responseString = String(data: data, encoding: .utf8) {
-                    print("요청 실패: \(error)\n응답 내용: \(responseString)")
-                } else {
-                    print("요청 실패: \(error)")
-                }
+            .alert(isPresented: $viewModel.uploadSuccess) {
+                Alert(
+                    title: Text("\(viewModel.uploadSuccessText ?? "알림")"),
+                    message: nil,
+                    dismissButton: .default(Text("확인")) {
+                        dismiss()
+                        backFlag = true
+                    }
+                )
             }
         }
     }
-}
-
-#Preview {
-    AddPinDetailView(backFlag: .constant(false), latitude: 37.7749, longitude: -122.4194, currentLocation: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)) // 예시 위도와 경도 값
-        .environmentObject(UserManager())
 }
