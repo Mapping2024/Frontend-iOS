@@ -3,7 +3,6 @@ import SwiftUI
 struct CategoryView: View {
     @EnvironmentObject var userManager: UserManager
     @Binding var category: String
-    @Binding var isPinAdd: Bool
     @Binding var update: Bool
     let CategoryOptions: [(String, String)] = [
         ("전체", "mappin"),
@@ -20,7 +19,7 @@ struct CategoryView: View {
             HStack(alignment: .center) {
                 Spacer()
                 if userManager.isLoggedIn && userManager.userInfo != nil {
-                    PinAddButton(isPinAdd: $isPinAdd, update: $update)
+                    PinAddButton( update: $update)
                 }
                 ForEach(CategoryOptions, id: \.0) { key, value in
                     if (key == "개인") {
@@ -65,7 +64,7 @@ struct CategoryView: View {
 }
 
 #Preview {
-    CategoryView(category: .constant("전체"), isPinAdd: .constant(false), update: .constant(false))
+    CategoryView(category: .constant("전체"), update: .constant(false))
         .environmentObject(UserManager())
     
 }

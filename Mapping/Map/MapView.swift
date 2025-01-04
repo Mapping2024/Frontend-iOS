@@ -19,7 +19,6 @@ struct MapView: View {
     @State private var mapItems: [Item] = []
     @State private var filteredMapItems: [Item] = [] // 필터링된 데이터를 저장할 변수
     @State private var selectedMemoId: Int?
-    @State private var isPinAdd: Bool = false
     @State private var displayMode: DisplayMode = .main
     
     @State private var locationData: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 0, longitude: 0) // 기본값 설정
@@ -39,7 +38,7 @@ struct MapView: View {
                     switch displayMode {
                     case .main:
                         SearchBarView(update: $update, selectedMemoId: $selectedMemoId, item: $mapItems)
-                        CategoryView(category: $category, isPinAdd: $isPinAdd, update: $update)
+                        CategoryView(category: $category, update: $update)
                     case .detail:
                         MemoDetailView(id: $selectedMemoId, size: $selectedDetent)
                     }

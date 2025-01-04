@@ -1,14 +1,7 @@
-//
-//  PinAddButton.swift
-//  Mapping
-//
-//  Created by 김민정 on 11/23/24.
-//
-
 import SwiftUI
 
 struct PinAddButton: View {
-    @Binding var isPinAdd: Bool
+    @State private var isPinAdd = false
     @Binding var update: Bool
     
     var body: some View {
