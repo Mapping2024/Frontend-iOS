@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct SearchBarView: View {
+    @EnvironmentObject var userManager: UserManager
     @Binding var update: Bool
     @Binding var selectedMemoId: Int?
     @Binding var item: [Item]
@@ -17,7 +18,7 @@ struct SearchBarView: View {
                 Spacer()
                 
                 Button(action: { isMyInfo.toggle() }) {
-                    ProfileImageView()
+                    ProfileImageView(imageURL: userManager.userInfo?.profileImage)
                         .frame(width: 40, height: 40)
                 }
                 .sheet(isPresented: $isMyInfo, content: {

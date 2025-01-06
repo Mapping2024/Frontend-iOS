@@ -24,7 +24,7 @@ struct ChangeMyInfoView: View {
                                 .clipShape(Circle())
                                 .overlay(Circle().stroke(Color.blue, lineWidth: 2))
                         } else {
-                            ProfileImageView()
+                            ProfileImageView(imageURL: userManager.userInfo?.profileImage)
                                 .frame(width: 150, height: 150)
                                 .overlay(Circle().stroke(Color.blue, lineWidth: 2))
                         }

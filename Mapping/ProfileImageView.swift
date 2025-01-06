@@ -1,12 +1,11 @@
 import SwiftUI
 
 struct ProfileImageView: View {
-    @EnvironmentObject var userManager: UserManager
+    var imageURL: String? // 이미지 URL을 문자열로 받는 매개변수
     
-    // 프로필 이미지 URL 추출 로직을 외부로 분리
+    // 프로필 이미지 URL 생성 로직
     private var profileImageURL: URL? {
-        guard let profileImage = userManager.userInfo?.profileImage,
-              let url = URL(string: profileImage) else {
+        guard let imageURL = imageURL, !imageURL.isEmpty, let url = URL(string: imageURL) else {
             return nil
         }
         return url
@@ -14,48 +13,51 @@ struct ProfileImageView: View {
 
     var body: some View {
         VStack {
-            if userManager.isLoggedIn == false { // 비로그인 상태
-                Image(systemName: "person.circle.fill")
-                    .resizable()
-                    .scaledToFit()
-                    .foregroundStyle(Color.gray)
-                    .background(Circle().fill(Color.white))
-                    .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
-            } else {
-                if let url = profileImageURL {
-                    AsyncImage(url: url) { phase in
-                        switch phase {
-                        case .empty:
-                            ProgressView() // 로딩 중 표시
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .scaledToFill()
-                                .clipShape(Circle())
-                                .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
-                            
-                        case .failure:
-                            ProgressView()
-                        @unknown default:
-                            EmptyView()
-                        }
+            if let url = profileImageURL {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .empty:
+                        ProgressView() // 로딩 중 표시
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFill()
+                            .clipShape(Circle())
+                            .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
+                        
+                    case .failure:
+                        defaultImageView() // 기본 이미지 출력
+                    @unknown default:
+                        EmptyView()
                     }
-                } else { // 프로필 이미지 URL이 없을 경우
-                    Image(systemName: "person.circle.fill")
-                        .resizable()
-                        .scaledToFit()
-                        .foregroundStyle(Color.skyBlue)
-                        .background(Circle().fill(Color.white))
-                        .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
                 }
+            } else { // URL이 없거나 잘못된 경우
+                defaultImageView()
             }
         }
+    }
+    
+    // 기본 이미지 뷰를 반환하는 함수
+    @ViewBuilder
+    private func defaultImageView() -> some View {
+        Image(systemName: "person.circle.fill")
+            .resizable()
+            .scaledToFit()
+            .foregroundStyle(Color.gray)
+            .background(Circle().fill(Color.white))
+            .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
     }
 }
 
 #Preview {
-    ProfileImageView()
-        .environmentObject(UserManager())
-        .frame(width: 70, height: 70)
+    VStack(spacing: 20) {
+        ProfileImageView(imageURL: "https://example.com/profile.jpg")
+            .frame(width: 70, height: 70)
+        
+        ProfileImageView(imageURL: nil) // URL이 없는 경우
+            .frame(width: 70, height: 70)
+        
+        ProfileImageView(imageURL: "") // 빈 문자열인 경우
+            .frame(width: 70, height: 70)
+    }
 }
-

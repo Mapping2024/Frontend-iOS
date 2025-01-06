@@ -1,10 +1,3 @@
-//
-//  MyInfoView.swift
-//  Mapping
-//
-//  Created by 김민정 on 11/6/24.
-//
-
 import SwiftUI
 
 struct MyInfoView: View {
@@ -16,7 +9,7 @@ struct MyInfoView: View {
             GroupBox(label:
                         Label("프로필", systemImage: "person")) {
                 HStack{
-                    ProfileImageView()
+                    ProfileImageView(imageURL: userManager.userInfo?.profileImage)
                         .frame(width: 50, height: 50)
                     if userManager.isLoggedIn, let userInfo = userManager.userInfo {
                         HStack{
