@@ -12,18 +12,8 @@ struct CommentView: View {
 
     var body: some View {
         HStack(alignment: .top) {
-            if let profileImageUrl = comment.profileImageUrl {
-                AsyncImage(url: URL(string: profileImageUrl)) { image in
-                    image
-                        .resizable()
-                        .frame(width: 40, height: 40)
-                        .clipShape(Circle())
-                } placeholder: {
-                    Image(systemName: "person.circle.fill")
-                        .resizable()
-                        .frame(width: 40, height: 40)
-                }
-            }
+            ProfileImageView(imageURL: comment.profileImageUrl)
+                .frame(width: 25, height: 25)
             
             VStack(alignment: .leading, spacing: 4) {
                 HStack {

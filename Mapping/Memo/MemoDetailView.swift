@@ -33,24 +33,8 @@ struct MemoDetailView: View {
                         }
                     }
                     Spacer()
-                    if let profileImageUrl = detail.profileImage {
-                        AsyncImage(url: URL(string: profileImageUrl)) { image in
-                            image
-                                .resizable()
-                                .frame(width: 40, height: 40)
-                                .clipShape(Circle())
-                        } placeholder: {
-                            Image(systemName: "person.circle.fill")
-                                .resizable() // 크기 조정을 가능하게 만듦
-                                .aspectRatio(contentMode: .fit) // 비율 유지
-                                .frame(width: 40, height: 40) // 원하는 크기로 설정
-                        }
-                    } else {
-                        Image(systemName: "person.circle.fill")
-                            .resizable() // 크기 조정을 가능하게 만듦
-                            .aspectRatio(contentMode: .fit) // 비율 유지
-                            .frame(width: 40, height: 40) // 원하는 크기로 설정
-                    }
+                    ProfileImageView(imageURL: detail.profileImage)
+                        .frame(width: 35, height: 35)
                     
                     Text("\(detail.nickname)")
                         .font(.subheadline)

@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct SearchBarView: View {
+    @EnvironmentObject var userManager: UserManager
     @Binding var update: Bool
     @Binding var selectedMemoId: Int?
     @Binding var item: [Item]
@@ -17,8 +18,19 @@ struct SearchBarView: View {
                 Spacer()
                 
                 Button(action: { isMyInfo.toggle() }) {
-                    ProfileImageView()
-                        .frame(width: 40, height: 40)
+                    if userManager.userInfo != nil {
+                        ProfileImageView(imageURL: userManager.userInfo?.profileImage)
+                            .frame(width: 40, height: 40)
+                    } else {
+                        ZStack {
+                            Circle()
+                                .fill(Color.gray)
+                                .frame(width: 40, height: 40)
+                            Text("Login")
+                                .font(.caption2)
+                                .foregroundColor(.white)
+                        }
+                    }
                 }
                 .sheet(isPresented: $isMyInfo, content: {
                     NavigationStack {

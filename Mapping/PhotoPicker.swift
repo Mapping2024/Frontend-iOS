@@ -1,9 +1,3 @@
-//
-//  PhotoPicker.swift
-//  Mapping
-//
-//  Created by 김민정 on 11/8/24.
-//
 import SwiftUI
 import PhotosUI
 
