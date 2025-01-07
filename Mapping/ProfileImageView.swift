@@ -1,9 +1,8 @@
 import SwiftUI
 
 struct ProfileImageView: View {
-    var imageURL: String? // 이미지 URL을 문자열로 받는 매개변수
+    var imageURL: String?
     
-    // 프로필 이미지 URL 생성 로직
     private var profileImageURL: URL? {
         guard let imageURL = imageURL, !imageURL.isEmpty, let url = URL(string: imageURL) else {
             return nil
@@ -26,20 +25,21 @@ struct ProfileImageView: View {
                             .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
                         
                     case .failure:
-                        defaultImageView() // 기본 이미지 출력
+                        DefaultImageView() // 기본 이미지 출력
                     @unknown default:
                         EmptyView()
                     }
                 }
             } else { // URL이 없거나 잘못된 경우
-                defaultImageView()
+                DefaultImageView()
             }
         }
     }
-    
-    // 기본 이미지 뷰를 반환하는 함수
-    @ViewBuilder
-    private func defaultImageView() -> some View {
+}
+
+// 기본 이미지 뷰 구조체
+struct DefaultImageView: View {
+    var body: some View {
         Image(systemName: "person.circle.fill")
             .resizable()
             .scaledToFit()
