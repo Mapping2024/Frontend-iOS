@@ -4,11 +4,9 @@ struct CommentListView: View {
     @EnvironmentObject var userManager: UserManager
     let memoId: Int
     
-    @State private var comments: [Comment] = []
+    @State private var comments: [Int] = []
     @State private var isLoading: Bool = true
     @State var update: Bool = false
-    
-    @State var editingCommentId: Int = 0 // 수정 중인 댓글의 ID
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -21,35 +19,25 @@ struct CommentListView: View {
                         .font(.body)
                         .foregroundColor(.gray)
                         .padding()
-                    if userManager.isLoggedIn && editingCommentId == 0 {
+                    if userManager.isLoggedIn {
                         Divider()
                         CommentInputView(memoId: memoId, update: $update)
                     }
                 } else {
                     ScrollView {
                         VStack(spacing: 16) {
-                            ForEach(comments) { comment in
+                            ForEach(comments, id: \.self) { comment in
                                 VStack(spacing: 8) {
-                                    if editingCommentId == comment.id { // 수정시 해당 위치에서 수정 뷰 출력
-                                        CommentEditView(
-                                            editingCommentId: $editingCommentId,
-                                            update: $update,
-                                            editingCommentString: comment.comment,
-                                            editingRating: comment.rating
-                                        )
-                                    } else {
-                                        CommentView(comment: comment, editingCommentId: $editingCommentId, update: $update)
-                                    }
-                                    
-                                    Divider()
+                                    CommentView(commentID: comment, update: $update)
                                 }
+                                Divider()
                             }
                         }
-                        .padding(.horizontal)
-                        
-                        if userManager.isLoggedIn && editingCommentId == 0 {
-                            CommentInputView(memoId: memoId, update: $update)
-                        }
+                    }
+                    .padding(.horizontal)
+                    
+                    if userManager.isLoggedIn {
+                        CommentInputView(memoId: memoId, update: $update)
                     }
                 }
             }
@@ -64,7 +52,7 @@ struct CommentListView: View {
     }
     
     private func fetchComments() {
-        guard let url = URL(string: "https://api.mapping.kro.kr/api/v2/comment?memoId=\(memoId)") else { return }
+        guard let url = URL(string: "https://api.mapping.kro.kr/api/v2/comment/ids?memoId=\(memoId)") else { return }
         
         URLSession.shared.dataTask(with: url) { data, response, error in
             guard let data = data, error == nil else {
@@ -73,7 +61,7 @@ struct CommentListView: View {
             }
             
             do {
-                let decodedResponse = try JSONDecoder().decode(CommentResponse.self, from: data)
+                let decodedResponse = try JSONDecoder().decode(CommentsResponse.self, from: data)
                 if decodedResponse.success, let fetchedComments = decodedResponse.data {
                     DispatchQueue.main.async {
                         self.comments = fetchedComments
