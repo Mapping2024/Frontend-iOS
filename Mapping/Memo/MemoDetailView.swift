@@ -14,6 +14,7 @@ struct MemoDetailView: View {
     @State private var cachedImages: [String: Image] = [:]
     @State private var isPhotoViewerPresented = false
     @State private var selectedImageURL: String?
+    @State var update: Bool = false
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -41,64 +42,49 @@ struct MemoDetailView: View {
                 }
                 
                 Divider()
+                // 여기서부터 본문 내용 + 사진 + 댓글 부분
                 
-                if size != .small {
-                    ScrollView(.vertical, showsIndicators: true){
+                ScrollView {
+                    VStack(alignment: .leading){
                         Text(detail.content)
                             .font(.body)
-                    }
-                } else {
-                    Text(detail.content)
-                        .font(.body)
-                }
-                
-                if size != .small, let images = detail.images, !images.isEmpty {
-                    if images.count > 1 {
-                        ScrollView(.horizontal, showsIndicators: true) {
-                            HStack(alignment: .center, spacing: 10) {
-                                ForEach(images, id: \.self) { url in
-                                    if let cachedImage = cachedImages[url] {
-                                        cachedImage
-                                            .resizable()
-                                            .frame(width: 200, height: 150)
-                                            .cornerRadius(8)
-                                            .onTapGesture {
-                                                selectedImageURL = nil // 초기화
+                        
+                        Spacer()
+                        
+                        if size != .small, let images = detail.images, !images.isEmpty {
+                            
+                            ScrollView(.horizontal, showsIndicators: true) {
+                                HStack(alignment: .center, spacing: 10) {
+                                    ForEach(images, id: \.self) { url in
+                                        if let cachedImage = cachedImages[url] {
+                                            cachedImage
+                                                .resizable()
+                                                .scaledToFit()
+                                                .frame(height: 200)
+                                                .cornerRadius(8)
+                                                .onTapGesture {
+                                                    selectedImageURL = nil // 초기화
                                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                                         selectedImageURL = url // 새 URL로 설정
                                                     }
-                                            }
+                                                }
+                                        }
                                     }
                                 }
                             }
                         }
-                    } else {
-                        HStack(alignment: .center, spacing: 10) {
-                            Spacer()
-                            ForEach(images, id: \.self) { url in
-                                if let cachedImage = cachedImages[url] {
-                                    cachedImage
-                                        .resizable()
-                                        .frame(width: 200, height: 150)
-                                        .cornerRadius(8)
-                                        .onTapGesture {
-                                            selectedImageURL = nil // 초기화
-                                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                                    selectedImageURL = url // 새 URL로 설정
-                                                }
-                                        }
-                                }
-                            }
-                            Spacer()
+                        
+                        if size == .large {
+                            Divider()
+                            CommentListView(memoId: detail.id, update: $update)
                         }
                     }
                 }
                 
-                Spacer()
-                
                 if size == .large {
-                    Divider()
-                    CommentListView(memoId: detail.id)
+                    if userManager.isLoggedIn {
+                        CommentInputView(memoId: detail.id, update: $update)
+                    }
                 }
                 
                 HStack {

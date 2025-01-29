@@ -6,7 +6,7 @@ struct CommentListView: View {
     
     @State private var comments: [Int] = []
     @State private var isLoading: Bool = true
-    @State var update: Bool = false
+    @Binding var update: Bool
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -19,10 +19,8 @@ struct CommentListView: View {
                         .font(.body)
                         .foregroundColor(.gray)
                         .padding()
-                    if userManager.isLoggedIn {
-                        Divider()
-                        CommentInputView(memoId: memoId, update: $update)
-                    }
+                    Divider()
+            
                 } else {
                     ScrollView {
                         VStack(spacing: 16) {
@@ -35,10 +33,6 @@ struct CommentListView: View {
                         }
                     }
                     .padding(.horizontal)
-                    
-                    if userManager.isLoggedIn {
-                        CommentInputView(memoId: memoId, update: $update)
-                    }
                 }
             }
         }
@@ -75,7 +69,7 @@ struct CommentListView: View {
     }
 }
 
-#Preview {
-    CommentListView(memoId: 1)
-        .environmentObject(UserManager())
-}
+//#Preview {
+//    CommentListView(memoId: 1)
+//        .environmentObject(UserManager())
+//}
