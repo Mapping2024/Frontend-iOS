@@ -30,7 +30,6 @@ struct CommentListView: View {
                                 VStack(spacing: 8) {
                                     CommentView(commentID: comment, update: $update)
                                 }
-                                
                                 Divider()
                             }
                         }

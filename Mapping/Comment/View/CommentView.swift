@@ -91,7 +91,7 @@ struct CommentView: View {
             }
             .onAppear(perform: fetchComment)
         } else {
-            CommentEditView(editingCommentId: $commentID, update: $update, editingCommentString: comment.comment, editingRating: comment.rating)
+            CommentEditView(editingComment: $editingComment, update: $update, editingCommentId: commentID, editingCommentString: comment.comment, editingRating: comment.rating)
         }
     }
     
