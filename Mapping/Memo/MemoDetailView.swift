@@ -21,7 +21,7 @@ struct MemoDetailView: View {
                 HStack {
                     VStack(alignment: .leading){
                         Text(detail.title)
-                            .font(.title)
+                            .font(.title2)
                             .fontWeight(.bold)
                         if let datePart = detail.date.split(separator: ":").first {
                             HStack{
@@ -242,6 +242,6 @@ struct MemoDetailView: View {
 }
 
 #Preview {
-    MemoDetailView(id: .constant(3), size: .constant(.medium))
+    MemoDetailView(id: .constant(1), size: .constant(.large))
         .environmentObject(UserManager())
 }

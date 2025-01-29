@@ -22,7 +22,6 @@ struct ProfileImageView: View {
                             .resizable()
                             .scaledToFill()
                             .clipShape(Circle())
-                            .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
                         
                     case .failure:
                         DefaultImageView() // 기본 이미지 출력
@@ -45,7 +44,6 @@ struct DefaultImageView: View {
             .scaledToFit()
             .foregroundStyle(Color.gray)
             .background(Circle().fill(Color.white))
-            .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
     }
 }
 
