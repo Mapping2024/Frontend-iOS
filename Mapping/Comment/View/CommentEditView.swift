@@ -5,7 +5,7 @@ struct CommentEditView: View {
     @StateObject private var viewModel = CommentEditViewModel()
     
     @Binding var editingComment: Bool
-    @Binding var update: Bool
+    @Binding var updateComment: Bool
     var editingCommentId: Int
     var editingCommentString: String
     var editingRating: Int
@@ -42,7 +42,7 @@ struct CommentEditView: View {
                     Button("저장") {
                         viewModel.updateComment(id: editingCommentId, userManager: userManager) {
                             editingComment = false
-                            update = true
+                            updateComment = true
                         }
                     }
                     .padding(.horizontal)

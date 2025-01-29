@@ -8,6 +8,7 @@ struct CommentView: View {
     
     @State var commentID: Int
     @Binding var update: Bool
+    @State private var updateComment: Bool = false
     
     var body: some View {
         if !editingComment {
@@ -63,7 +64,7 @@ struct CommentView: View {
                             isShaking = true
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                 isShaking = false
-                                update = true
+                                updateComment = true
                             }
                             
                             LikeHateService.likeComment(id: comment.id, accessToken: userManager.accessToken) { result in
@@ -90,8 +91,14 @@ struct CommentView: View {
                 }
             }
             .onAppear(perform: fetchComment)
+            .onChange(of: updateComment, { oldValue, newValue in
+                if updateComment {
+                    fetchComment()
+                    updateComment = false
+                }
+            })
         } else {
-            CommentEditView(editingComment: $editingComment, update: $update, editingCommentId: commentID, editingCommentString: comment.comment, editingRating: comment.rating)
+            CommentEditView(editingComment: $editingComment, updateComment: $updateComment, editingCommentId: commentID, editingCommentString: comment.comment, editingRating: comment.rating)
         }
     }
     
@@ -118,8 +125,10 @@ struct CommentView: View {
     }
     
     private func deleteComment(id: Int) {
+        
         let urlString = "https://api.mapping.kro.kr/api/v2/comment/\(id)"
         guard let url = URL(string: urlString) else { return }
+        print(userManager.accessToken)
         
         var request = URLRequest(url: url)
         request.httpMethod = "DELETE"
