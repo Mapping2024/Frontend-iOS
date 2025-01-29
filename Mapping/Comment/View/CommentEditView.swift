@@ -53,7 +53,6 @@ struct CommentEditView: View {
                 }
             }
         }
-        .padding(.horizontal)
         .onAppear {
             viewModel.setup(editingComment: self.editingCommentString, editingRating: self.editingRating)
         }

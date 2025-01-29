@@ -20,19 +20,18 @@ struct CommentListView: View {
                         .foregroundColor(.gray)
                         .padding()
                     Divider()
-            
+                    
                 } else {
                     ScrollView {
-                        VStack(spacing: 16) {
-                            ForEach(comments, id: \.self) { comment in
-                                VStack(spacing: 8) {
-                                    CommentView(commentID: comment, update: $update)
-                                }
-                                Divider()
+                        ForEach(comments, id: \.self) { comment in
+                            VStack(spacing: 8) {
+                                CommentView(commentID: comment, update: $update)
                             }
+                            Divider()
+                                .padding(.horizontal)
                         }
+                        
                     }
-                    .padding(.horizontal)
                 }
             }
         }
@@ -69,7 +68,7 @@ struct CommentListView: View {
     }
 }
 
-//#Preview {
-//    CommentListView(memoId: 1)
-//        .environmentObject(UserManager())
-//}
+#Preview {
+    CommentListView(memoId: 1, update: .constant(false))
+        .environmentObject(UserManager())
+}
