@@ -21,10 +21,12 @@ struct CommentView: View {
                         Text(comment.nickname)
                             .font(.headline)
                         
-                        ForEach(0..<comment.rating, id: \.self) { _ in
-                            Image(systemName: "star.fill")
-                                .foregroundColor(.yellow)
-                                .font(.caption2)
+                        HStack(spacing: 1) {
+                            ForEach(0..<comment.rating, id: \.self) { _ in
+                                Image(systemName: "star.fill")
+                                    .foregroundColor(.yellow)
+                                    .font(.caption2)
+                            }
                         }
                         
                         Spacer()
