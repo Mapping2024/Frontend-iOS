@@ -12,8 +12,13 @@ struct MyMemoEditView: View {
     var body: some View {
         Group {
             Form {
-                Section(header: Text("제목")) {
+                Section(header: Text("제목"), footer: Text("* 제목은 최대 20자까지 입력 가능합니다.").font(.caption)) {
                     TextField("제목을 입력하세요", text: $viewModel.title)
+                        .onChange(of: viewModel.title) { newValue, oldValue in
+                            if newValue.count > 20 {
+                                viewModel.title = String(newValue.prefix(20)) // 20자 제한
+                            }
+                        }
                 }
                 
                 Section(header: Text("내용")) {
@@ -82,8 +87,10 @@ struct MyMemoEditView: View {
             .navigationBarTitle("메모 수정하기", displayMode: .inline)
             .navigationBarItems(
                 trailing: Button("저장") {
+                    userManager.fetchUserInfo() // 토큰 유효성 확인 및 재발급
                     viewModel.updateMemo(userManager: userManager)
-                }.disabled(viewModel.isSaveDisabled)
+                }
+                    .disabled(viewModel.isSaveDisabled)
             )
             .sheet(isPresented: $viewModel.isPickerPresented) {
                 PhotoPicker(selectedImages: $viewModel.newImages, selectionLimit: 5)

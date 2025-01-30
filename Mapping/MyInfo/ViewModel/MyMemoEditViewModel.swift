@@ -24,7 +24,7 @@ final class MyMemoEditViewModel: ObservableObject {
     }
     
     var isSaveDisabled: Bool {
-        title.isEmpty || content.isEmpty
+        title.trimmingCharacters(in: .whitespaces).isEmpty || content.trimmingCharacters(in: .whitespaces).isEmpty
     }
     
     func deleteImage(at index: Int) {

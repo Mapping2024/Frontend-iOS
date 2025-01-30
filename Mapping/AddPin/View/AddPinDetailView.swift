@@ -15,28 +15,33 @@ struct AddPinDetailView: View {
     @EnvironmentObject var userManager: UserManager
     @Environment(\.dismiss) private var dismiss
     @Binding var backFlag: Bool
-
+    
     @StateObject private var viewModel: AddPinDetailViewModel
-
+    
     init(backFlag: Binding<Bool>, latitude: Double, longitude: Double, currentLocation: CLLocationCoordinate2D) {
         self._backFlag = backFlag
         self._viewModel = StateObject(
             wrappedValue: AddPinDetailViewModel(latitude: latitude, longitude: longitude, currentLocation: currentLocation)
         )
     }
-
+    
     var body: some View {
         Group {
             Form {
-                Section(header: Text("제목")) {
+                Section(header: Text("제목"), footer: Text("* 제목은 최대 20자까지 입력 가능합니다.").font(.caption)) {
                     TextField("핀 이름", text: $viewModel.pinName)
+                        .onChange(of: viewModel.pinName) { newValue, oldValue in
+                            if newValue.count > 20 {
+                                viewModel.pinName = String(newValue.prefix(20)) // 20자 제한
+                            }
+                        }
                 }
-
+                
                 Section(header: Text("내용")) {
                     TextEditor(text: $viewModel.pinDescription)
                         .frame(minHeight: 100)
                 }
-
+                
                 Section(header: Text("카테고리")) {
                     Picker("카테고리 선택", selection: $viewModel.selectedCategory) {
                         ForEach(PinCategory.allCases) { category in
@@ -45,11 +50,11 @@ struct AddPinDetailView: View {
                     }
                     .pickerStyle(MenuPickerStyle())
                 }
-
+                
                 Section(header: Text("개인 메모")) {
                     Toggle("프라이빗 설정", isOn: $viewModel.secret)
                 }
-
+                
                 Section(header: Text("사진")) {
                     ForEach(viewModel.selectedImages, id: \.self) { image in
                         Image(uiImage: image)
@@ -58,7 +63,7 @@ struct AddPinDetailView: View {
                             .frame(height: 200)
                             .cornerRadius(10)
                     }
-
+                    
                     Button("사진 선택") {
                         viewModel.isPickerPresented = true
                     }
@@ -70,7 +75,8 @@ struct AddPinDetailView: View {
                     userManager.fetchUserInfo() // 토큰 유효성 확인 및 재발급
                     viewModel.createPin(accessToken: userManager.accessToken)
                 }
-                .disabled(viewModel.pinName.isEmpty || viewModel.pinDescription.isEmpty)
+                    .disabled(viewModel.pinName.trimmingCharacters(in: .whitespaces).isEmpty || viewModel.pinDescription.trimmingCharacters(in: .whitespaces).isEmpty)
+                // 제목, 내용 비어있을때 생성 불가능
             )
             .sheet(isPresented: $viewModel.isPickerPresented) {
                 PhotoPicker(selectedImages: $viewModel.selectedImages, selectionLimit: 5)

@@ -67,32 +67,46 @@ struct ChangeMyInfoView: View {
             
             // 닉네임 변경 입력 필드 및 버튼
             GroupBox {
-                HStack {
-                    TextField(userManager.userInfo?.nickname ?? "", text: $viewModel.newNickname)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.gray, lineWidth: 2)
-                        )
-                    
-                    Spacer()
-                    
-                    Button(action: {
-                        viewModel.updateNickname(userManager: userManager)
-                    }) {
-                        Text("닉네임 변경")
-                            .padding(7)
-                            .background(Color.green)
-                            .cornerRadius(10)
-                            .foregroundStyle(.white)
+                VStack(alignment: .leading){
+                    HStack {
+                        TextField(userManager.userInfo?.nickname ?? "", text: $viewModel.newNickname)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
                             .overlay(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color.green, lineWidth: 2)
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.gray, lineWidth: 2)
                             )
+                            .onChange(of: viewModel.newNickname) { newValue, oldValue in
+                                if newValue.count > 8 {
+                                    viewModel.newNickname = String(newValue.prefix(8)) // 최대 8자로 제한
+                                }
+                            }
+                        
+                        Spacer()
+                        
+                        Button(action: {
+                            if viewModel.newNickname.count <= 8 {
+                                viewModel.updateNickname(userManager: userManager)
+                            }
+                        }) {
+                            Text("닉네임 변경")
+                                .padding(7)
+                                .background(viewModel.newNickname.count <= 8 && viewModel.newNickname.count >= 2 && !viewModel.newNickname.trimmingCharacters(in: .whitespaces).isEmpty ? Color.green : Color.gray)
+                                .cornerRadius(10)
+                                .foregroundStyle(.white)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(viewModel.newNickname.count <= 8 && viewModel.newNickname.count >= 2 && !viewModel.newNickname.trimmingCharacters(in: .whitespaces).isEmpty ? Color.green : Color.gray, lineWidth: 2)
+                                )
+                        }
+                        .disabled(viewModel.newNickname.count > 8 || viewModel.newNickname.count < 2 || viewModel.newNickname.trimmingCharacters(in: .whitespaces).isEmpty) // 비활성화 조건 추가
+                        .padding(.leading)
                     }
-                    .padding(.leading)
+                    .padding(.vertical)
+                    
+                    Text("* 닉네임은 2~8자 입니다.")
+                        .font(.caption) // 작은 글씨 크기
+                        .foregroundColor(.gray)
                 }
-                .padding(.vertical)
             }
             .padding(.horizontal)
         }
