@@ -12,7 +12,7 @@ struct MyMemoEditView: View {
     var body: some View {
         Group {
             Form {
-                Section(header: Text("제목")) {
+                Section(header: Text("제목"), footer: Text("* 제목은 최대 20자까지 입력 가능합니다.").font(.caption)) {
                     TextField("제목을 입력하세요", text: $viewModel.title)
                         .onChange(of: viewModel.title) { newValue, oldValue in
                             if newValue.count > 20 {
