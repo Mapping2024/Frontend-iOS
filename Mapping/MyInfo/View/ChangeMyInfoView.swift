@@ -67,7 +67,7 @@ struct ChangeMyInfoView: View {
             
             // 닉네임 변경 입력 필드 및 버튼
             GroupBox {
-                VStack{
+                VStack(alignment: .leading){
                     HStack {
                         TextField(userManager.userInfo?.nickname ?? "", text: $viewModel.newNickname)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -90,22 +90,23 @@ struct ChangeMyInfoView: View {
                         }) {
                             Text("닉네임 변경")
                                 .padding(7)
-                                .background(viewModel.newNickname.count <= 8 ? Color.green : Color.gray)
+                                .background(viewModel.newNickname.count <= 8 && viewModel.newNickname.count >= 2 && !viewModel.newNickname.trimmingCharacters(in: .whitespaces).isEmpty ? Color.green : Color.gray)
                                 .cornerRadius(10)
                                 .foregroundStyle(.white)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 10)
-                                        .stroke(viewModel.newNickname.count <= 8 ? Color.green : Color.gray, lineWidth: 2)
+                                        .stroke(viewModel.newNickname.count <= 8 && viewModel.newNickname.count >= 2 && !viewModel.newNickname.trimmingCharacters(in: .whitespaces).isEmpty ? Color.green : Color.gray, lineWidth: 2)
                                 )
                         }
-                        .disabled(viewModel.newNickname.count > 8) // 8자 초과 시 버튼 비활성화
+                        .disabled(viewModel.newNickname.count > 8 || viewModel.newNickname.count < 2 || viewModel.newNickname.trimmingCharacters(in: .whitespaces).isEmpty) // 비활성화 조건 추가
                         .padding(.leading)
                     }
                     .padding(.vertical)
+                    
+                    Text("* 닉네임은 2~8자 입니다.")
+                        .font(.caption) // 작은 글씨 크기
+                        .foregroundColor(.gray)
                 }
-                Text("* 닉네임은 최대 8자 입니다.")
-                    .font(.caption) // 작은 글씨 크기
-                    .foregroundColor(.gray)
             }
             .padding(.horizontal)
         }
