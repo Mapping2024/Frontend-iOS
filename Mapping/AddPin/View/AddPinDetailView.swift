@@ -70,7 +70,8 @@ struct AddPinDetailView: View {
                     userManager.fetchUserInfo() // 토큰 유효성 확인 및 재발급
                     viewModel.createPin(accessToken: userManager.accessToken)
                 }
-                .disabled(viewModel.pinName.isEmpty || viewModel.pinDescription.isEmpty)
+                    .disabled(viewModel.pinName.trimmingCharacters(in: .whitespaces).isEmpty || viewModel.pinDescription.trimmingCharacters(in: .whitespaces).isEmpty)
+                // 제목, 내용 비어있을때 생성 불가능
             )
             .sheet(isPresented: $viewModel.isPickerPresented) {
                 PhotoPicker(selectedImages: $viewModel.selectedImages, selectionLimit: 5)
