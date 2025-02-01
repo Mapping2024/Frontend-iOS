@@ -8,6 +8,7 @@ struct PinAddButton: View {
         Button(action:{isPinAdd.toggle()}){
             HStack{
                 Image(systemName: "mappin.and.ellipse")
+                    .font(.caption)
                 Text("핀 생성")
                     .font(.caption)
             }

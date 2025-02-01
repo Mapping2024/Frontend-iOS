@@ -43,6 +43,7 @@ struct CategoryView: View {
                         }, label: {
                             HStack {
                                 Image(systemName: value)
+                                    .font(.caption)
                                 if key == "공용 화장실" {
                                     Text("화장실").font(.caption)
                                 } else {
@@ -66,6 +67,5 @@ struct CategoryView: View {
 #Preview {
     CategoryView(category: .constant("전체"), update: .constant(false))
         .environmentObject(UserManager())
-    
 }
 
