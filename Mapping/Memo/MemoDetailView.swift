@@ -14,7 +14,6 @@ struct MemoDetailView: View {
     @State private var cachedImages: [String: Image] = [:]
     @State private var isPhotoViewerPresented = false
     @State private var selectedImageURL: String?
-    @State var update: Bool = false
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -76,14 +75,8 @@ struct MemoDetailView: View {
                         
                         if size == .large {
                             Divider()
-                            CommentListView(memoId: detail.id, update: $update)
+                            CommentListView(memoId: detail.id)
                         }
-                    }
-                }
-                
-                if size == .large {
-                    if userManager.isLoggedIn {
-                        CommentInputView(memoId: detail.id, update: $update)
                     }
                 }
                 
