@@ -26,11 +26,11 @@ struct SearchBarView: View {
                         ZStack {
                             Circle()
                                 .fill(Color.gray)
-                                .frame(width: 40, height: 40)
                             Text("Login")
                                 .font(.caption2)
                                 .foregroundColor(.white)
                         }
+                        .frame(width: 40, height: 40)
                     }
                 }
                 .sheet(isPresented: $isMyInfo, content: {
