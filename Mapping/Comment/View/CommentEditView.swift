@@ -4,7 +4,7 @@ struct CommentEditView: View {
     @EnvironmentObject var userManager: UserManager
     @StateObject private var viewModel = CommentEditViewModel()
     
-    @Binding var editingComment: Bool
+    @Binding var editingComment: Int
     @Binding var updateComment: Bool
     var editingCommentId: Int
     var editingCommentString: String
@@ -31,7 +31,7 @@ struct CommentEditView: View {
                 
                 HStack {
                     Button("취소") {
-                        editingComment = false // 수정 모드 종료
+                        editingComment = 0 // 수정 모드 종료
                     }
                     .padding(.horizontal)
                     .padding(.vertical, 8)
@@ -41,7 +41,7 @@ struct CommentEditView: View {
                     
                     Button("저장") {
                         viewModel.updateComment(id: editingCommentId, userManager: userManager) {
-                            editingComment = false
+                            editingComment = 0
                             updateComment = true
                         }
                     }

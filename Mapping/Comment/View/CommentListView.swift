@@ -6,7 +6,8 @@ struct CommentListView: View {
     
     @State private var comments: [Int] = []
     @State private var isLoading: Bool = true
-    @Binding var update: Bool
+    @State var update: Bool = false
+    @State var editingComment: Int = 0
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -25,13 +26,17 @@ struct CommentListView: View {
                     ScrollView {
                         ForEach(comments, id: \.self) { comment in
                             VStack(spacing: 8) {
-                                CommentView(commentID: comment, update: $update)
+                                CommentView(editingComment: $editingComment, commentID: comment, update: $update)
                             }
                             Divider()
                                 .padding(.horizontal)
                         }
                         
                     }
+                }
+                
+                if userManager.isLoggedIn && editingComment == 0 {
+                    CommentInputView(memoId: memoId, update: $update)
                 }
             }
         }
@@ -69,6 +74,6 @@ struct CommentListView: View {
 }
 
 #Preview {
-    CommentListView(memoId: 1, update: .constant(false))
+    CommentListView(memoId: 1)
         .environmentObject(UserManager())
 }

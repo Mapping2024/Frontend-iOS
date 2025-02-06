@@ -4,14 +4,14 @@ struct CommentView: View {
     @EnvironmentObject var userManager: UserManager
     @State private var comment: Comment = Comment()
     @State private var isShaking: Bool = false // 애니메이션 상태 변수 추가
-    @State private var editingComment: Bool = false
-    
-    @State var commentID: Int
-    @Binding var update: Bool
     @State private var updateComment: Bool = false
     
+    @Binding var editingComment: Int
+    @State var commentID: Int
+    @Binding var update: Bool
+    
     var body: some View {
-        if !editingComment {
+        if editingComment != commentID {
             HStack(alignment: .top) {
                 ProfileImageView(imageURL: comment.profileImageUrl)
                     .frame(width: 25, height: 25)
@@ -34,7 +34,7 @@ struct CommentView: View {
                         if comment.nickname == userManager.userInfo?.nickname {
                             Menu {
                                 Button("수정") {
-                                    editingComment = true
+                                    editingComment = commentID
                                 }
                                 Button("삭제") {
                                     deleteComment(id: comment.id)
@@ -99,7 +99,7 @@ struct CommentView: View {
                     updateComment = false
                 }
             })
-        } else {
+        } else if (commentID == editingComment){
             CommentEditView(editingComment: $editingComment, updateComment: $updateComment, editingCommentId: commentID, editingCommentString: comment.comment, editingRating: comment.rating)
         }
     }
