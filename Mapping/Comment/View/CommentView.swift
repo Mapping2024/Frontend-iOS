@@ -74,6 +74,7 @@ struct CommentView: View {
                                     switch result {
                                     case .success:
                                         print("Successfully liked the post.")
+                                        updateComment = false
                                         
                                     case .failure(let error):
                                         print("Failed to like the post: \(error)")
@@ -96,7 +97,7 @@ struct CommentView: View {
             .onChange(of: updateComment, { oldValue, newValue in
                 if updateComment {
                     fetchComment()
-                    updateComment = false
+                    //updateComment = false
                 }
             })
         } else if (commentID == editingComment){
