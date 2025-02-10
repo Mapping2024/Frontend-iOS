@@ -15,6 +15,9 @@ struct MemoDetailView: View {
     @State private var isPhotoViewerPresented = false
     @State private var selectedImageURL: String?
     
+    @State var editingComment: Int = 0
+    @State var update: Bool = false
+    
     var body: some View {
         VStack(alignment: .leading) {
             if let detail = memoDetail {
@@ -75,9 +78,14 @@ struct MemoDetailView: View {
                         
                         if size == .large {
                             Divider()
-                            CommentListView(memoId: detail.id)
+                            CommentListView(memoId: detail.id, editingComment: $editingComment, update: $update)
                         }
                     }
+                }
+                if size == .large && userManager.isLoggedIn && editingComment == 0 {
+                    //Divider()
+                    // 댓글입력
+                    CommentInputView(memoId: detail.id, update: $update)
                 }
                 
                 HStack {
