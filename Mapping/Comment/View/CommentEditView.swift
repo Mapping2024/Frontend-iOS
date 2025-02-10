@@ -9,6 +9,7 @@ struct CommentEditView: View {
     var editingCommentId: Int
     var editingCommentString: String
     var editingRating: Int
+    var editingTime: String
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -17,40 +18,34 @@ struct CommentEditView: View {
                 .textFieldStyle(RoundedBorderTextFieldStyle())
             
             HStack {
-                ForEach(1...5, id: \.self) { star in
-                    Image(systemName: star <= viewModel.editingRating ? "star.fill" : "star")
-                        .resizable()
-                        .frame(width: 20, height: 20)
-                        .foregroundColor(star <= viewModel.editingRating ? .yellow : .gray)
-                        .onTapGesture {
-                            viewModel.editingRating = star
-                        }
-                }
+                Text("\(editingTime) (수정됨)")
+                    .font(.body)
+                    .foregroundColor(.gray)
                 
                 Spacer()
                 
-                HStack {
-                    Button("취소") {
-                        editingComment = 0 // 수정 모드 종료
-                    }
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
-                    .background(Color.red)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-                    
-                    Button("저장") {
-                        viewModel.updateComment(id: editingCommentId, userManager: userManager) {
-                            editingComment = 0
-                            updateComment = true
-                        }
-                    }
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
+                Button("취소") {
+                    editingComment = 0 // 수정 모드 종료
                 }
+                .padding(.horizontal)
+                .padding(.vertical, 8)
+                .foregroundColor(.cRed)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.cRed, lineWidth: 2)
+                )
+                
+                Button("저장") {
+                    viewModel.updateComment(id: editingCommentId, userManager: userManager) {
+                        editingComment = 0
+                        updateComment = true
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.vertical, 8)
+                .background(Color.cBlue)
+                .foregroundColor(.white)
+                .cornerRadius(8)
             }
         }
         .onAppear {
@@ -59,7 +54,19 @@ struct CommentEditView: View {
     }
 }
 
-//#Preview {
-//    CommentEditView(editingCommentId: .constant(1), update: .constant(false), editingCommentString: "adsfadsf", editingRating: 5)
-//        .environmentObject(UserManager())
-//}
+#Preview {
+    CommentEditView(editingComment: .constant(0), updateComment: .constant(false),editingCommentId: 2, editingCommentString: "adsfadsf", editingRating: 0, editingTime: "2024-11-22 20:31:11")
+        .environmentObject(UserManager())
+}
+
+
+// 별점 수정
+//                ForEach(1...5, id: \.self) { star in
+//                    Image(systemName: star <= viewModel.editingRating ? "star.fill" : "star")
+//                        .resizable()
+//                        .frame(width: 20, height: 20)
+//                        .foregroundColor(star <= viewModel.editingRating ? .yellow : .gray)
+//                        .onTapGesture {
+//                            viewModel.editingRating = star
+//                        }
+//                }

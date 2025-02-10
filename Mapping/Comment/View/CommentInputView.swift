@@ -21,7 +21,7 @@ struct CommentInputView: View {
                 Text("등록")
                     .padding(.horizontal)
                     .padding(.vertical, 8)
-                    .background(Color.blue)
+                    .background(Color.cBlue)
                     .foregroundColor(.white)
                     .cornerRadius(8)
             }
