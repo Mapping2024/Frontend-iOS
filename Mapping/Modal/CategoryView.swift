@@ -29,7 +29,9 @@ struct CategoryView: View {
                            }, label: {
                                HStack {
                                    Image(systemName: value)
-                                   Text(key).font(.caption)
+                                       .font(.caption)
+                                   Text(key)
+                                       .font(.caption)
                                }
                                .padding(10)
                                .background(category == key ? Color.cBlue : Color.gray)
