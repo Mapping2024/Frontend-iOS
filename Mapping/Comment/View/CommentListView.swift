@@ -6,8 +6,8 @@ struct CommentListView: View {
     
     @State private var comments: [Int] = []
     @State private var isLoading: Bool = true
-    @State var update: Bool = false
-    @State var editingComment: Int = 0
+    @Binding var editingComment: Int
+    @Binding var update: Bool
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -33,10 +33,6 @@ struct CommentListView: View {
                         }
                         
                     }
-                }
-                
-                if userManager.isLoggedIn && editingComment == 0 {
-                    CommentInputView(memoId: memoId, update: $update)
                 }
             }
         }
@@ -74,6 +70,6 @@ struct CommentListView: View {
 }
 
 #Preview {
-    CommentListView(memoId: 1)
+    CommentListView(memoId: 2, editingComment: .constant(0), update: .constant(false))
         .environmentObject(UserManager())
 }
