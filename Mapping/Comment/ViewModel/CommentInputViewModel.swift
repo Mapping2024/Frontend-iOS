@@ -2,7 +2,7 @@ import SwiftUI
 
 class CommentInputViewModel: ObservableObject {
     @Published var newComment: String = ""
-    @Published var rating: Int = 5
+    @Published var rating: Int = 0
     
     func addComment(memoId: Int, userManager: UserManager, completion: @escaping () -> Void) {
         // 필수 입력 확인

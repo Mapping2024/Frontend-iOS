@@ -82,6 +82,8 @@ struct MemoDetailView: View {
                         }
                     }
                 }
+                .scrollIndicators(.hidden)
+                
                 if size == .large && userManager.isLoggedIn && editingComment == 0 {
                     //Divider()
                     // 댓글입력

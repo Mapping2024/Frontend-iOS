@@ -101,7 +101,7 @@ struct CommentView: View {
                 }
             })
         } else if (commentID == editingComment){
-            CommentEditView(editingComment: $editingComment, updateComment: $updateComment, editingCommentId: commentID, editingCommentString: comment.comment, editingRating: comment.rating)
+            CommentEditView(editingComment: $editingComment, updateComment: $updateComment, editingCommentId: commentID, editingCommentString: comment.comment, editingRating: comment.rating, editingTime: comment.updatedAt)
         }
     }
     
