@@ -62,31 +62,30 @@ struct MyMemoDetailView: View {
                             .cornerRadius(10)
                             
                             if let images = detail.images, !images.isEmpty {
+                                let uniqueImages = Array(Set(images)) // 중복 제거
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     HStack {
-                                        ForEach(images, id: \.self) { url in
-                                            VStack {
-                                                if let image = URL(string: url) {
-                                                    AsyncImage(url: image) { phase in
-                                                        switch phase {
-                                                        case .empty:
-                                                            ProgressView()
-                                                        case .success(let image):
-                                                            image
-                                                                .resizable()
-                                                                .frame(width: 150, height: 150)
-                                                                .cornerRadius(8)
-                                                                .onTapGesture {
-                                                                    selectedImageURL = nil
-                                                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                                                        selectedImageURL = url
-                                                                    }
+                                        ForEach(uniqueImages, id: \.self) { url in
+                                            if let image = URL(string: url) {
+                                                AsyncImage(url: image) { phase in
+                                                    switch phase {
+                                                    case .empty:
+                                                        ProgressView()
+                                                    case .success(let image):
+                                                        image
+                                                            .resizable()
+                                                            .frame(width: 150, height: 150)
+                                                            .cornerRadius(8)
+                                                            .onTapGesture {
+                                                                selectedImageURL = nil
+                                                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                                                    selectedImageURL = url
                                                                 }
-                                                        case .failure:
-                                                            ProgressView()
-                                                        @unknown default:
-                                                            EmptyView()
-                                                        }
+                                                            }
+                                                    case .failure:
+                                                        ProgressView()
+                                                    @unknown default:
+                                                        EmptyView()
                                                     }
                                                 }
                                             }

@@ -12,6 +12,7 @@ final class MyMemoEditViewModel: ObservableObject {
     @Published var isPickerPresented = false
     @Published var uploadSuccess = false
     @Published var uploadSuccessText: String? = nil
+    @Published var isSaving = false // 추가: 저장 중인지 여부
     
     private let memo: MemoDetail
     
@@ -24,8 +25,10 @@ final class MyMemoEditViewModel: ObservableObject {
     }
     
     var isSaveDisabled: Bool {
-        title.trimmingCharacters(in: .whitespaces).isEmpty || content.trimmingCharacters(in: .whitespaces).isEmpty
-    }
+            title.trimmingCharacters(in: .whitespaces).isEmpty ||
+            content.trimmingCharacters(in: .whitespaces).isEmpty ||
+            isSaving // 저장 중이면 버튼 비활성화
+        }
     
     func deleteImage(at index: Int) {
         if let removedImage = images?.remove(at: index) {
@@ -34,6 +37,9 @@ final class MyMemoEditViewModel: ObservableObject {
     }
     
     func updateMemo(userManager: UserManager) {
+        guard !isSaving else { return } // 중복 요청 방지
+        isSaving = true // 요청 시작
+        
         userManager.fetchUserInfo()
         let url = "https://api.mapping.kro.kr/api/v2/memo/update/\(memo.id)"
         let headers: HTTPHeaders = [
@@ -52,7 +58,7 @@ final class MyMemoEditViewModel: ObservableObject {
             
             for image in self.newImages {
                 if let imageData = image.jpegData(compressionQuality: 0.8) {
-                    formData.append(imageData, withName: "images", fileName: "new_image.jpg", mimeType: "image/jpeg")
+                    formData.append(imageData, withName: "images", fileName: "\(image)new_image.jpg", mimeType: "image/jpeg")
                 }
             }
         }, to: url, method: .put, headers: headers).response { [weak self] response in
