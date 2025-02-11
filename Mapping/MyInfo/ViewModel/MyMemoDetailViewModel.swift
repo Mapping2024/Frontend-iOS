@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 
+@MainActor
 class MyMemoDetailViewModel: ObservableObject {
     @Published var memoDetail: MemoDetail?
     @Published var isLoading = true

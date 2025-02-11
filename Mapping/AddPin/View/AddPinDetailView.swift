@@ -72,11 +72,12 @@ struct AddPinDetailView: View {
             .navigationBarTitle(Text("핀 생성하기"), displayMode: .inline)
             .navigationBarItems(
                 trailing: Button("생성") {
-                    userManager.fetchUserInfo() // 토큰 유효성 확인 및 재발급
+                    userManager.fetchUserInfo()
                     viewModel.createPin(accessToken: userManager.accessToken)
                 }
-                    .disabled(viewModel.pinName.trimmingCharacters(in: .whitespaces).isEmpty || viewModel.pinDescription.trimmingCharacters(in: .whitespaces).isEmpty)
-                // 제목, 내용 비어있을때 생성 불가능
+                .disabled(viewModel.pinName.trimmingCharacters(in: .whitespaces).isEmpty ||
+                          viewModel.pinDescription.trimmingCharacters(in: .whitespaces).isEmpty ||
+                          viewModel.isUploading) // 요청 중이면 비활성화
             )
             .sheet(isPresented: $viewModel.isPickerPresented) {
                 PhotoPicker(selectedImages: $viewModel.selectedImages, selectionLimit: 5)

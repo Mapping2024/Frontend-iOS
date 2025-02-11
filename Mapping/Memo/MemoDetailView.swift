@@ -54,10 +54,11 @@ struct MemoDetailView: View {
                         Spacer()
                         
                         if size != .small, let images = detail.images, !images.isEmpty {
+                            let uniqueImages = Array(Set(images)) // 중복 제거
                             
                             ScrollView(.horizontal, showsIndicators: true) {
                                 HStack(alignment: .center, spacing: 10) {
-                                    ForEach(images, id: \.self) { url in
+                                    ForEach(uniqueImages, id: \.self) { url in
                                         if let cachedImage = cachedImages[url] {
                                             cachedImage
                                                 .resizable()
@@ -65,9 +66,9 @@ struct MemoDetailView: View {
                                                 .frame(height: 200)
                                                 .cornerRadius(8)
                                                 .onTapGesture {
-                                                    selectedImageURL = nil // 초기화
+                                                    selectedImageURL = nil
                                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                                        selectedImageURL = url // 새 URL로 설정
+                                                        selectedImageURL = url
                                                     }
                                                 }
                                         }
