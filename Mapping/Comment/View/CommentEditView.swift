@@ -29,11 +29,7 @@ struct CommentEditView: View {
                 }
                 .padding(.horizontal)
                 .padding(.vertical, 8)
-                .foregroundColor(.cRed)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.cRed, lineWidth: 2)
-                )
+                .foregroundColor(.gray)
                 
                 Button("저장") {
                     viewModel.updateComment(id: editingCommentId, userManager: userManager) {
