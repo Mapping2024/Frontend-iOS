@@ -6,6 +6,8 @@ struct SearchBarView: View {
     @Binding var update: Bool
     @Binding var selectedMemoId: Int?
     @Binding var item: [Item]
+    @Binding var size: PresentationDetent
+    
     @State var query: String = ""
     @State var isMyInfo: Bool = false
     
@@ -59,8 +61,9 @@ struct SearchBarView: View {
                     selectedMemoId = result.id
                 }
             }
-                 .scrollContentBackground(.hidden)
-                 .padding(.top, -20)
+            .scrollContentBackground(.hidden)
+            .padding(.top, -20)
+            .offset(y: size == .small ? 500 : 0) // 작은 크기일 때 아래로 숨김
         }
     }
 }
@@ -70,6 +73,6 @@ struct SearchBarView: View {
         Item(id: 1, title: "테스트1", category: "Fruit", location: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194), secret: false),
         Item(id: 2, title: "테스트2", category: "Fruit", location: CLLocationCoordinate2D(latitude: 34.0522, longitude: -118.2437), secret: false),
         Item(id: 3, title: "테스트3", category: "Vegetable", location: CLLocationCoordinate2D(latitude: 40.7128, longitude: -74.0060), secret: false)
-    ]))
+    ]), size: .constant(.small))
                 .environmentObject(UserManager())
 }
