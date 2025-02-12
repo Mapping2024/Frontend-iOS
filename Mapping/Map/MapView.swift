@@ -37,7 +37,7 @@ struct MapView: View {
                 Group {
                     switch displayMode {
                     case .main:
-                        SearchBarView(update: $update, selectedMemoId: $selectedMemoId, item: $mapItems)
+                        SearchBarView(update: $update, selectedMemoId: $selectedMemoId, item: $mapItems, size: $selectedDetent)
                         CategoryView(category: $category, update: $update)
                     case .detail:
                         MemoDetailView(id: $selectedMemoId, size: $selectedDetent)
@@ -49,7 +49,6 @@ struct MapView: View {
                 .interactiveDismissDisabled()// 닫기 금지
                 .presentationBackgroundInteraction(.enabled(upThrough: .medium))
                 //.edgesIgnoringSafeArea(.bottom) //바텀 사용
-                //.fixedSize(horizontal: false, vertical: true)
             })
             .onChange(of: locationManager.region, { oldValue, newValue in
                 position = .region(locationManager.region)

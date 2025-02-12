@@ -232,6 +232,6 @@ struct MemoDetailView: View {
 }
 
 #Preview {
-    MemoDetailView(id: .constant(10), size: .constant(.small))
+    MemoDetailView(id: .constant(10), size: .constant(.medium))
         .environmentObject(UserManager())
 }
