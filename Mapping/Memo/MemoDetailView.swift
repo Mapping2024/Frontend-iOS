@@ -52,27 +52,41 @@ struct MemoDetailView: View {
                             .font(.body)
 
                         if let images = detail.images, !images.isEmpty {
-                            let uniqueImages = Array(Set(images)) // 중복 제거
                             
-                            ScrollView(.horizontal, showsIndicators: true) {
-                                HStack( spacing: 10) {
-                                    ForEach(uniqueImages, id: \.self) { url in
-                                        if let cachedImage = cachedImages[url] {
-                                            cachedImage
-                                                .resizable()
-                                                .scaledToFit()
-                                                .frame(height: 200)
-                                                .cornerRadius(8)
-                                                .onTapGesture {
-                                                    selectedImageURL = nil
-                                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                                        selectedImageURL = url
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                        HStack(spacing: 10) {
+                                            ForEach(images, id: \.self) { urlString in
+                                                if let url = URL(string: urlString) {
+                                                    AsyncImage(url: url) { phase in
+                                                        switch phase {
+                                                        case .empty:
+                                                            ProgressView()
+                                                        case .success(let image):
+                                                            image.resizable()
+                                                                .scaledToFill()
+                                                                .onTapGesture {
+                                                                    selectedImageURL = nil
+                                                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                                                        selectedImageURL = urlString
+                                                                    }
+                                                                }
+                                                        case .failure:
+                                                            Image(systemName: "photo")
+                                                                .resizable()
+                                                                .scaledToFit()
+                                                                .foregroundColor(.gray)
+                                                        @unknown default:
+                                                            EmptyView()
+                                                        }
                                                     }
+                                                    .frame(width: 150, height: 150)
+                                                    .clipped()
+                                                    .cornerRadius(10)
                                                 }
+                                            }
                                         }
+                                        .padding(.bottom)
                                     }
-                                }
-                            }
                             .offset(y: size == .small ? 500 : 0)
                         }
                         
@@ -198,13 +212,6 @@ struct MemoDetailView: View {
             let decodedResponse = try JSONDecoder().decode(MemoDetailResponse.self, from: data)
             if decodedResponse.success {
                 memoDetail = decodedResponse.data
-                
-                // 이미지 미리 로드
-                if let images = decodedResponse.data.images {
-                    for imageUrl in images {
-                        loadImage(from: imageUrl)
-                    }
-                }
             } else {
                 print("Failed to fetch memo detail: \(decodedResponse.message)")
             }
@@ -212,23 +219,6 @@ struct MemoDetailView: View {
             print("Error fetching memo detail: \(error)")
         }
         isLoading = false
-    }
-    
-    private func loadImage(from url: String) {
-        guard cachedImages[url] == nil else { return } // 이미 캐싱된 경우 로드하지 않음
-        
-        Task {
-            do {
-                guard let imageUrl = URL(string: url) else { return }
-                let (data, _) = try await URLSession.shared.data(from: imageUrl)
-                if let uiImage = UIImage(data: data) {
-                    let image = Image(uiImage: uiImage)
-                    cachedImages[url] = image
-                }
-            } catch {
-                print("Failed to load image: \(error)")
-            }
-        }
     }
 }
 
