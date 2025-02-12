@@ -165,7 +165,17 @@ extension MKCoordinateRegion: @retroactive Equatable {
 }
 
 extension PresentationDetent {
-    static let small = Self.fraction(0.19)
+    static let small: Self = {
+        let screenWidth = UIScreen.main.bounds.width
+        print("Screen Width:", screenWidth) // 초기 실행 시 한 번만 출력됨
+        if screenWidth <= 380 { // iPhone SE
+            return .fraction(0.20)
+        } else if screenWidth <= 410 { // 일반, 프로
+            return .fraction(0.16)
+        } else { // 플러스, 맥스
+            return .fraction(0.15)
+        }
+    }()
 }
 
 #Preview {
