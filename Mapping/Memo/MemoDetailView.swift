@@ -51,7 +51,7 @@ struct MemoDetailView: View {
                         Text(detail.content)
                             .font(.body)
 
-                        if size != .small, let images = detail.images, !images.isEmpty {
+                        if let images = detail.images, !images.isEmpty {
                             let uniqueImages = Array(Set(images)) // 중복 제거
                             
                             ScrollView(.horizontal, showsIndicators: true) {
@@ -73,64 +73,65 @@ struct MemoDetailView: View {
                                     }
                                 }
                             }
+                            .offset(y: size == .small ? 500 : 0)
                         }
                         
-                        if size == .large {
+                        HStack {
+                            Button(action: {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    isAnimatingLike = true
+                                }
+                                LikeHateService.likePost(id: detail.id, accessToken: userManager.accessToken) { result in
+                                    switch result {
+                                    case .success:
+                                        print("Successfully liked the post.")
+                                        isRefresh = true
+                                    case .failure(let error):
+                                        print("Failed to like the post: \(error)")
+                                    }
+                                    // 애니메이션 복구
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        isAnimatingLike = false
+                                    }
+                                }
+                            }) {
+                                Text("👍 \(detail.likeCnt)")
+                                    .scaleEffect(isAnimatingLike ? 1.5 : 1.0) // 크기 애니메이션
+                            }
+                            
+                            Button(action: {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    isAnimatingHate = true
+                                }
+                                LikeHateService.hatePost(id: detail.id, accessToken: userManager.accessToken) { result in
+                                    switch result {
+                                    case .success:
+                                        print("Successfully hated the post.")
+                                        isRefresh = true
+                                    case .failure(let error):
+                                        print("Failed to hate the post: \(error)")
+                                    }
+                                    // 애니메이션 복구
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        isAnimatingHate = false
+                                    }
+                                }
+                            }) {
+                                Text("👎 \(detail.hateCnt)")
+                                    .scaleEffect(isAnimatingHate ? 1.5 : 1.0) // 크기 애니메이션
+                            }
+                            Spacer()
+                        }
+                        .font(.subheadline)
+                        .foregroundStyle(Color.cBlack)
+                        .offset(y: size == .small ? 100 : 0)
+                        
+                        Group{
                             Divider()
                             CommentListView(memoId: detail.id, editingComment: $editingComment, update: $update)
                         }
+                            .offset(y: size != .large ? 500 : 0)
                     }
-                    
-                    
-                    HStack {
-                        Button(action: {
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                isAnimatingLike = true
-                            }
-                            LikeHateService.likePost(id: detail.id, accessToken: userManager.accessToken) { result in
-                                switch result {
-                                case .success:
-                                    print("Successfully liked the post.")
-                                    isRefresh = true
-                                case .failure(let error):
-                                    print("Failed to like the post: \(error)")
-                                }
-                                // 애니메이션 복구
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    isAnimatingLike = false
-                                }
-                            }
-                        }) {
-                            Text("👍 \(detail.likeCnt)")
-                                .scaleEffect(isAnimatingLike ? 1.5 : 1.0) // 크기 애니메이션
-                        }
-                        
-                        Button(action: {
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                isAnimatingHate = true
-                            }
-                            LikeHateService.hatePost(id: detail.id, accessToken: userManager.accessToken) { result in
-                                switch result {
-                                case .success:
-                                    print("Successfully hated the post.")
-                                    isRefresh = true
-                                case .failure(let error):
-                                    print("Failed to hate the post: \(error)")
-                                }
-                                // 애니메이션 복구
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    isAnimatingHate = false
-                                }
-                            }
-                        }) {
-                            Text("👎 \(detail.hateCnt)")
-                                .scaleEffect(isAnimatingHate ? 1.5 : 1.0) // 크기 애니메이션
-                        }
-                        Spacer()
-                    }
-                    .font(.subheadline)
-                    .foregroundStyle(Color.cBlack)
-                    .offset(y: size == .small ? 100 : 0)
                 }
                 .scrollIndicators(.hidden)
                 
