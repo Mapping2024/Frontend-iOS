@@ -39,6 +39,7 @@ struct MapView: View {
                     case .main:
                         SearchBarView(update: $update, selectedMemoId: $selectedMemoId, item: $mapItems)
                         CategoryView(category: $category, update: $update)
+                            //.padding(.bottom, 4)
                     case .detail:
                         MemoDetailView(id: $selectedMemoId, size: $selectedDetent)
                     }
@@ -48,6 +49,8 @@ struct MapView: View {
                 .padding(.vertical)
                 .interactiveDismissDisabled()
                 .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+                //.edgesIgnoringSafeArea(.bottom) //바텀 사용
+                //.fixedSize(horizontal: false, vertical: true)
             })
             .onChange(of: locationManager.region, { oldValue, newValue in
                 position = .region(locationManager.region)
@@ -167,11 +170,13 @@ extension MKCoordinateRegion: @retroactive Equatable {
 extension PresentationDetent {
     static let small: Self = {
         let screenWidth = UIScreen.main.bounds.width
+        let screenHeight = UIScreen.main.bounds.height
         print("Screen Width:", screenWidth) // 초기 실행 시 한 번만 출력됨
-        if screenWidth <= 380 { // iPhone SE
+        print("Screen Height:", screenHeight)
+        if screenHeight <= 670 { // iPhone SE
             return .fraction(0.20)
-        } else if screenWidth <= 410 { // 일반, 프로
-            return .fraction(0.16)
+        } else if screenHeight <= 900 { // 미니, 일반, 프로
+            return .fraction(0.17)
         } else { // 플러스, 맥스
             return .fraction(0.15)
         }

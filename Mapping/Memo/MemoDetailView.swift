@@ -82,6 +82,55 @@ struct MemoDetailView: View {
                             CommentListView(memoId: detail.id, editingComment: $editingComment, update: $update)
                         }
                     }
+                    
+                    HStack {
+                        Button(action: {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                isAnimatingLike = true
+                            }
+                            LikeHateService.likePost(id: detail.id, accessToken: userManager.accessToken) { result in
+                                switch result {
+                                case .success:
+                                    print("Successfully liked the post.")
+                                    isRefresh = true
+                                case .failure(let error):
+                                    print("Failed to like the post: \(error)")
+                                }
+                                // 애니메이션 복구
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    isAnimatingLike = false
+                                }
+                            }
+                        }) {
+                            Text("👍 \(detail.likeCnt)")
+                                .scaleEffect(isAnimatingLike ? 1.5 : 1.0) // 크기 애니메이션
+                        }
+                        
+                        Button(action: {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                isAnimatingHate = true
+                            }
+                            LikeHateService.hatePost(id: detail.id, accessToken: userManager.accessToken) { result in
+                                switch result {
+                                case .success:
+                                    print("Successfully hated the post.")
+                                    isRefresh = true
+                                case .failure(let error):
+                                    print("Failed to hate the post: \(error)")
+                                }
+                                // 애니메이션 복구
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    isAnimatingHate = false
+                                }
+                            }
+                        }) {
+                            Text("👎 \(detail.hateCnt)")
+                                .scaleEffect(isAnimatingHate ? 1.5 : 1.0) // 크기 애니메이션
+                        }
+                        Spacer()
+                    }
+                    .font(.subheadline)
+                    .foregroundStyle(Color.cBlack)
                 }
                 .scrollIndicators(.hidden)
                 
@@ -90,55 +139,6 @@ struct MemoDetailView: View {
                     // 댓글입력
                     CommentInputView(memoId: detail.id, update: $update)
                 }
-                
-                HStack {
-                    Button(action: {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            isAnimatingLike = true
-                        }
-                        LikeHateService.likePost(id: detail.id, accessToken: userManager.accessToken) { result in
-                            switch result {
-                            case .success:
-                                print("Successfully liked the post.")
-                                isRefresh = true
-                            case .failure(let error):
-                                print("Failed to like the post: \(error)")
-                            }
-                            // 애니메이션 복구
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                isAnimatingLike = false
-                            }
-                        }
-                    }) {
-                        Text("👍 \(detail.likeCnt)")
-                            .scaleEffect(isAnimatingLike ? 1.5 : 1.0) // 크기 애니메이션
-                    }
-                    
-                    Button(action: {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            isAnimatingHate = true
-                        }
-                        LikeHateService.hatePost(id: detail.id, accessToken: userManager.accessToken) { result in
-                            switch result {
-                            case .success:
-                                print("Successfully hated the post.")
-                                isRefresh = true
-                            case .failure(let error):
-                                print("Failed to hate the post: \(error)")
-                            }
-                            // 애니메이션 복구
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                isAnimatingHate = false
-                            }
-                        }
-                    }) {
-                        Text("👎 \(detail.hateCnt)")
-                            .scaleEffect(isAnimatingHate ? 1.5 : 1.0) // 크기 애니메이션
-                    }
-                }
-                .font(.subheadline)
-                .foregroundStyle(Color.cBlack)
-                
             } else if isLoading {
                 ProgressView("Loading...")
             } else {
@@ -146,6 +146,7 @@ struct MemoDetailView: View {
                     .foregroundColor(.red)
             }
         }
+        .edgesIgnoringSafeArea(.bottom)
         .padding(.horizontal)
         .onAppear {
             Task {
@@ -169,7 +170,7 @@ struct MemoDetailView: View {
             if let selectedImageURL {
                 PhotoView(imageURL: selectedImageURL, isPresented: $isPhotoViewerPresented)
             }
-        }
+        } // 사진 뷰어
         .onChange(of: selectedImageURL) { oldValue, newValue in
             if newValue != nil {
                 isPhotoViewerPresented = true
@@ -232,6 +233,6 @@ struct MemoDetailView: View {
 }
 
 #Preview {
-    MemoDetailView(id: .constant(1), size: .constant(.large))
+    MemoDetailView(id: .constant(7), size: .constant(.small))
         .environmentObject(UserManager())
 }
