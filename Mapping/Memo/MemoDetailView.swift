@@ -47,17 +47,15 @@ struct MemoDetailView: View {
                 // 여기서부터 본문 내용 + 사진 + 댓글 부분
                 
                 ScrollView {
-                    VStack(alignment: .leading){
+                    LazyVStack(alignment: .leading){
                         Text(detail.content)
                             .font(.body)
-                        
-                        Spacer()
-                        
+
                         if size != .small, let images = detail.images, !images.isEmpty {
                             let uniqueImages = Array(Set(images)) // 중복 제거
                             
                             ScrollView(.horizontal, showsIndicators: true) {
-                                HStack(alignment: .center, spacing: 10) {
+                                HStack( spacing: 10) {
                                     ForEach(uniqueImages, id: \.self) { url in
                                         if let cachedImage = cachedImages[url] {
                                             cachedImage
@@ -82,6 +80,7 @@ struct MemoDetailView: View {
                             CommentListView(memoId: detail.id, editingComment: $editingComment, update: $update)
                         }
                     }
+                    
                     
                     HStack {
                         Button(action: {
@@ -131,6 +130,7 @@ struct MemoDetailView: View {
                     }
                     .font(.subheadline)
                     .foregroundStyle(Color.cBlack)
+                    .offset(y: size == .small ? 100 : 0)
                 }
                 .scrollIndicators(.hidden)
                 
@@ -146,7 +146,6 @@ struct MemoDetailView: View {
                     .foregroundColor(.red)
             }
         }
-        .edgesIgnoringSafeArea(.bottom)
         .padding(.horizontal)
         .onAppear {
             Task {
@@ -233,6 +232,6 @@ struct MemoDetailView: View {
 }
 
 #Preview {
-    MemoDetailView(id: .constant(7), size: .constant(.small))
+    MemoDetailView(id: .constant(10), size: .constant(.small))
         .environmentObject(UserManager())
 }

@@ -39,7 +39,6 @@ struct MapView: View {
                     case .main:
                         SearchBarView(update: $update, selectedMemoId: $selectedMemoId, item: $mapItems)
                         CategoryView(category: $category, update: $update)
-                            //.padding(.bottom, 4)
                     case .detail:
                         MemoDetailView(id: $selectedMemoId, size: $selectedDetent)
                     }
@@ -47,7 +46,7 @@ struct MapView: View {
                 .presentationDetents([.small, .medium, .large], selection: $selectedDetent)
                 .presentationDragIndicator(.visible)
                 .padding(.vertical)
-                .interactiveDismissDisabled()
+                .interactiveDismissDisabled()// 닫기 금지
                 .presentationBackgroundInteraction(.enabled(upThrough: .medium))
                 //.edgesIgnoringSafeArea(.bottom) //바텀 사용
                 //.fixedSize(horizontal: false, vertical: true)
