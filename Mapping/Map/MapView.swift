@@ -144,15 +144,15 @@ struct MapView: View {
     private func categoryColor(for category: String) -> Color {
         switch category {
         case "공용 화장실":
-            return .blue
+            return .pastelBlue
         case "쓰레기통":
-            return .red
+            return .pastelDarkGreen
         case "흡연장":
-            return .gray
+            return .pastelRed
         case "붕어빵":
-            return .orange
+            return .pastelOrange
         default:
-            return .yellow
+            return .pastelPurple
         }
     }
 }
