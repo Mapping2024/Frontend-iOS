@@ -57,7 +57,7 @@ struct MapView: View {
             })
             .mapControls({
                 MapUserLocationButton()
-                //MapCompass()
+                MapCompass()
                 //MapScaleView()
             })
             .tint(Color.pastelAqua)// 내부에 포함된 전체 포인트 색상 변경
