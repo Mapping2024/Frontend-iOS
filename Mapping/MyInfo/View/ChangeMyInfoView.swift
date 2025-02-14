@@ -22,11 +22,11 @@ struct ChangeMyInfoView: View {
                                 .resizable()
                                 .frame(width: 150, height: 150)
                                 .clipShape(Circle())
-                                .overlay(Circle().stroke(Color.blue, lineWidth: 2))
+                                .overlay(Circle().stroke(Color.pastelAqua, lineWidth: 2))
                         } else {
                             ProfileImageView(imageURL: userManager.userInfo?.profileImage)
                                 .frame(width: 150, height: 150)
-                                .overlay(Circle().stroke(Color.blue, lineWidth: 2))
+                                .overlay(Circle().stroke(Color.pastelAqua, lineWidth: 2))
                         }
                     }
                     Spacer()
@@ -35,12 +35,12 @@ struct ChangeMyInfoView: View {
                     }) {
                         Text("사진 선택")
                             .padding(7)
-                            .background(Color.blue)
+                            .background(Color.pastelAqua)
                             .cornerRadius(10)
                             .foregroundStyle(.white)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color.blue, lineWidth: 2)
+                                    .stroke(Color.pastelAqua, lineWidth: 2)
                             )
                     }
                     .padding(.leading)
@@ -55,10 +55,11 @@ struct ChangeMyInfoView: View {
                         Text("프로필 사진 업데이트")
                             .padding(7)
                             .background(Color("cWhite"))
+                            .foregroundStyle(.pastelAqua)
                             .cornerRadius(10)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color.blue, lineWidth: 2)
+                                    .stroke(Color.pastelAqua, lineWidth: 2)
                             )
                     }
                 }
@@ -90,12 +91,12 @@ struct ChangeMyInfoView: View {
                         }) {
                             Text("닉네임 변경")
                                 .padding(7)
-                                .background(viewModel.newNickname.count <= 8 && viewModel.newNickname.count >= 2 && !viewModel.newNickname.trimmingCharacters(in: .whitespaces).isEmpty ? Color.green : Color.gray)
+                                .background(viewModel.newNickname.count <= 8 && viewModel.newNickname.count >= 2 && !viewModel.newNickname.trimmingCharacters(in: .whitespaces).isEmpty ? Color.pastelAqua : Color.gray)
                                 .cornerRadius(10)
                                 .foregroundStyle(.white)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 10)
-                                        .stroke(viewModel.newNickname.count <= 8 && viewModel.newNickname.count >= 2 && !viewModel.newNickname.trimmingCharacters(in: .whitespaces).isEmpty ? Color.green : Color.gray, lineWidth: 2)
+                                        .stroke(viewModel.newNickname.count <= 8 && viewModel.newNickname.count >= 2 && !viewModel.newNickname.trimmingCharacters(in: .whitespaces).isEmpty ? Color.pastelAqua : Color.gray, lineWidth: 2)
                                 )
                         }
                         .disabled(viewModel.newNickname.count > 8 || viewModel.newNickname.count < 2 || viewModel.newNickname.trimmingCharacters(in: .whitespaces).isEmpty) // 비활성화 조건 추가

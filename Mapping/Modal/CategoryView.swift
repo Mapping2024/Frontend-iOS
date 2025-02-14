@@ -35,7 +35,7 @@ struct CategoryView: View {
                                        .font(.caption)
                                }
                                .padding(10)
-                               .background(category == key ? Color.cBlue : Color.gray)
+                               .background(category == key ? Color.pastelDarkGreen : Color.gray)
                                .cornerRadius(8)
                                .foregroundStyle(Color.cWhite)
                            })
@@ -54,7 +54,7 @@ struct CategoryView: View {
                                 }
                             }
                             .padding(10)
-                            .background(category == key ? Color.cBlue : Color.gray)
+                            .background(category == key ? Color.pastelDarkGreen : Color.gray)
                             .cornerRadius(8)
                             .foregroundStyle(Color.cWhite)
                         })

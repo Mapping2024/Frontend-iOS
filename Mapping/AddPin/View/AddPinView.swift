@@ -21,11 +21,11 @@ struct AddPinView: View {
                 VStack {
                     Spacer()
                     if let coordinate = viewModel.pinCoordinate {
-                        Text("Latitude: \(coordinate.latitude), Longitude: \(coordinate.longitude)")
-                            .padding()
-                            .background(Color.cWhite.opacity(0.8))
-                            .cornerRadius(8)
-                            .padding()
+//                        Text("Latitude: \(coordinate.latitude), Longitude: \(coordinate.longitude)")
+//                            .padding()
+//                            .background(Color.cWhite.opacity(0.8))
+//                            .cornerRadius(8)
+//                            .padding()
                     } else {
                         Text("지도를 길게 눌러 핀을 생성하세요.")
                             .padding()
