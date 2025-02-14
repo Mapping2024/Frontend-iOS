@@ -58,9 +58,10 @@ struct MapView: View {
             })
             .mapControls({
                 MapUserLocationButton()
-                MapCompass()
-                MapScaleView()
+                //MapCompass()
+                //MapScaleView()
             })
+            .tint(Color.pastelAqua)
         }
         .onChange(of: selectedMemoId, { oldValue, newValue in
             // `selectedMemoId` 변경 시 지도 중심 업데이트
