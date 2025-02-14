@@ -134,6 +134,8 @@ struct MapView: View {
             return "trash.fill"
         case "흡연장":
             return "smoke.fill"
+        case "주차장":
+            return "car.fill"
         case "붕어빵":
             return "fish.fill"
         default:
@@ -149,6 +151,8 @@ struct MapView: View {
             return .pastelDarkGreen
         case "흡연장":
             return .pastelRed
+        case "주차장":
+            return .pastelAqua
         case "붕어빵":
             return .pastelOrange
         default:
