@@ -58,9 +58,10 @@ struct MapView: View {
             })
             .mapControls({
                 MapUserLocationButton()
-                MapCompass()
-                MapScaleView()
+                //MapCompass()
+                //MapScaleView()
             })
+            .tint(Color.pastelAqua)
         }
         .onChange(of: selectedMemoId, { oldValue, newValue in
             // `selectedMemoId` 변경 시 지도 중심 업데이트
@@ -134,6 +135,8 @@ struct MapView: View {
             return "trash.fill"
         case "흡연장":
             return "smoke.fill"
+        case "주차장":
+            return "car.fill"
         case "붕어빵":
             return "fish.fill"
         default:
@@ -144,15 +147,17 @@ struct MapView: View {
     private func categoryColor(for category: String) -> Color {
         switch category {
         case "공용 화장실":
-            return .blue
+            return .pastelBlue
         case "쓰레기통":
-            return .red
+            return .pastelDarkGreen
         case "흡연장":
-            return .gray
+            return .pastelRed
+        case "주차장":
+            return .pastelAqua
         case "붕어빵":
-            return .orange
+            return .pastelOrange
         default:
-            return .yellow
+            return .pastelPurple
         }
     }
 }

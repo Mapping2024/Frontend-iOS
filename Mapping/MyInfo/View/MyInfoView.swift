@@ -14,17 +14,18 @@ struct MyInfoView: View {
                     if userManager.isLoggedIn, let userInfo = userManager.userInfo {
                         HStack{
                             Text("\(userInfo.nickname)")
-                                .font(.title2)
+                                .font(.body).fontWeight(.bold)
                                 .padding(.leading)
                             Spacer()
                             NavigationLink(destination: ChangeMyInfoView()){
                                 Text("프로필 변경")
                                     .padding(7)
-                                    .background(Color("cWhite")) // 원하는 백그라운드 색상 지정
+                                    .background(Color("pastelAqua")) // 원하는 백그라운드 색상 지정
+                                    .foregroundStyle(.white)
                                     .cornerRadius(10) // 백그라운드에 모서리 곡선 적용
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 10)
-                                            .stroke(Color("cBlue"), lineWidth: 2)
+                                            .stroke(Color("pastelAqua"), lineWidth: 2)
                                     )
                                     .padding()
                             }

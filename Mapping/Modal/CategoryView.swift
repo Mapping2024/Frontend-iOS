@@ -6,12 +6,13 @@ struct CategoryView: View {
     @Binding var update: Bool
     let CategoryOptions: [(String, String)] = [
         ("전체", "mappin"),
+        ("개인","person.fill"),
         ("흡연장", "smoke.fill"),
         ("쓰레기통", "trash.fill"),
         ("공용 화장실", "toilet.fill"),
-        ("붕어빵","fish.fill"),
-        ("기타", "star.fill"),
-        ("개인","person.fill")
+        ("주차장", "car.fill"),
+        //("붕어빵","fish.fill"),
+        ("기타", "star.fill")
     ]
 
     var body: some View {
@@ -34,7 +35,7 @@ struct CategoryView: View {
                                        .font(.caption)
                                }
                                .padding(10)
-                               .background(category == key ? Color.cBlue : Color.gray)
+                               .background(category == key ? Color.pastelAqua : Color.gray)
                                .cornerRadius(8)
                                .foregroundStyle(Color.cWhite)
                            })
@@ -53,7 +54,7 @@ struct CategoryView: View {
                                 }
                             }
                             .padding(10)
-                            .background(category == key ? Color.cBlue : Color.gray)
+                            .background(category == key ? Color.pastelAqua : Color.gray)
                             .cornerRadius(8)
                             .foregroundStyle(Color.cWhite)
                         })
