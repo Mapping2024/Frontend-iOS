@@ -43,7 +43,7 @@ struct MyInfoView: View {
                                     .cornerRadius(10)
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 10)
-                                            .stroke(Color("cBlue"), lineWidth: 2)
+                                            .stroke(Color("pastelAqua"), lineWidth: 2)
                                     )
                             }
                             .padding()
