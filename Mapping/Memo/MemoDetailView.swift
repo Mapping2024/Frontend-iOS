@@ -85,7 +85,7 @@ struct MemoDetailView: View {
                                                 }
                                             }
                                         }
-                                        .padding(.bottom)
+                                        .padding(.top)
                                     }
                             .offset(y: size == .small ? 500 : 0)
                         }
@@ -138,6 +138,7 @@ struct MemoDetailView: View {
                         }
                         .font(.subheadline)
                         .foregroundStyle(Color.cBlack)
+                        .padding(.top)
                         .offset(y: size == .small ? 100 : 0)
                         
                         Group{
