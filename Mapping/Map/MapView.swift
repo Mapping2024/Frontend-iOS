@@ -3,8 +3,7 @@ import MapKit
 import Alamofire
 
 enum DisplayMode {
-    case main
-    case detail
+    case main, detail
 }
 
 struct MapView: View {
@@ -53,7 +52,7 @@ struct MapView: View {
             .onChange(of: locationManager.region, { oldValue, newValue in
                 position = .region(locationManager.region)
                 if let location = position.region?.center {
-                    locationData = location //현재 위치를 저장 나중에 보낼 수 있음
+                    locationData = location //현재 위치를 저장
                 }
             })
             .mapControls({
@@ -61,17 +60,17 @@ struct MapView: View {
                 //MapCompass()
                 //MapScaleView()
             })
-            .tint(Color.pastelAqua)
+            .tint(Color.pastelAqua)// 내부에 포함된 전체 포인트 색상 변경
         }
         .onChange(of: selectedMemoId, { oldValue, newValue in
-            // `selectedMemoId` 변경 시 지도 중심 업데이트
+            // 핀중 하나를 선택하면 핀을 지도 중앙으로 변경
             if let id = selectedMemoId,
                let selectedItem = mapItems.first(where: { $0.id == id }) {
-                let adjustedCenter = CLLocationCoordinate2D(
-                            latitude: selectedItem.location.latitude - 0.002,
+                let adjustedCenter = CLLocationCoordinate2D( //현재 내가 보는 지도의 센터를 변경한다
+                            latitude: selectedItem.location.latitude - 0.001,
                             longitude: selectedItem.location.longitude
                         )
-                        position = .region(MKCoordinateRegion(center: adjustedCenter, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)))
+                        position = .region(MKCoordinateRegion(center: adjustedCenter, span: MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)))
                         displayMode = .detail // 상세 모드로 전환
             } else {
                 displayMode = .main
@@ -96,20 +95,26 @@ struct MapView: View {
             Task {
                 await matching()
             }
-        }
+        } //초기 화면에 나타날시 로그인 확인
         .onMapCameraChange { context in
             visibleRegion = context.region.center // 내 위치가 바뀌면 지도 시선 위치를 변경
             Task {
                 await matching()
             }
-        }
+        }// 지도를 움직일시 새로 검색
     }
     
     private func matching() async {
-        
         do {
             mapItems = try await MemoMatching(location: visibleRegion!, accessToken: userManager.accessToken)
+            
             applyFilter() // 필터 적용
+
+            // selectedMemoId가 mapItems에 존재하는지 확인
+            if let selectedId = selectedMemoId,
+               !mapItems.contains(where: { $0.id == selectedId }) {
+                selectedMemoId = nil
+            }
         } catch {
             mapItems = []
             filteredMapItems = []
@@ -128,38 +133,26 @@ struct MapView: View {
     }
     
     private func categoryImage(for category: String) -> String {
-        switch category {
-        case "공용 화장실":
-            return "toilet.fill"
-        case "쓰레기통":
-            return "trash.fill"
-        case "흡연장":
-            return "smoke.fill"
-        case "주차장":
-            return "car.fill"
-        case "붕어빵":
-            return "fish.fill"
-        default:
-            return "star.fill"
-        }
+            switch category {
+            case "공용 화장실": return "toilet.fill"
+            case "쓰레기통": return "trash.fill"
+            case "흡연장": return "smoke.fill"
+            case "주차장": return "car.fill"
+            case "붕어빵": return "fish.fill"
+            default: return "star.fill"
+            }
     }
     
     private func categoryColor(for category: String) -> Color {
-        switch category {
-        case "공용 화장실":
-            return .pastelBlue
-        case "쓰레기통":
-            return .pastelDarkGreen
-        case "흡연장":
-            return .pastelRed
-        case "주차장":
-            return .pastelAqua
-        case "붕어빵":
-            return .pastelOrange
-        default:
-            return .pastelPurple
+            switch category {
+            case "공용 화장실": return .pastelBlue
+            case "쓰레기통": return .pastelDarkGreen
+            case "흡연장": return .pastelRed
+            case "주차장": return .pastelAqua
+            case "붕어빵": return .pastelOrange
+            default: return .pastelPurple
+            }
         }
-    }
 }
 
 extension MKCoordinateRegion: @retroactive Equatable {
@@ -172,10 +165,8 @@ extension MKCoordinateRegion: @retroactive Equatable {
 
 extension PresentationDetent {
     static let small: Self = {
-        let screenWidth = UIScreen.main.bounds.width
         let screenHeight = UIScreen.main.bounds.height
-        print("Screen Width:", screenWidth) // 초기 실행 시 한 번만 출력됨
-        print("Screen Height:", screenHeight)
+        
         if screenHeight <= 670 { // iPhone SE
             return .fraction(0.20)
         } else if screenHeight <= 900 { // 미니, 일반, 프로
