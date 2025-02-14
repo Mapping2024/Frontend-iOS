@@ -9,6 +9,7 @@ struct MyMemoDetailView: View {
     
     @State private var isPhotoViewerPresented = false
     @State private var selectedImageURL: String?
+    @State private var position: MapCameraPosition = .userLocation(fallback: .automatic)
     
     var body: some View {
         NavigationStack {
@@ -55,44 +56,48 @@ struct MyMemoDetailView: View {
                         VStack(alignment: .leading) {
                             Text(detail.content)
                                 .font(.body)
-                            Map {
-                                Marker("", coordinate: CLLocationCoordinate2D(latitude: detail.lat, longitude: detail.lng))
-                            }
-                            .frame(height: 200)
-                            .cornerRadius(10)
                             
                             if let images = detail.images, !images.isEmpty {
-                                let uniqueImages = Array(Set(images)) // 중복 제거
                                 ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack {
-                                        ForEach(uniqueImages, id: \.self) { url in
-                                            if let image = URL(string: url) {
-                                                AsyncImage(url: image) { phase in
+                                    HStack(spacing: 10) {
+                                        ForEach(images, id: \.self) { urlString in
+                                            if let url = URL(string: urlString) {
+                                                AsyncImage(url: url) { phase in
                                                     switch phase {
                                                     case .empty:
                                                         ProgressView()
                                                     case .success(let image):
-                                                        image
-                                                            .resizable()
-                                                            .frame(width: 150, height: 150)
-                                                            .cornerRadius(8)
+                                                        image.resizable()
+                                                            .scaledToFill()
                                                             .onTapGesture {
                                                                 selectedImageURL = nil
                                                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                                                    selectedImageURL = url
+                                                                    selectedImageURL = urlString
                                                                 }
                                                             }
                                                     case .failure:
-                                                        ProgressView()
+                                                        Image(systemName: "photo")
+                                                            .resizable()
+                                                            .scaledToFit()
+                                                            .foregroundColor(.gray)
                                                     @unknown default:
                                                         EmptyView()
                                                     }
                                                 }
+                                                .frame(width: 150, height: 150)
+                                                .clipped()
+                                                .cornerRadius(10)
                                             }
                                         }
                                     }
+                                    .padding(.top)
                                 }
                             }
+                            Map(position: $position) {
+                                Marker("", coordinate: CLLocationCoordinate2D(latitude: detail.lat, longitude: detail.lng))
+                            }
+                            .frame(height: 200)
+                            .cornerRadius(10)
                         }
                     }
                 } else {

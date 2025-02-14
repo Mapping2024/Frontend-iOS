@@ -52,7 +52,6 @@ struct MemoDetailView: View {
                             .font(.body)
 
                         if let images = detail.images, !images.isEmpty {
-                            
                             ScrollView(.horizontal, showsIndicators: false) {
                                         HStack(spacing: 10) {
                                             ForEach(images, id: \.self) { urlString in
