@@ -15,7 +15,8 @@ struct SearchBarView: View {
         VStack {
             HStack {
                 Spacer()
-                TextField("Search", text: $query)
+
+                TextField("검색어를 입력하세요.", text: $query)
                     .textFieldStyle(.roundedBorder)
                 
                 Spacer()
@@ -63,7 +64,7 @@ struct SearchBarView: View {
             }
             .scrollContentBackground(.hidden)
             .padding(.top, -20)
-            .offset(y: size == .small ? 500 : 0) // 작은 크기일 때 아래로 숨김
+            //.offset(y: size == .small ? 10 : 0) // 작은 크기일 때 아래로 숨김
         }
     }
 }
