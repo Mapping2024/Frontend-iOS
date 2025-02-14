@@ -6,12 +6,12 @@ struct CategoryView: View {
     @Binding var update: Bool
     let CategoryOptions: [(String, String)] = [
         ("전체", "mappin"),
+        ("개인","person.fill"),
         ("흡연장", "smoke.fill"),
         ("쓰레기통", "trash.fill"),
         ("공용 화장실", "toilet.fill"),
-        ("붕어빵","fish.fill"),
-        ("기타", "star.fill"),
-        ("개인","person.fill")
+        //("붕어빵","fish.fill"),
+        ("기타", "star.fill")
     ]
 
     var body: some View {

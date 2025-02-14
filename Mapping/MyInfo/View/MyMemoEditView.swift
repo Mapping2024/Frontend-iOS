@@ -32,7 +32,7 @@ struct MyMemoEditView: View {
                         Text("흡연장").tag("흡연장")
                         Text("쓰레기통").tag("쓰레기통")
                         Text("공용 화장실").tag("공용 화장실")
-                        Text("붕어빵").tag("붕어빵")
+//                        Text("붕어빵").tag("붕어빵")
                     }
                     .pickerStyle(MenuPickerStyle())
                 }

@@ -5,7 +5,7 @@ enum PinCategory: String, CaseIterable, Identifiable {
     case smokingArea = "흡연장"
     case trashBin = "쓰레기통"
     case publicRestroom = "공용 화장실"
-    case bungeobbang = "붕어빵"
+//    case bungeobbang = "붕어빵"
     case other = "기타"
     
     var id: String { self.rawValue }
