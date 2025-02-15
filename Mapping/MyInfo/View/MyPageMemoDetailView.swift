@@ -9,7 +9,7 @@ struct MyPageMemoDetailView: View {
     
     @State private var isPhotoViewerPresented = false
     @State private var selectedImageURL: String?
-    @State private var position: MapCameraPosition = .userLocation(fallback: .automatic)
+    @State private var position: MapCameraPosition = .automatic
     
     var body: some View {
         NavigationStack {
@@ -99,7 +99,7 @@ struct MyPageMemoDetailView: View {
                             Map(position: $position) {
                                 Marker("", coordinate: CLLocationCoordinate2D(latitude: detail.lat, longitude: detail.lng))
                             }
-                            .frame(height: 200)
+                            .frame(height: 300)
                             .cornerRadius(10)
                         }
                     }
@@ -134,6 +134,15 @@ struct MyPageMemoDetailView: View {
             .onAppear {
                 viewModel.fetchMemoDetail(id: id, token: userManager.accessToken)
             }
+            .onReceive(viewModel.$memoDetail) { newValue in
+                if let detail = newValue {
+                    position = .region(MKCoordinateRegion(
+                        center: CLLocationCoordinate2D(latitude: detail.lat, longitude: detail.lng),
+                        span: MKCoordinateSpan(latitudeDelta: 0.001, longitudeDelta: 0.001)
+                    ))
+                }
+            }
+
         }
         .fullScreenCover(isPresented: $isPhotoViewerPresented) {
             if let selectedImageURL = selectedImageURL {

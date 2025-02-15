@@ -39,7 +39,7 @@ struct CommentEditView: View {
                 }
                 .padding(.horizontal)
                 .padding(.vertical, 8)
-                .background(Color.cBlue)
+                .background(Color.pastelAqua)
                 .foregroundColor(.white)
                 .cornerRadius(8)
             }

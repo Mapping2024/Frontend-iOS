@@ -17,16 +17,17 @@ struct MyInfoView: View {
                         HStack {
                             Text(userInfo.nickname)
                                 .font(.body).fontWeight(.bold)
-                                .padding(.leading)
+                                //.padding(.leading)
+
                             Spacer()
                             NavigationLink(destination: ChangeMyInfoView()) {
                                 Text("프로필 변경")
+                                    .font(.subheadline)
                                     .padding(7)
                                     .background(Color("pastelAqua"))
                                     .foregroundStyle(.white)
                                     .cornerRadius(10)
                                     .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color("pastelAqua"), lineWidth: 2))
-                                    .padding()
                             }
                         }
                     } else {
@@ -68,31 +69,43 @@ struct MyInfoView: View {
             Divider().padding([.horizontal])
             
             if userManager.isLoggedIn {
-                GroupBox(label: Text("메모 관리")) {
+                GroupBox(label: Text("내 활동")) {
                     VStack(alignment: .leading) {
                         NavigationLink(destination: MemoListView(type: "my-memo")) {
-                            Text("📝 내 메모")
-                                .font(.headline)
-                                .padding()
-                                .foregroundStyle(Color("cBlack"))
+                            HStack{
+                                Text("📝 내 메모")
+                                    .font(.subheadline).fontWeight(.semibold)
+                                    .padding()
+                                    .foregroundStyle(Color("cBlack"))
+                                
+                                Spacer()
+                            }
                         }
                         
                         Divider()
                         
                         NavigationLink(destination: MemoListView(type: "liked")) {
-                            Text("👍 좋아요 누른 메모")
-                                .font(.headline)
-                                .padding()
-                                .foregroundStyle(Color("cBlack"))
+                            HStack{
+                                Text("👍 좋아요 누른 메모")
+                                    .font(.subheadline).fontWeight(.semibold)
+                                    .padding()
+                                    .foregroundStyle(Color("cBlack"))
+                                
+                                Spacer()
+                            }
                         }
                         
                         Divider()
                         
                         NavigationLink(destination: MemoListView(type: "commented")) {
-                            Text("💬 댓글 단 메모")
-                                .font(.headline)
-                                .padding()
-                                .foregroundStyle(Color("cBlack"))
+                            HStack{
+                                Text("💬 댓글 단 메모")
+                                    .font(.subheadline).fontWeight(.semibold)
+                                    .padding()
+                                    .foregroundStyle(Color("cBlack"))
+                                
+                                Spacer()
+                            }
                         }
                     }
                 }
@@ -107,7 +120,7 @@ struct MyInfoView: View {
                     userManager.fetchUserInfo()
                 }) {
                     Text("회원 탈퇴")
-                        .font(.body)
+                        .font(.subheadline)
                         .foregroundStyle(Color.gray)
                 }
                 .padding()
