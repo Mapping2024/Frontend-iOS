@@ -1,18 +1,20 @@
 import SwiftUI
+import MapKit
 
-struct MemoDetailView: View {
+struct MemoListDetailView: View {
     @EnvironmentObject var userManager: UserManager
-    @Binding var id: Int?
-    @Binding var size: PresentationDetent
+    var id: Int?
     @State private var memoDetail: MemoDetail?
     @State private var isLoading = true
-    @State private var isRefresh: Bool = false
+    @State private var isRefresh: Bool = false //좋아요 싫어요 관여
     // 좋아요 버튼 애니메이션 상태
     @State private var isAnimatingLike: Bool = false
     @State private var isAnimatingHate: Bool = false
-
+    
     @State private var isPhotoViewerPresented = false
     @State private var selectedImageURL: String?
+    
+    @State private var position: MapCameraPosition = .userLocation(fallback: .automatic)
     
     @State var editingComment: Int = 0
     @State var update: Bool = false
@@ -20,10 +22,10 @@ struct MemoDetailView: View {
     var body: some View {
         VStack(alignment: .leading) {
             if let detail = memoDetail {
-                HStack {
-                    VStack(alignment: .leading){
+                HStack(spacing: 10) {
+                    VStack(alignment: .leading) {
                         Text(detail.title)
-                            .font(.title2)
+                            .font(.title)
                             .fontWeight(.bold)
                         if let datePart = detail.date.split(separator: ":").first {
                             HStack{
@@ -35,58 +37,73 @@ struct MemoDetailView: View {
                         }
                     }
                     Spacer()
-                    ProfileImageView(imageURL: detail.profileImage)
-                        .frame(width: 35, height: 35)
                     
-                    Text("\(detail.nickname)")
-                        .font(.subheadline)
+                    HStack {
+                        AsyncImage(url: URL(string: detail.profileImage ?? "")) { image in
+                            image
+                                .resizable()
+                                .frame(width: 40, height: 40)
+                                .clipShape(Circle())
+                        } placeholder: {
+                            Image(systemName: "person.circle.fill")
+                                .resizable()
+                                .frame(width: 40, height: 40)
+                                .clipShape(Circle())
+                                .foregroundColor(.gray)
+                        }
+                        Text(detail.nickname)
+                            .font(.subheadline)
+                    }
                 }
                 
                 Divider()
-                // 여기서부터 본문 내용 + 사진 + 댓글 부분
                 
                 ScrollView {
                     LazyVStack(alignment: .leading){
                         Text(detail.content)
                             .font(.body)
-
+                        
                         if let images = detail.images, !images.isEmpty {
                             ScrollView(.horizontal, showsIndicators: false) {
-                                        HStack(spacing: 10) {
-                                            ForEach(images, id: \.self) { urlString in
-                                                if let url = URL(string: urlString) {
-                                                    AsyncImage(url: url) { phase in
-                                                        switch phase {
-                                                        case .empty:
-                                                            ProgressView()
-                                                        case .success(let image):
-                                                            image.resizable()
-                                                                .scaledToFill()
-                                                                .onTapGesture {
-                                                                    selectedImageURL = nil
-                                                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                                                        selectedImageURL = urlString
-                                                                    }
-                                                                }
-                                                        case .failure:
-                                                            Image(systemName: "photo")
-                                                                .resizable()
-                                                                .scaledToFit()
-                                                                .foregroundColor(.gray)
-                                                        @unknown default:
-                                                            EmptyView()
+                                HStack(spacing: 10) {
+                                    ForEach(images, id: \.self) { urlString in
+                                        if let url = URL(string: urlString) {
+                                            AsyncImage(url: url) { phase in
+                                                switch phase {
+                                                case .empty:
+                                                    ProgressView()
+                                                case .success(let image):
+                                                    image.resizable()
+                                                        .scaledToFill()
+                                                        .onTapGesture {
+                                                            selectedImageURL = nil
+                                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                                                selectedImageURL = urlString
+                                                            }
                                                         }
-                                                    }
-                                                    .frame(width: 150, height: 150)
-                                                    .clipped()
-                                                    .cornerRadius(10)
+                                                case .failure:
+                                                    Image(systemName: "photo")
+                                                        .resizable()
+                                                        .scaledToFit()
+                                                        .foregroundColor(.gray)
+                                                @unknown default:
+                                                    EmptyView()
                                                 }
                                             }
+                                            .frame(width: 150, height: 150)
+                                            .clipped()
+                                            .cornerRadius(10)
                                         }
-                                        .padding(.top)
                                     }
-                            .offset(y: size == .small ? 500 : 0)
+                                }
+                                .padding(.top)
+                            }
                         }
+                        Map(position: $position) {
+                            Marker("", coordinate: CLLocationCoordinate2D(latitude: detail.lat, longitude: detail.lng))
+                        }
+                        .frame(height: 200)
+                        .cornerRadius(10)
                         
                         HStack {
                             Button(action: {
@@ -137,20 +154,16 @@ struct MemoDetailView: View {
                         .font(.subheadline)
                         .foregroundStyle(Color.cBlack)
                         .padding(.top)
-                        .offset(y: size == .small ? 100 : 0)
                         
                         Group{
                             Divider()
                             CommentListView(memoId: detail.id, editingComment: $editingComment, update: $update)
                         }
-                            .offset(y: size != .large ? 500 : 0)
                     }
                 }
                 .scrollIndicators(.hidden)
                 
-                if size == .large && userManager.isLoggedIn && editingComment == 0 {
-                    //Divider()
-                    // 댓글입력
+                if userManager.isLoggedIn && editingComment == 0 {
                     CommentInputView(memoId: detail.id, update: $update)
                 }
             } else if isLoading {
@@ -160,13 +173,8 @@ struct MemoDetailView: View {
                     .foregroundColor(.red)
             }
         }
-        .padding(.horizontal)
+        .padding()
         .onAppear {
-            Task {
-                await fetchMemoDetail()
-            }
-        }.onChange(of: id) { oldId, newId in
-            id = newId
             Task {
                 await fetchMemoDetail()
             }
@@ -221,7 +229,3 @@ struct MemoDetailView: View {
     }
 }
 
-#Preview {
-    MemoDetailView(id: .constant(10), size: .constant(.medium))
-        .environmentObject(UserManager())
-}

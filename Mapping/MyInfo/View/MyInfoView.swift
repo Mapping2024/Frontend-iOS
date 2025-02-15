@@ -70,7 +70,7 @@ struct MyInfoView: View {
             if userManager.isLoggedIn {
                 GroupBox(label: Text("메모 관리")) {
                     VStack(alignment: .leading) {
-                        NavigationLink(destination: MyMemoListView()) {
+                        NavigationLink(destination: MemoListView(type: "my-memo")) {
                             Text("📝 내 메모")
                                 .font(.headline)
                                 .padding()
@@ -79,8 +79,17 @@ struct MyInfoView: View {
                         
                         Divider()
                         
-                        NavigationLink(destination: MyMemoListView()) {
+                        NavigationLink(destination: MemoListView(type: "liked")) {
                             Text("👍 좋아요 누른 메모")
+                                .font(.headline)
+                                .padding()
+                                .foregroundStyle(Color("cBlack"))
+                        }
+                        
+                        Divider()
+                        
+                        NavigationLink(destination: MemoListView(type: "commented")) {
+                            Text("💬 댓글 단 메모")
                                 .font(.headline)
                                 .padding()
                                 .foregroundStyle(Color("cBlack"))

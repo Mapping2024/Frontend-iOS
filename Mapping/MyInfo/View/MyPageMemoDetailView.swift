@@ -1,9 +1,9 @@
 import SwiftUI
 import MapKit
 
-struct MyMemoDetailView: View {
+struct MyPageMemoDetailView: View {
     let id: Int
-    @StateObject private var viewModel = MyMemoDetailViewModel()
+    @StateObject private var viewModel = MyPageMemoDetailViewModel()
     @EnvironmentObject var userManager: UserManager
     @Environment(\.dismiss) var dismiss // 삭제 후 화면 닫기용
     
@@ -24,9 +24,12 @@ struct MyMemoDetailView: View {
                                 .font(.title)
                                 .fontWeight(.bold)
                             if let datePart = detail.date.split(separator: ":").first {
-                                Text(datePart)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                HStack{
+                                    Text(datePart).font(.caption2).foregroundStyle(.secondary)
+                                    if detail.certified {
+                                        Image(systemName: "checkmark.seal.fill").font(.caption2).foregroundStyle(.secondary)
+                                    }
+                                }
                             }
                         }
                         Spacer()

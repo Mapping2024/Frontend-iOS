@@ -1,4 +1,4 @@
-struct MyMemo: Identifiable, Decodable {
+struct ListMemo: Identifiable, Decodable {
     let id: Int
     let title: String
     let content: String
@@ -6,12 +6,12 @@ struct MyMemo: Identifiable, Decodable {
     let likeCnt: Int
     let hateCnt: Int
     let images: [String]
-    let secret: Bool
+    let secret: Bool?
 }
 
-struct MyMemoResponse: Decodable {
+struct ListMemoResponse: Decodable {
     let status: Int
     let success: Bool
     let message: String
-    let data: [MyMemo]
+    let data: [ListMemo]
 }

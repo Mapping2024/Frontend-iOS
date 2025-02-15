@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 
 @MainActor
-class MyMemoDetailViewModel: ObservableObject {
+class MyPageMemoDetailViewModel: ObservableObject {
     @Published var memoDetail: MemoDetail?
     @Published var isLoading = true
     @Published var isDeleting = false
