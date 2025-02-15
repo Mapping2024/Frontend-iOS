@@ -164,5 +164,34 @@ class UserManager: ObservableObject {
                 }
             }
     }
+    
+    func withdrawUser(completion: @escaping (Bool) -> Void) {
+            let url = "https://api.mapping.kro.kr/api/v2/member/withdraw"
+            
+            let headers: HTTPHeaders = [
+                "Authorization": "Bearer \(accessToken)",
+                "accept": "*/*"
+            ]
+            
+            AF.request(url, method: .delete, headers: headers)
+                .validate(statusCode: 200..<300)
+                .response { response in
+                    DispatchQueue.main.async {
+                        switch response.result {
+                        case .success:
+                            print("✅ 회원 탈퇴 성공")
+                            self.isLoggedIn = false
+                            self.userInfo = nil
+                            self.accessTokenKakao = ""
+                            self.accessToken = ""
+                            self.refreshToken = ""
+                            completion(true)
+                        case .failure(let error):
+                            print("❌ 회원 탈퇴 실패: \(error.localizedDescription)")
+                            completion(false)
+                        }
+                    }
+                }
+        }
 }
 
