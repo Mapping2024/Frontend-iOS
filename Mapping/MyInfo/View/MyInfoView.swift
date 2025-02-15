@@ -58,18 +58,30 @@ struct MyInfoView: View {
                         }
                             .disabled(!userManager.isLoggedIn))
             Divider()
-                .padding([.horizontal, .bottom])
+                .padding([.horizontal])
             
             if userManager.isLoggedIn {
-                NavigationLink(destination: MyMemoListView()) {
-                    Text("내가 작성한 메모")
-                        .font(.headline)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.gray.opacity(0.2))
-                        .cornerRadius(10)
+                GroupBox(label: Text("메모 관리")){
+                    VStack(alignment: .leading){
+                        
+                        NavigationLink(destination: MyMemoListView()) {
+                            Text("📝 내 메모")
+                                .font(.headline)
+                                .padding()
+                                .foregroundStyle(Color("cBlack"))
+                        }
+                        
+                        Divider()
+                        
+                        NavigationLink(destination: MyMemoListView()) {
+                            Text("👍 좋아요 누른 메모")
+                                .font(.headline)
+                                .padding()
+                                .foregroundStyle(Color("cBlack"))
+                        }
+                    }
                 }
-                .padding(.horizontal)
+                .padding()
             }
             Spacer()
         }
@@ -78,6 +90,15 @@ struct MyInfoView: View {
 }
 
 #Preview {
-    MyInfoView()
-        .environmentObject(UserManager())
+    let userManager = UserManager()
+    userManager.isLoggedIn = true // 로그인된 상태로 설정
+    userManager.userInfo = UserInfo(
+        socialId: "123456",
+        nickname: "테스트 사용자",
+        profileImage: nil, // 필요하면 이미지 URL 추가
+        role: "user"
+    )
+
+    return MyInfoView()
+        .environmentObject(userManager)
 }
