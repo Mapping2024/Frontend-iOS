@@ -17,16 +17,18 @@ struct MyInfoView: View {
                         HStack {
                             Text(userInfo.nickname)
                                 .font(.body).fontWeight(.bold)
-                                .padding(.leading)
+                                //.padding(.leading)
+
                             Spacer()
                             NavigationLink(destination: ChangeMyInfoView()) {
                                 Text("프로필 변경")
+                                    .font(.subheadline)
                                     .padding(7)
                                     .background(Color("pastelAqua"))
                                     .foregroundStyle(.white)
                                     .cornerRadius(10)
                                     .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color("pastelAqua"), lineWidth: 2))
-                                    .padding()
+                                    
                             }
                         }
                     } else {
