@@ -14,7 +14,7 @@ struct MemoListDetailView: View {
     @State private var isPhotoViewerPresented = false
     @State private var selectedImageURL: String?
     
-    @State private var position: MapCameraPosition = .userLocation(fallback: .automatic)
+    @State private var position: MapCameraPosition = .automatic
     
     @State var editingComment: Int = 0
     @State var update: Bool = false
@@ -102,7 +102,7 @@ struct MemoListDetailView: View {
                         Map(position: $position) {
                             Marker("", coordinate: CLLocationCoordinate2D(latitude: detail.lat, longitude: detail.lng))
                         }
-                        .frame(height: 200)
+                        .frame(height: 300)
                         .cornerRadius(10)
                         
                         HStack {
@@ -219,6 +219,14 @@ struct MemoListDetailView: View {
             let decodedResponse = try JSONDecoder().decode(MemoDetailResponse.self, from: data)
             if decodedResponse.success {
                 memoDetail = decodedResponse.data
+                if let detail = memoDetail {
+                    position = .region(
+                        MKCoordinateRegion(
+                            center: CLLocationCoordinate2D(latitude: detail.lat, longitude: detail.lng),
+                            span: MKCoordinateSpan(latitudeDelta: 0.001, longitudeDelta: 0.001) // 원하는 줌 레벨 설정
+                        )
+                    )
+                }
             } else {
                 print("Failed to fetch memo detail: \(decodedResponse.message)")
             }
