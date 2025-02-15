@@ -8,7 +8,11 @@ struct MemoListView: View {
     var body: some View {
         NavigationStack {
             List(viewModel.listMemo) { memo in
-                NavigationLink(destination: MyPageMemoDetailView(id: memo.id)) {
+                NavigationLink(destination: type == "my-memo" ?
+                               AnyView(MyPageMemoDetailView(id: memo.id)) :
+                                AnyView(MemoListDetailView(id: memo.id))
+                )
+                {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
                             VStack(alignment: .leading) {
@@ -60,9 +64,9 @@ struct MemoListView: View {
             }
             .navigationBarTitle(
                 type == "liked" ? "좋아요 누른 메모" :
-                type == "commented" ? "댓글 단 메모" : "내 메모"
+                    type == "commented" ? "댓글 단 메모" : "내 메모"
             )
-
+            
             .onAppear {
                 viewModel.fetchListMemo(userManager: userManager, type: type)
             }

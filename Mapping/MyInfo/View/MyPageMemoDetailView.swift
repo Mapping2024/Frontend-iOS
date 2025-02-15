@@ -24,9 +24,12 @@ struct MyPageMemoDetailView: View {
                                 .font(.title)
                                 .fontWeight(.bold)
                             if let datePart = detail.date.split(separator: ":").first {
-                                Text(datePart)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                HStack{
+                                    Text(datePart).font(.caption2).foregroundStyle(.secondary)
+                                    if detail.certified {
+                                        Image(systemName: "checkmark.seal.fill").font(.caption2).foregroundStyle(.secondary)
+                                    }
+                                }
                             }
                         }
                         Spacer()
