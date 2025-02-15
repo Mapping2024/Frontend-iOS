@@ -10,8 +10,7 @@ struct MemoDetailView: View {
     // 좋아요 버튼 애니메이션 상태
     @State private var isAnimatingLike: Bool = false
     @State private var isAnimatingHate: Bool = false
-    
-    @State private var cachedImages: [String: Image] = [:]
+
     @State private var isPhotoViewerPresented = false
     @State private var selectedImageURL: String?
     

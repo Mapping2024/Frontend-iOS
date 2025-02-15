@@ -1,9 +1,9 @@
 import SwiftUI
 import MapKit
 
-struct MyMemoDetailView: View {
+struct MyPageMemoDetailView: View {
     let id: Int
-    @StateObject private var viewModel = MyMemoDetailViewModel()
+    @StateObject private var viewModel = MyPageMemoDetailViewModel()
     @EnvironmentObject var userManager: UserManager
     @Environment(\.dismiss) var dismiss // 삭제 후 화면 닫기용
     

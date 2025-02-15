@@ -1,13 +1,14 @@
 import SwiftUI
 
-struct MyMemoListView: View {
+struct MemoListView: View {
     @EnvironmentObject var userManager: UserManager
-    @StateObject private var viewModel = MyMemoListViewModel()
+    @StateObject private var viewModel = MemoListViewModel()
+    var type: String
     
     var body: some View {
         NavigationStack {
-            List(viewModel.myMemo) { memo in
-                NavigationLink(destination: MyMemoDetailView(id: memo.id)) {
+            List(viewModel.listMemo) { memo in
+                NavigationLink(destination: MyPageMemoDetailView(id: memo.id)) {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
                             VStack(alignment: .leading) {
@@ -39,7 +40,7 @@ struct MyMemoListView: View {
                             Spacer()
                             
                             HStack {
-                                if memo.secret {
+                                if memo.secret != nil && memo.secret == true {
                                     Image(systemName: "parkingsign")
                                 }
                                 HStack {
@@ -57,15 +58,18 @@ struct MyMemoListView: View {
                     }
                 }
             }
-            .navigationBarTitle("내 메모")
+            .navigationBarTitle(
+                type == "liked" ? "좋아요 누른 메모" :
+                type == "commented" ? "댓글 단 메모" : "내 메모"
+            )
+
             .onAppear {
-                viewModel.fetchMyMemo(userManager: userManager)
+                viewModel.fetchListMemo(userManager: userManager, type: type)
             }
         }
     }
 }
 
-#Preview {
-    MyMemoListView()
-        .environmentObject(UserManager())
-}
+//#Preview {
+//    MemoListView()
+//}
