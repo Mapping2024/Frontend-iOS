@@ -23,6 +23,7 @@ class UserManager: ObservableObject {
         self.refreshToken = ""
         self.userInfo = nil
         self.isLoggedIn = false
+        print("logout")
     }
     
     func kakaoLogin() {

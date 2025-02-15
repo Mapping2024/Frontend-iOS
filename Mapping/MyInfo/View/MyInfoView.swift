@@ -3,7 +3,8 @@ import SwiftUI
 struct MyInfoView: View {
     @EnvironmentObject var userManager: UserManager
     @Environment(\.presentationMode) var presentationMode
-    @State private var showAlert = false  // ✅ 탈퇴 확인 창 표시 여부
+    @State private var showAlertLogout = false
+    @State private var showAlertWithdraw = false
     
     var body: some View {
         NavigationStack {
@@ -37,7 +38,8 @@ struct MyInfoView: View {
                             }) {
                                 Text("카카오로 로그인 하기")
                                     .padding(7)
-                                    .background(Color("cWhite"))
+                                    .background(Color("pastelAqua"))
+                                    .foregroundStyle(Color.white)
                                     .cornerRadius(10)
                                     .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color("pastelAqua"), lineWidth: 2))
                             }
@@ -48,9 +50,20 @@ struct MyInfoView: View {
             }
             .padding()
             .navigationBarTitle("내 정보", displayMode: .inline)
-            .navigationBarItems(trailing: Button(action: { userManager.logout() }) {
+            .navigationBarItems(trailing: Button(action: {
+                showAlertLogout = true
+            }) {
                 Image(systemName: "rectangle.portrait.and.arrow.forward")
             }.disabled(!userManager.isLoggedIn))
+            .alert("로그아웃", isPresented: $showAlertLogout) {
+                Button("취소", role: .cancel) { }
+                Button("확인", role: .destructive) {
+                    userManager.logout()
+                    presentationMode.wrappedValue.dismiss()
+                }
+            } message: {
+                Text("로그아웃 하시겠습니까?")
+            }
             
             Divider().padding([.horizontal])
             
@@ -81,7 +94,7 @@ struct MyInfoView: View {
             
             if userManager.isLoggedIn {
                 Button(action: {
-                    showAlert = true
+                    showAlertWithdraw = true
                     userManager.fetchUserInfo()
                 }) {
                     Text("회원 탈퇴")
@@ -89,7 +102,7 @@ struct MyInfoView: View {
                         .foregroundStyle(Color.gray)
                 }
                 .padding()
-                .alert("회원 탈퇴", isPresented: $showAlert) {
+                .alert("회원 탈퇴", isPresented: $showAlertWithdraw) {
                     Button("취소", role: .cancel) { }
                     Button("확인", role: .destructive) {
                         userManager.withdrawUser { success in
