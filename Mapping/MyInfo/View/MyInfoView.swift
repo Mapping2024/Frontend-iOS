@@ -3,30 +3,29 @@ import SwiftUI
 struct MyInfoView: View {
     @EnvironmentObject var userManager: UserManager
     @Environment(\.presentationMode) var presentationMode
+    @State private var showAlertLogout = false
+    @State private var showAlertWithdraw = false
     
     var body: some View {
-        NavigationStack{
-            GroupBox(label:
-                        Label("프로필", systemImage: "person")) {
-                HStack{
+        NavigationStack {
+            GroupBox(label: Label("프로필", systemImage: "person")) {
+                HStack {
                     ProfileImageView(imageURL: userManager.userInfo?.profileImage)
                         .frame(width: 50, height: 50)
+                    
                     if userManager.isLoggedIn, let userInfo = userManager.userInfo {
-                        HStack{
-                            Text("\(userInfo.nickname)")
+                        HStack {
+                            Text(userInfo.nickname)
                                 .font(.body).fontWeight(.bold)
                                 .padding(.leading)
                             Spacer()
-                            NavigationLink(destination: ChangeMyInfoView()){
+                            NavigationLink(destination: ChangeMyInfoView()) {
                                 Text("프로필 변경")
                                     .padding(7)
-                                    .background(Color("pastelAqua")) // 원하는 백그라운드 색상 지정
+                                    .background(Color("pastelAqua"))
                                     .foregroundStyle(.white)
-                                    .cornerRadius(10) // 백그라운드에 모서리 곡선 적용
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(Color("pastelAqua"), lineWidth: 2)
-                                    )
+                                    .cornerRadius(10)
+                                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color("pastelAqua"), lineWidth: 2))
                                     .padding()
                             }
                         }
@@ -36,48 +35,95 @@ struct MyInfoView: View {
                             Button(action: {
                                 presentationMode.wrappedValue.dismiss()
                                 userManager.kakaoLogin()
-                            }){
+                            }) {
                                 Text("카카오로 로그인 하기")
                                     .padding(7)
-                                    .background(Color("cWhite"))
+                                    .background(Color("pastelAqua"))
+                                    .foregroundStyle(Color.white)
                                     .cornerRadius(10)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(Color("pastelAqua"), lineWidth: 2)
-                                    )
+                                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color("pastelAqua"), lineWidth: 2))
                             }
                             .padding()
                         }
                     }
                 }
             }
-                        .padding()
-                        .navigationBarTitle(Text("내 정보"), displayMode: .inline)
-                        .navigationBarItems(trailing: Button(action: {userManager.logout()}) {
-                            Image(systemName: "rectangle.portrait.and.arrow.forward")
-                        }
-                            .disabled(!userManager.isLoggedIn))
-            Divider()
-                .padding([.horizontal, .bottom])
+            .padding()
+            .navigationBarTitle("내 정보", displayMode: .inline)
+            .navigationBarItems(trailing: Button(action: {
+                showAlertLogout = true
+            }) {
+                Image(systemName: "rectangle.portrait.and.arrow.forward")
+            }.disabled(!userManager.isLoggedIn))
+            .alert("로그아웃", isPresented: $showAlertLogout) {
+                Button("취소", role: .cancel) { }
+                Button("확인", role: .destructive) {
+                    userManager.logout()
+                    presentationMode.wrappedValue.dismiss()
+                }
+            } message: {
+                Text("로그아웃 하시겠습니까?")
+            }
+            
+            Divider().padding([.horizontal])
             
             if userManager.isLoggedIn {
-                NavigationLink(destination: MyMemoListView()) {
-                    Text("내가 작성한 메모")
-                        .font(.headline)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.gray.opacity(0.2))
-                        .cornerRadius(10)
+                GroupBox(label: Text("메모 관리")) {
+                    VStack(alignment: .leading) {
+                        NavigationLink(destination: MyMemoListView()) {
+                            Text("📝 내 메모")
+                                .font(.headline)
+                                .padding()
+                                .foregroundStyle(Color("cBlack"))
+                        }
+                        
+                        Divider()
+                        
+                        NavigationLink(destination: MyMemoListView()) {
+                            Text("👍 좋아요 누른 메모")
+                                .font(.headline)
+                                .padding()
+                                .foregroundStyle(Color("cBlack"))
+                        }
+                    }
                 }
-                .padding(.horizontal)
+                .padding()
             }
+            
             Spacer()
+            
+            if userManager.isLoggedIn {
+                Button(action: {
+                    showAlertWithdraw = true
+                    userManager.fetchUserInfo()
+                }) {
+                    Text("회원 탈퇴")
+                        .font(.body)
+                        .foregroundStyle(Color.gray)
+                }
+                .padding()
+                .alert("회원 탈퇴", isPresented: $showAlertWithdraw) {
+                    Button("취소", role: .cancel) { }
+                    Button("확인", role: .destructive) {
+                        userManager.withdrawUser { success in
+                            if success {
+                                presentationMode.wrappedValue.dismiss()
+                            }
+                        }
+                    }
+                } message: {
+                    Text("회원 탈퇴 후 30일간 데이터가 유지되며, 이후 완전히 삭제됩니다. 만약 30일 안에 재가입하면 기존 정보를 유지할 수 있습니다. 정말 탈퇴하시겠습니까?")
+                }
+            }
         }
         .padding(.top)
     }
 }
 
 #Preview {
-    MyInfoView()
-        .environmentObject(UserManager())
+    let userManager = UserManager()
+    userManager.isLoggedIn = true
+    userManager.userInfo = UserInfo(socialId: "123456", nickname: "테스트 사용자", profileImage: nil, role: "user")
+
+    return MyInfoView().environmentObject(userManager)
 }
