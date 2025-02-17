@@ -35,18 +35,8 @@ struct MyPageMemoDetailView: View {
                         Spacer()
                         
                         HStack {
-                            AsyncImage(url: URL(string: detail.profileImage ?? "")) { image in
-                                image
-                                    .resizable()
-                                    .frame(width: 40, height: 40)
-                                    .clipShape(Circle())
-                            } placeholder: {
-                                Image(systemName: "person.circle.fill")
-                                    .resizable()
-                                    .frame(width: 40, height: 40)
-                                    .clipShape(Circle())
-                                    .foregroundColor(.gray)
-                            }
+                            ProfileImageView(imageURL: detail.profileImage)
+                                .frame(width: 40, height: 40)
                             Text(detail.nickname)
                                 .font(.subheadline)
                         }

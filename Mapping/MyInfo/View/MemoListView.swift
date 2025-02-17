@@ -28,7 +28,9 @@ struct MemoListView: View {
                             Spacer()
                             if let imageUrl = memo.images.first, let url = URL(string: imageUrl) {
                                 AsyncImage(url: url) { image in
-                                    image.resizable()
+                                    image
+                                        .resizable()
+                                        .scaledToFill()
                                 } placeholder: {
                                     ProgressView()
                                 }

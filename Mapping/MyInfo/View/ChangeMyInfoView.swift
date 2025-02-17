@@ -17,9 +17,10 @@ struct ChangeMyInfoView: View {
             GroupBox {
                 HStack {
                     Group {
-                        if let selectedImage = viewModel.selectedImage.first {
+                        if let selectedImage = viewModel.selectedImage.last {
                             Image(uiImage: selectedImage)
                                 .resizable()
+                                .scaledToFill()
                                 .frame(width: 150, height: 150)
                                 .clipShape(Circle())
                                 .overlay(Circle().stroke(Color.pastelAqua, lineWidth: 2))
