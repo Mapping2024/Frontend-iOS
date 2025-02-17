@@ -1,0 +1,7 @@
+name: Alamofire, nameSpecified: Alamofire, owner: Alamofire, version: 5.10.2, source: https://github.com/Alamofire/Alamofire
+
+name: kakao-ios-sdk, nameSpecified: KakaoOpenSDK, owner: kakao, version: 2.23.0, source: https://github.com/kakao/kakao-ios-sdk
+
+add-version-numbers: false
+
+LicensePlist Version: 3.26.0
