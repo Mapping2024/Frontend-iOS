@@ -20,6 +20,7 @@ struct ChangeMyInfoView: View {
                         if let selectedImage = viewModel.selectedImage.first {
                             Image(uiImage: selectedImage)
                                 .resizable()
+                                .scaledToFill()
                                 .frame(width: 150, height: 150)
                                 .clipShape(Circle())
                                 .overlay(Circle().stroke(Color.pastelAqua, lineWidth: 2))
