@@ -17,7 +17,7 @@ struct ChangeMyInfoView: View {
             GroupBox {
                 HStack {
                     Group {
-                        if let selectedImage = viewModel.selectedImage.first {
+                        if let selectedImage = viewModel.selectedImage.last {
                             Image(uiImage: selectedImage)
                                 .resizable()
                                 .scaledToFill()

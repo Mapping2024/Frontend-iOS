@@ -10,7 +10,7 @@ class ChangeMyInfoViewModel: ObservableObject {
     
     func uploadProfileImage(userManager: UserManager) {
         userManager.fetchUserInfo()
-        guard let selectedImage = selectedImage.first else { return }
+        guard let selectedImage = selectedImage.last else { return }
         
         let url = "https://api.mapping.kro.kr/api/v2/member/modify-profile-image"
         let headers: HTTPHeaders = [
