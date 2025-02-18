@@ -30,7 +30,7 @@ struct AddPinDetailView: View {
         Group {
             Form {
                 Section(header: Text("제목"), footer: Text("* 제목은 최대 20자까지 입력 가능합니다.").font(.caption)) {
-                    TextField("핀 이름", text: $viewModel.pinName)
+                    TextField("메모 이름", text: $viewModel.pinName)
                         .onChange(of: viewModel.pinName) { newValue, oldValue in
                             if newValue.count > 20 {
                                 viewModel.pinName = String(newValue.prefix(20)) // 20자 제한
@@ -38,7 +38,7 @@ struct AddPinDetailView: View {
                         }
                 }
                 
-                Section(header: Text("내용"), footer: Text("* 불쾌감을 줄 수 있는 컨텐츠는 제재를 받을 수 있습니다.").font(.caption)) {
+                Section(header: Text("내용"), footer: Text("* 부적절하거나 불쾌감을 줄 수 있는 컨텐츠는 제재를 받을 수 있습니다.").font(.caption)) {
                     TextEditor(text: $viewModel.pinDescription)
                         .frame(minHeight: 100)
                 }

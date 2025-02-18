@@ -105,7 +105,7 @@ struct MyPageMemoDetailView: View {
                     Menu {
                         if let memo = viewModel.memoDetail {
                             NavigationLink(destination: MyMemoEditView(memo: memo)) {
-                                Label("수정", systemImage: "pencil")
+                                Label("메모 수정", systemImage: "pencil")
                             }
                         }
                         Button(action: {
@@ -113,7 +113,7 @@ struct MyPageMemoDetailView: View {
                                 dismiss()
                             }
                         }) {
-                            Label("핀 삭제", systemImage: "trash")
+                            Label("메모 삭제", systemImage: "trash")
                         }
                     } label: {
                         Label("edit", systemImage: "ellipsis.circle")

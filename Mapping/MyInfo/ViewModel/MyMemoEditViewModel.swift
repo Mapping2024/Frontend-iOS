@@ -69,7 +69,7 @@ final class MyMemoEditViewModel: ObservableObject {
                 if let data = data, let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                    let status = jsonResponse["status"] as? Int, status == 200 {
                     DispatchQueue.main.async {
-                        self?.uploadSuccessText = "메모 수정 완료."
+                        self?.uploadSuccessText = "메모 수정 완료"
                         self?.uploadSuccess = true
                     }
                 } else {
