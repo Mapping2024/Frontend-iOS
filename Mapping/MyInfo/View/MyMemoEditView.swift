@@ -21,7 +21,7 @@ struct MyMemoEditView: View {
                         }
                 }
                 
-                Section(header: Text("내용")) {
+                Section(header: Text("내용"), footer: Text("* 부적절하거나 불쾌감을 줄 수 있는 컨텐츠는 제재를 받을 수 있습니다.").font(.caption)) {
                     TextEditor(text: $viewModel.content)
                         .frame(minHeight: 100)
                 }
@@ -80,8 +80,30 @@ struct MyMemoEditView: View {
                                     .cornerRadius(10)
                             }
                             Button("사진 선택") {
-                                viewModel.isPickerPresented = true
+                                viewModel.isPresented = true
                             }
+                            .confirmationDialog("사진 선택",
+                                                isPresented: $viewModel.isPresented,
+                                                actions: {
+                                Button(action: {
+                                    viewModel.isPickerPresented = true
+                                }) {
+                                    Text("사진 보관함")
+                                }
+                                
+                                Button(action: {
+                                    viewModel.isCameraPresented = true
+                                }) {
+                                    Text("카메라")
+                                }
+                                
+                                Button("취소", role: .cancel) {
+                                    }
+                            },
+                                                message: {
+                                Text("불러올 사진 위치를 선택해주세요.")
+                            }
+                            )
                         }
                     }
                 }
@@ -96,6 +118,11 @@ struct MyMemoEditView: View {
             )
             .sheet(isPresented: $viewModel.isPickerPresented) {
                 PhotoPicker(selectedImages: $viewModel.newImages, selectionLimit: 5)
+                    .edgesIgnoringSafeArea(.bottom)
+            }
+            .sheet(isPresented: $viewModel.isCameraPresented) {
+                CameraPicker(selectedImages: $viewModel.newImages)
+                    .edgesIgnoringSafeArea(.bottom)
             }
         }
         .alert(isPresented: $viewModel.uploadSuccess) {
