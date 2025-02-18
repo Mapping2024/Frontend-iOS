@@ -31,8 +31,9 @@ struct ChangeMyInfoView: View {
                         }
                     }
                     Spacer()
+                    
                     Button(action: {
-                        viewModel.isPickerPresented = true
+                        viewModel.isPresented = true
                     }) {
                         Text("사진 선택")
                             .padding(7)
@@ -44,7 +45,30 @@ struct ChangeMyInfoView: View {
                                     .stroke(Color.pastelAqua, lineWidth: 2)
                             )
                     }
-                    .padding(.leading)
+                    .confirmationDialog("사진 선택",
+                                        isPresented: $viewModel.isPresented,
+                                        actions: {
+                        Button(action: {
+                            viewModel.isPickerPresented = true
+                        }) {
+                            Text("사진 보관함")
+                        }
+                        
+                        Button(action: {
+                            viewModel.isCameraPresented = true
+                        }) {
+                            Text("카메라")
+                        }
+                        
+                        Button("취소", role: .cancel) {
+                            }
+                    },
+                                        message: {
+                        Text("불러올 사진 위치를 선택해주세요.")
+                    }
+                    )
+                    
+                    
                 }
                 .padding()
                 
@@ -114,6 +138,11 @@ struct ChangeMyInfoView: View {
         }
         .sheet(isPresented: $viewModel.isPickerPresented) {
             PhotoPicker(selectedImages: $viewModel.selectedImage, selectionLimit: 1)
+                .edgesIgnoringSafeArea(.bottom)
+        }
+        .sheet(isPresented: $viewModel.isCameraPresented) {
+            CameraPicker(selectedImages: $viewModel.selectedImage)
+                .edgesIgnoringSafeArea(.bottom)
         }
         .alert(isPresented: $viewModel.uploadSuccess) {
             Alert(

@@ -4,6 +4,8 @@ import Alamofire
 class ChangeMyInfoViewModel: ObservableObject {
     @Published var selectedImage: [UIImage] = []
     @Published var isPickerPresented = false
+    @Published var isCameraPresented = false
+    @Published var isPresented = false
     @Published var uploadSuccessText: String? = nil
     @Published var uploadSuccess = false
     @Published var newNickname: String = ""
