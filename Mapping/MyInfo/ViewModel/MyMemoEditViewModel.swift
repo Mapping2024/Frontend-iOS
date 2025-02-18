@@ -10,6 +10,8 @@ final class MyMemoEditViewModel: ObservableObject {
     @Published var newImages: [UIImage] = []
     @Published var deleteImageUrls: [String] = []
     @Published var isPickerPresented = false
+    @Published var isCameraPresented = false
+    @Published var isPresented = false
     @Published var uploadSuccess = false
     @Published var uploadSuccessText: String? = nil
     @Published var isSaving = false // 추가: 저장 중인지 여부
