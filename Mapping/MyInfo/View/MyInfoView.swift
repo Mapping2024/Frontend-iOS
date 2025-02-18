@@ -17,8 +17,8 @@ struct MyInfoView: View {
                         HStack {
                             Text(userInfo.nickname)
                                 .font(.body).fontWeight(.bold)
-                                //.padding(.leading)
-
+                            //.padding(.leading)
+                            
                             Spacer()
                             NavigationLink(destination: ChangeMyInfoView()) {
                                 Text("프로필 변경")
@@ -31,21 +31,10 @@ struct MyInfoView: View {
                             }
                         }
                     } else {
+                        Text("로그인이 필요합니다.")
+                            .font(.body).fontWeight(.bold)
+                        
                         Spacer()
-                        HStack {
-                            Button(action: {
-                                presentationMode.wrappedValue.dismiss()
-                                userManager.kakaoLogin()
-                            }) {
-                                Text("카카오로 로그인 하기")
-                                    .padding(7)
-                                    .background(Color("pastelAqua"))
-                                    .foregroundStyle(Color.white)
-                                    .cornerRadius(10)
-                                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color("pastelAqua"), lineWidth: 2))
-                            }
-                            .padding()
-                        }
                     }
                 }
             }
@@ -110,6 +99,27 @@ struct MyInfoView: View {
                     }
                 }
                 .padding()
+            } else {
+                GroupBox {
+                    HStack{
+                        Spacer()
+                        
+                        VStack {
+                            AppleSignInView()
+                                .frame(width: 270, height: 40)
+                            Button(action: {
+                                presentationMode.wrappedValue.dismiss()// 로그인 후 메인 화면으로 나가기 위함
+                                userManager.kakaoLogin()
+                            }) {
+                                Image("kakaoLogin")
+                                    .resizable()
+                                    .frame(width: 270, height: 40)
+                            }
+                        }
+                        Spacer()
+                    }
+                }
+                .padding()
             }
             
             Spacer()
@@ -143,9 +153,10 @@ struct MyInfoView: View {
 }
 
 #Preview {
-    let userManager = UserManager()
-    userManager.isLoggedIn = true
-    userManager.userInfo = UserInfo(socialId: "123456", nickname: "테스트 사용자", profileImage: nil, role: "user")
-
-    return MyInfoView().environmentObject(userManager)
+    //    let userManager = UserManager()
+    //    userManager.isLoggedIn = true
+    //    userManager.userInfo = UserInfo(socialId: "123456", nickname: "테스트 사용자", profileImage: nil, role: "user")
+    //
+    //    return MyInfoView().environmentObject(userManager)
+    MyInfoView().environmentObject(UserManager())
 }
