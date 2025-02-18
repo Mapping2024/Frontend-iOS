@@ -13,6 +13,8 @@ class AddPinDetailViewModel: ObservableObject {
     @Published var uploadSuccessText: String? = nil
     @Published var uploadSuccess: Bool = false
     @Published var isPickerPresented: Bool = false
+    @Published var isCameraPresented = false
+    @Published var isPresented = false
     
     private var latitude: Double
     private var longitude: Double
@@ -62,10 +64,10 @@ class AddPinDetailViewModel: ObservableObject {
                 switch response.result {
                 case .success:
                     self.uploadSuccess = true
-                    self.uploadSuccessText = "핀 생성 완료"
+                    self.uploadSuccessText = "메모 생성 완료"
                 case .failure:
                     self.uploadSuccess = true
-                    self.uploadSuccessText = "핀 생성 오류 다시 시도해 주세요"
+                    self.uploadSuccessText = "메모 생성 오류 다시 시도해 주세요"
                 }
             }
         }
