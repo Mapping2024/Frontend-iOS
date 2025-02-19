@@ -37,9 +37,12 @@ struct CommentEditView: View {
                         updateComment = true
                     }
                 }
+                .disabled(viewModel.editingComment.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 .padding(.horizontal)
                 .padding(.vertical, 8)
-                .background(Color.pastelAqua)
+                .background(
+                    viewModel.editingComment.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.gray : Color.pastelAqua
+                )
                 .foregroundColor(.white)
                 .cornerRadius(8)
             }
