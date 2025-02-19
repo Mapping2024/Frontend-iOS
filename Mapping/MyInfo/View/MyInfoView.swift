@@ -122,7 +122,7 @@ struct MyInfoView: View {
                                         .foregroundColor(.black)
                                 }
                                 .frame(width: 270, height: 40)
-                                .background(Color.kYellow)
+                                .background(Color.kakaoYellow)
                                 .cornerRadius(8) // 둥근 모서리 적용
                             }
                         }

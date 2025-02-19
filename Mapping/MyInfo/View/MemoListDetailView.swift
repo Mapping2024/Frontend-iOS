@@ -7,9 +7,6 @@ struct MemoListDetailView: View {
     @State private var memoDetail: MemoDetail?
     @State private var isLoading = true
     @State private var isRefresh: Bool = false //좋아요 싫어요 관여
-    // 좋아요 버튼 애니메이션 상태
-    @State private var isAnimatingLike: Bool = false
-    @State private var isAnimatingHate: Bool = false
     
     @State private var isPhotoViewerPresented = false
     @State private var selectedImageURL: String?
@@ -97,9 +94,6 @@ struct MemoListDetailView: View {
                         
                         HStack {
                             Button(action: {
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    isAnimatingLike = true
-                                }
                                 LikeHateService.likePost(id: detail.id, accessToken: userManager.accessToken) { result in
                                     switch result {
                                     case .success:
@@ -108,20 +102,14 @@ struct MemoListDetailView: View {
                                     case .failure(let error):
                                         print("Failed to like the post: \(error)")
                                     }
-                                    // 애니메이션 복구
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        isAnimatingLike = false
-                                    }
                                 }
                             }) {
-                                Text("👍 \(detail.likeCnt)")
-                                    .scaleEffect(isAnimatingLike ? 1.5 : 1.0) // 크기 애니메이션
+                                Image(systemName: detail.myLike ? "hand.thumbsup.fill" : "hand.thumbsup")
+                                    .foregroundStyle(.yellow)
+                                Text("\(detail.likeCnt)")
                             }
                             
                             Button(action: {
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    isAnimatingHate = true
-                                }
                                 LikeHateService.hatePost(id: detail.id, accessToken: userManager.accessToken) { result in
                                     switch result {
                                     case .success:
@@ -130,14 +118,11 @@ struct MemoListDetailView: View {
                                     case .failure(let error):
                                         print("Failed to hate the post: \(error)")
                                     }
-                                    // 애니메이션 복구
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        isAnimatingHate = false
-                                    }
                                 }
                             }) {
-                                Text("👎 \(detail.hateCnt)")
-                                    .scaleEffect(isAnimatingHate ? 1.5 : 1.0) // 크기 애니메이션
+                                Image(systemName: detail.myHate ? "hand.thumbsdown.fill" : "hand.thumbsdown")
+                                    .foregroundStyle(.yellow)
+                                Text("\(detail.hateCnt)")
                             }
                             Spacer()
                         }

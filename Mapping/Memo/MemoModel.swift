@@ -5,6 +5,7 @@ struct MemoDetailResponse: Decodable {
     let data: MemoDetail
 }
 
+//1개만 상세보기
 struct MemoDetail: Decodable {
     let id: Int
     let title: String
@@ -25,6 +26,7 @@ struct MemoDetail: Decodable {
     let profileImage: String?
 }
 
+// 맵에서 검색할때
 struct MemoData: Identifiable, Decodable {
     let id: Int
     let title: String

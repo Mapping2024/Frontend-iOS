@@ -22,8 +22,6 @@ struct Comment: Identifiable, Decodable {
     let profileImageUrl: String?
     let updatedAt: String
     let myLike: Bool
-    
-    var isAnimatingLike: Bool? = nil
 
     // 기본 생성자 추가
     init(
@@ -35,8 +33,7 @@ struct Comment: Identifiable, Decodable {
         nickname: String = "",
         profileImageUrl: String? = nil,
         updatedAt: String = "",
-        myLike: Bool = false,
-        isAnimatingLike: Bool? = nil
+        myLike: Bool = false
     ) {
         self.id = id
         self.comment = comment
@@ -47,7 +44,6 @@ struct Comment: Identifiable, Decodable {
         self.profileImageUrl = profileImageUrl
         self.updatedAt = updatedAt
         self.myLike = myLike
-        self.isAnimatingLike = isAnimatingLike
     }
 }
 
