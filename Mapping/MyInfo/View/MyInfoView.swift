@@ -111,9 +111,19 @@ struct MyInfoView: View {
                                 //presentationMode.wrappedValue.dismiss()// 로그인 후 메인 화면으로 나가기 위함
                                 userManager.kakaoLogin()
                             }) {
-                                Image("kakaoLogin")
-                                    .resizable()
-                                    .frame(width: 270, height: 40)
+                                HStack(spacing: 6) {
+                                    Image("kakaoLogin") // 사용자의 이미지 이름으로 변경
+                                        .resizable()
+                                        .frame(width: 12, height: 12)
+
+                                    Text("카카오로 로그인")
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(.black)
+                                }
+                                .frame(width: 270, height: 40)
+                                .background(Color.kYellow)
+                                .cornerRadius(8) // 둥근 모서리 적용
                             }
                         }
                         Spacer()

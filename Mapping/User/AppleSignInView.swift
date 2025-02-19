@@ -3,6 +3,7 @@ import SwiftUI
 
 struct AppleSignInView: View {
     @EnvironmentObject var userManager: UserManager
+    @Environment(\.colorScheme) var colorScheme // 다크모드 감지
     
     var body: some View {
         SignInWithAppleButton(
@@ -29,6 +30,6 @@ struct AppleSignInView: View {
                 }
             }
         )
-        .signInWithAppleButtonStyle(.white) // 스타일 (.black, .white, .whiteOutline) 선택 가능
+        .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .whiteOutline) // 스타일 (.black, .white, .whiteOutline) 선택 가능
     }
 }

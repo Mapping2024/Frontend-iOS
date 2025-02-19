@@ -1,12 +1,11 @@
 {
   "images" : [
     {
-      "filename" : "kakao_login_medium_wide.png",
+      "filename" : "kakao_login_original-Photoroom.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "kakao_login_large_wide.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
