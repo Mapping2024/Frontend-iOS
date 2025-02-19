@@ -17,8 +17,8 @@ struct MyInfoView: View {
                         HStack {
                             Text(userInfo.nickname)
                                 .font(.body).fontWeight(.bold)
-                                //.padding(.leading)
-
+                            //.padding(.leading)
+                            
                             Spacer()
                             NavigationLink(destination: ChangeMyInfoView()) {
                                 Text("프로필 변경")
@@ -31,21 +31,10 @@ struct MyInfoView: View {
                             }
                         }
                     } else {
+                        Text("로그인이 필요합니다.")
+                            .font(.body).fontWeight(.bold)
+                        
                         Spacer()
-                        HStack {
-                            Button(action: {
-                                presentationMode.wrappedValue.dismiss()
-                                userManager.kakaoLogin()
-                            }) {
-                                Text("카카오로 로그인 하기")
-                                    .padding(7)
-                                    .background(Color("pastelAqua"))
-                                    .foregroundStyle(Color.white)
-                                    .cornerRadius(10)
-                                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color("pastelAqua"), lineWidth: 2))
-                            }
-                            .padding()
-                        }
                     }
                 }
             }
@@ -60,7 +49,7 @@ struct MyInfoView: View {
                 Button("취소", role: .cancel) { }
                 Button("확인", role: .destructive) {
                     userManager.logout()
-                    presentationMode.wrappedValue.dismiss()
+                    //presentationMode.wrappedValue.dismiss()
                 }
             } message: {
                 Text("로그아웃 하시겠습니까?")
@@ -110,6 +99,37 @@ struct MyInfoView: View {
                     }
                 }
                 .padding()
+            } else {
+                GroupBox {
+                    HStack{
+                        Spacer()
+                        
+                        VStack {
+                            AppleSignInView()
+                                .frame(width: 270, height: 40)
+                            Button(action: {
+                                //presentationMode.wrappedValue.dismiss()// 로그인 후 메인 화면으로 나가기 위함
+                                userManager.kakaoLogin()
+                            }) {
+                                HStack(spacing: 6) {
+                                    Image("kakaoLogin") // 사용자의 이미지 이름으로 변경
+                                        .resizable()
+                                        .frame(width: 12, height: 12)
+
+                                    Text("카카오로 로그인")
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(.black)
+                                }
+                                .frame(width: 270, height: 40)
+                                .background(Color.kYellow)
+                                .cornerRadius(8) // 둥근 모서리 적용
+                            }
+                        }
+                        Spacer()
+                    }
+                }
+                .padding()
             }
             
             Spacer()
@@ -129,12 +149,12 @@ struct MyInfoView: View {
                     Button("확인", role: .destructive) {
                         userManager.withdrawUser { success in
                             if success {
-                                presentationMode.wrappedValue.dismiss()
+                                //presentationMode.wrappedValue.dismiss()
                             }
                         }
                     }
                 } message: {
-                    Text("회원 탈퇴 후 30일간 데이터가 유지되며, 이후 완전히 삭제됩니다. 만약 30일 안에 재가입하면 기존 정보를 유지할 수 있습니다. 정말 탈퇴하시겠습니까?")
+                    Text("회원 탈퇴 후 90일간 데이터가 유지되며, 이후 완전히 삭제됩니다. 만약 90일 안에 재가입하면 기존 정보를 유지할 수 있습니다. 정말 탈퇴하시겠습니까?")
                 }
             }
         }
@@ -143,9 +163,10 @@ struct MyInfoView: View {
 }
 
 #Preview {
-    let userManager = UserManager()
-    userManager.isLoggedIn = true
-    userManager.userInfo = UserInfo(socialId: "123456", nickname: "테스트 사용자", profileImage: nil, role: "user")
-
-    return MyInfoView().environmentObject(userManager)
+    //    let userManager = UserManager()
+    //    userManager.isLoggedIn = true
+    //    userManager.userInfo = UserInfo(socialId: "123456", nickname: "테스트 사용자", profileImage: nil, role: "user")
+    //
+    //    return MyInfoView().environmentObject(userManager)
+    MyInfoView().environmentObject(UserManager())
 }
