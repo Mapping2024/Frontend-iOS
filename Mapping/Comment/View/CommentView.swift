@@ -3,7 +3,6 @@ import SwiftUI
 struct CommentView: View {
     @EnvironmentObject var userManager: UserManager
     @State private var comment: Comment = Comment()
-    @State private var isShaking: Bool = false // 애니메이션 상태 변수 추가
     @State private var updateComment: Bool = false
     
     @Binding var editingComment: Int
@@ -11,104 +10,100 @@ struct CommentView: View {
     @Binding var update: Bool
     
     var body: some View {
-        if editingComment != commentID {
-            HStack(alignment: .top) {
-                ProfileImageView(imageURL: comment.profileImageUrl)
-                    .frame(width: 25, height: 25)
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text(comment.nickname)
-                            .font(.headline)
-                        
-                        HStack(spacing: 1) {
-                            ForEach(0..<comment.rating, id: \.self) { _ in
-                                Image(systemName: "star.fill")
-                                    .foregroundColor(.yellow)
-                                    .font(.caption2)
-                            }
-                        }
-                        
-                        Spacer()
-                        
-                        if comment.nickname == userManager.userInfo?.nickname {
-                            Menu {
-                                Button("수정") {
-                                    editingComment = commentID
-                                }
-                                Button("삭제") {
-                                    deleteComment(id: comment.id)
-                                }
-                            } label: {
-                                Image(systemName: "ellipsis")
-                                    .foregroundColor(.cBlack)
-                            }
-                        }
-                    }
+        Group{
+            if editingComment != commentID {
+                HStack(alignment: .top) {
+                    ProfileImageView(imageURL: comment.profileImageUrl)
+                        .frame(width: 25, height: 25)
                     
-                    Text(comment.comment)
-                        .font(.body)
-                    
-                    HStack {
-                        Text(comment.updatedAt)
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                        
-                        if comment.modify == true {
-                            Text("(수정됨)")
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                        }
-                        Spacer()
-                        // 좋아요 버튼
-                        Button(action: {
-                            // 흔들림 애니메이션 트리거
-                            isShaking = true
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                isShaking = false
-                                updateComment = true
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Text(comment.nickname)
+                                .font(.headline)
+                            
+                            HStack(spacing: 1) {
+                                ForEach(0..<comment.rating, id: \.self) { _ in
+                                    Image(systemName: "star.fill")
+                                        .foregroundColor(.yellow)
+                                        .font(.caption2)
+                                }
                             }
                             
-                            LikeHateService.likeComment(id: comment.id, accessToken: userManager.accessToken) { result in
-                                DispatchQueue.main.async {
+                            Spacer()
+                            
+                            if comment.nickname == userManager.userInfo?.nickname {
+                                Menu {
+                                    Button("수정") {
+                                        editingComment = commentID
+                                    }
+                                    Button("삭제") {
+                                        deleteComment(id: comment.id)
+                                    }
+                                } label: {
+                                    Image(systemName: "ellipsis")
+                                        .foregroundColor(.cBlack)
+                                }
+                            }
+                        }
+                        
+                        Text(comment.comment)
+                            .font(.body)
+                        
+                        HStack {
+                            Text(comment.updatedAt)
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                            
+                            if comment.modify == true {
+                                Text("(수정됨)")
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                            }
+                            Spacer()
+                            // 좋아요 버튼
+                            Button(action: {
+                                LikeHateService.likeComment(id: comment.id, accessToken: userManager.accessToken) { result in
                                     switch result {
                                     case .success:
                                         print("Successfully liked the post.")
-                                        updateComment = false
-                                        
+                                        updateComment = true
                                     case .failure(let error):
                                         print("Failed to like the post: \(error)")
                                     }
                                 }
-                            }
-                        }) {
-                            HStack(alignment: .bottom) {
-                                Text("👍 \(comment.likeCnt)")
+                            }) {
+                                Image(systemName: comment.myLike ? "hand.thumbsup.fill" : "hand.thumbsup")
+                                    .foregroundStyle(.yellow)
+                                Text("\(comment.likeCnt)")
                                     .font(.caption)
                                     .foregroundColor(.cBlack)
+                                
                             }
-                            .rotationEffect(isShaking ? Angle(degrees: -15) : Angle(degrees: 0))
-                            .animation(isShaking ? Animation.easeInOut(duration: 0.1).repeatCount(5, autoreverses: true) : .default, value: isShaking)
                         }
                     }
                 }
+                .onAppear(perform: fetchComment)
+            } else if (commentID == editingComment){
+                CommentEditView(editingComment: $editingComment, updateComment: $updateComment, editingCommentId: commentID, editingCommentString: comment.comment, editingRating: comment.rating, editingTime: comment.updatedAt)
             }
-            .onAppear(perform: fetchComment)
-            .onChange(of: updateComment, { oldValue, newValue in
-                if updateComment {
-                    fetchComment()
-                    //updateComment = false
-                }
-            })
-        } else if (commentID == editingComment){
-            CommentEditView(editingComment: $editingComment, updateComment: $updateComment, editingCommentId: commentID, editingCommentString: comment.comment, editingRating: comment.rating, editingTime: comment.updatedAt)
         }
+        .onChange(of: updateComment, { oldValue, newValue in
+            if updateComment {
+                fetchComment()
+                updateComment = false
+            }
+        })
     }
     
     private func fetchComment() {
         guard let url = URL(string: "https://api.mapping.kro.kr/api/v2/comment/\(commentID)") else { return }
         
-        URLSession.shared.dataTask(with: url) { data, response, error in
+        var request = URLRequest(url: url)
+            request.httpMethod = "GET"
+            request.addValue("*/*", forHTTPHeaderField: "accept")
+            request.addValue("Bearer \(userManager.accessToken)", forHTTPHeaderField: "Authorization")
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {
                 print("Failed to fetch comments: \(error?.localizedDescription ?? "Unknown error")")
                 return
