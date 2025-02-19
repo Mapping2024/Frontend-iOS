@@ -65,10 +65,43 @@ class UserManager: ObservableObject {
                                     profileImage: userData.profileImage,
                                     role: userData.role
                                 )
+                    
                                 if let token = userData.tokens {
                                     self.accessToken = token.accessToken
                                     self.refreshToken = token.refreshToken
                                 }
+                            }
+                        }
+                    } else {
+                        print("Failed to fetch user info: \(data.message)")
+                    }
+                case .failure(let error):
+                    print("Error fetching user info: \(error)")
+                }
+            }
+    }
+    
+    func appleLogin(appleAuthorizationCode: String) {
+        let url = "https://api.mapping.kro.kr/api/v2/member/apple-login?code=\(appleAuthorizationCode)"
+        
+        AF.request(url, method: .post, encoding: JSONEncoding.default)
+            .responseDecodable(of: UserInfoResponse.self) { response in
+                switch response.result {
+                case .success(let data):
+                    if data.status == 200, data.success {
+                        if let userData = data.data {
+                            DispatchQueue.main.async {
+                                self.userInfo = UserInfo(
+                                    socialId: userData.socialId,
+                                    nickname: userData.nickname,
+                                    profileImage: userData.profileImage,
+                                    role: userData.role
+                                )
+                                if let token = userData.tokens {
+                                    self.accessToken = token.accessToken
+                                    self.refreshToken = token.refreshToken
+                                }
+                                self.isLoggedIn = true
                             }
                         }
                     } else {

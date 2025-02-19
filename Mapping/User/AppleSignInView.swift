@@ -2,6 +2,8 @@ import AuthenticationServices
 import SwiftUI
 
 struct AppleSignInView: View {
+    @EnvironmentObject var userManager: UserManager
+    
     var body: some View {
         SignInWithAppleButton(
 
@@ -13,19 +15,14 @@ struct AppleSignInView: View {
                 switch result {
                 case .success(let authResults):
                     if let appleIDCredential = authResults.credential as? ASAuthorizationAppleIDCredential {
-                        let userIdentifier = appleIDCredential.user
-                        let fullName = appleIDCredential.fullName
-                        let email = appleIDCredential.email
-                        
-                        // identityToken을 활용해 서버 검증을 진행할 수 있습니다.
-                        if let identityTokenData = appleIDCredential.identityToken,
-                           let identityTokenString = String(data: identityTokenData, encoding: .utf8) {
-                            print("Identity Token: \(identityTokenString)")
+//                        let fullName = appleIDCredential.fullName
+//                        let email = appleIDCredential.email
+
+                        if let authorizationCodeData = appleIDCredential.authorizationCode,
+                           let authorizationCodeString = String(data: authorizationCodeData, encoding: .utf8) {
+                            //print("Authorization Token: \(authorizationCodeString)")
+                            userManager.appleLogin(appleAuthorizationCode: authorizationCodeString)
                         }
-                        
-                        print("사용자 ID: \(userIdentifier)")
-                        print("이름: \(fullName?.givenName ?? "")")
-                        print("이메일: \(email ?? "")")
                     }
                 case .failure(let error):
                     print("Apple 로그인 에러: \(error.localizedDescription)")
