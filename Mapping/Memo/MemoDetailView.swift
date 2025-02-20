@@ -40,15 +40,7 @@ struct MemoDetailView: View {
                         
                         HStack {
                             Button(action: {
-                                LikeHateService.likePost(id: detail.id, accessToken: userManager.accessToken) { result in
-                                    switch result {
-                                    case .success:
-                                        print("Successfully liked the post.")
-                                        isRefresh = true
-                                    case .failure(let error):
-                                        print("Failed to like the post: \(error)")
-                                    }
-                                }
+                                likeMemo(memoId: detail.id)
                             }) {
                                 Image(systemName: detail.myLike ? "hand.thumbsup.fill" : "hand.thumbsup")
                                     .foregroundStyle(.yellow)
@@ -56,15 +48,7 @@ struct MemoDetailView: View {
                             }
                             
                             Button(action: {
-                                LikeHateService.hatePost(id: detail.id, accessToken: userManager.accessToken) { result in
-                                    switch result {
-                                    case .success:
-                                        print("Successfully hated the post.")
-                                        isRefresh = true
-                                    case .failure(let error):
-                                        print("Failed to hate the post: \(error)")
-                                    }
-                                }
+                                hateMemo(memoId: detail.id)
                             }) {
                                 Image(systemName: detail.myHate ? "hand.thumbsdown.fill" : "hand.thumbsdown")
                                     .foregroundStyle(.yellow)
@@ -153,6 +137,30 @@ struct MemoDetailView: View {
                 .frame(width: 35, height: 35)
             Text("\(detail.nickname)")
                 .font(.subheadline)
+        }
+    }
+    
+    private func likeMemo(memoId: Int) {
+        LikeHateService.likePost(id: memoId, accessToken: userManager.accessToken) { result in
+            switch result {
+            case .success:
+                print("Successfully liked the post.")
+                isRefresh = true
+            case .failure(let error):
+                print("Failed to like the post: \(error)")
+            }
+        }
+    }
+    
+    private func hateMemo(memoId: Int) {
+        LikeHateService.hatePost(id: memoId, accessToken: userManager.accessToken) { result in
+            switch result {
+            case .success:
+                print("Successfully hated the post.")
+                isRefresh = true
+            case .failure(let error):
+                print("Failed to hate the post: \(error)")
+            }
         }
     }
     
