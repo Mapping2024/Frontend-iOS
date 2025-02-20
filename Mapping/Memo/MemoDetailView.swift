@@ -5,18 +5,19 @@ struct MemoDetailView: View {
     @Binding var id: Int?
     @Binding var size: PresentationDetent
     @State private var memoDetail: MemoDetail?
-    @State private var isLoading = true
+    @State private var isLoading: Bool = true
     @State private var isRefresh: Bool = false
     
-    @State private var isPhotoViewerPresented = false
+    @State private var isPhotoViewerPresented: Bool = false
     @State private var selectedImageURL: String?
     
     @State var editingComment: Int = 0
     @State var update: Bool = false
     
     var body: some View {
+        
         VStack(alignment: .leading) {
-            if let detail = memoDetail {
+            if let detail: MemoDetail = memoDetail {
                 
                 headerView(detail: detail)
                 
@@ -30,11 +31,11 @@ struct MemoDetailView: View {
                         
                         if let images = detail.images, !images.isEmpty {
                             ImageScrollView(images: images) { tappedImageURL in
-                                    selectedImageURL = nil
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                        selectedImageURL = tappedImageURL
-                                    }
+                                selectedImageURL = nil
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                    selectedImageURL = tappedImageURL
                                 }
+                            }
                             .offset(y: size == .small ? 500 : 0)
                         }
                         
@@ -54,18 +55,22 @@ struct MemoDetailView: View {
                                     .foregroundStyle(.yellow)
                                 Text("\(detail.hateCnt)")
                             }
+                            
                             Spacer()
+                            
+                            if userManager.isLoggedIn && detail.myMemo == false { // 자신의 게시글이 아닌경우
+                                userActionMenu
+                            }
                         }
                         .font(.subheadline)
                         .foregroundStyle(Color.cBlack)
                         .padding(.top)
                         .offset(y: size == .small ? 100 : 0)
                         
-                        Group{
+                        if size == .large {
                             Divider()
                             CommentListView(memoId: detail.id, editingComment: $editingComment, update: $update)
                         }
-                        .offset(y: size != .large ? 500 : 0)
                     }
                 }
                 .scrollIndicators(.hidden)
@@ -138,6 +143,14 @@ struct MemoDetailView: View {
             Text("\(detail.nickname)")
                 .font(.subheadline)
         }
+    }
+    
+    private var userActionMenu: some View {
+        UserActionMenuView(accesstoken: userManager.accessToken,
+                           id: memoDetail?.id ?? 0,
+                           userId: memoDetail?.authorId ?? 0,
+                           nickname: memoDetail?.nickname ?? "",
+                           type: "메모")
     }
     
     private func likeMemo(memoId: Int) {
