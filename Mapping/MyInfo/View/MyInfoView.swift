@@ -99,6 +99,50 @@ struct MyInfoView: View {
                     }
                 }
                 .padding()
+                
+                GroupBox{
+                    NavigationLink(destination: BlockedUsersView()) {
+                        HStack{
+                            Text("🚫 차단된 사용자")
+                                .font(.subheadline).fontWeight(.semibold)
+                                .padding(.leading)
+                                .foregroundStyle(Color("cBlack"))
+                            
+                            Spacer()
+                        }
+                    }
+                }
+                .padding(.horizontal)
+                
+                Spacer()
+                
+                HStack{
+                    Button(action: {
+                        showAlertWithdraw = true
+                        userManager.fetchUserInfo()
+                    }) {
+                        Text("회원 탈퇴")
+                            .font(.subheadline)
+                            .foregroundStyle(Color.gray)
+                            .padding(.leading)
+                    }
+                    .padding()
+                    .alert("회원 탈퇴", isPresented: $showAlertWithdraw) {
+                        Button("취소", role: .cancel) { }
+                        Button("확인", role: .destructive) {
+                            userManager.withdrawUser { success in
+                                if success {
+                                    //presentationMode.wrappedValue.dismiss()
+                                }
+                            }
+                        }
+                    } message: {
+                        Text("회원 탈퇴 후 90일간 데이터가 유지되며, 이후 완전히 삭제됩니다. 만약 90일 안에 재가입하면 기존 정보를 유지할 수 있습니다. 정말 탈퇴하시겠습니까?")
+                    }
+                    Spacer()
+                }
+                
+                
             } else {
                 GroupBox {
                     HStack{
@@ -115,7 +159,7 @@ struct MyInfoView: View {
                                     Image("kakaoLogin") // 사용자의 이미지 이름으로 변경
                                         .resizable()
                                         .frame(width: 12, height: 12)
-
+                                    
                                     Text("카카오로 로그인")
                                         .font(.subheadline)
                                         .fontWeight(.medium)
@@ -130,43 +174,26 @@ struct MyInfoView: View {
                     }
                 }
                 .padding()
+                Spacer()
             }
-            
-            Spacer()
-            
-            if userManager.isLoggedIn {
-                Button(action: {
-                    showAlertWithdraw = true
-                    userManager.fetchUserInfo()
-                }) {
-                    Text("회원 탈퇴")
-                        .font(.subheadline)
-                        .foregroundStyle(Color.gray)
-                }
-                .padding()
-                .alert("회원 탈퇴", isPresented: $showAlertWithdraw) {
-                    Button("취소", role: .cancel) { }
-                    Button("확인", role: .destructive) {
-                        userManager.withdrawUser { success in
-                            if success {
-                                //presentationMode.wrappedValue.dismiss()
-                            }
-                        }
-                    }
-                } message: {
-                    Text("회원 탈퇴 후 90일간 데이터가 유지되며, 이후 완전히 삭제됩니다. 만약 90일 안에 재가입하면 기존 정보를 유지할 수 있습니다. 정말 탈퇴하시겠습니까?")
-                }
+            HStack{
+                Text("문의하기 이메일: mapping@google.com")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.gray)
+                    .padding(.leading)
+                Spacer()
             }
+            .padding(.leading)
         }
         .padding(.top)
     }
 }
 
 #Preview {
-    //    let userManager = UserManager()
-    //    userManager.isLoggedIn = true
-    //    userManager.userInfo = UserInfo(socialId: "123456", nickname: "테스트 사용자", profileImage: nil, role: "user")
-    //
-    //    return MyInfoView().environmentObject(userManager)
-    MyInfoView().environmentObject(UserManager())
+    let userManager = UserManager()
+    userManager.isLoggedIn = true
+    userManager.userInfo = UserInfo(socialId: "123456", nickname: "테스트 사용자", profileImage: nil, role: "user")
+    
+    return MyInfoView().environmentObject(userManager)
+    //MyInfoView().environmentObject(UserManager())
 }

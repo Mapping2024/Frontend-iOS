@@ -4,9 +4,13 @@ class CommentInputViewModel: ObservableObject {
     @Published var newComment: String = ""
     @Published var rating: Int = 0
     
+    var isCommentValid: Bool {
+        return !newComment.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+    
     func addComment(memoId: Int, userManager: UserManager, completion: @escaping () -> Void) {
         // 필수 입력 확인
-        guard !newComment.isEmpty else {
+        guard isCommentValid else {
             print("댓글 내용이 비어 있습니다.")
             return
         }
@@ -39,7 +43,7 @@ class CommentInputViewModel: ObservableObject {
                     if decodedResponse.success {
                         print("댓글이 성공적으로 추가되었습니다.")
                         self?.newComment = ""
-                        self?.rating = 5
+                        self?.rating = 0
                         completion()
                     } else {
                         print("댓글 추가 실패: \(decodedResponse.message)")
