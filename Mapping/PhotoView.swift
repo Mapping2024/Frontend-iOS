@@ -33,7 +33,7 @@ struct PhotoView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(action:{isPresented.toggle()}) {
+                    Button(action:{isPresented = false}) {
                         Image(systemName: "xmark.circle")
                     }
                 }

@@ -29,40 +29,12 @@ struct MemoDetailView: View {
                             .font(.body)
                         
                         if let images = detail.images, !images.isEmpty {
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 10) {
-                                    ForEach(images, id: \.self) { urlString in
-                                        if let url = URL(string: urlString) {
-                                            AsyncImage(url: url) { phase in
-                                                switch phase {
-                                                case .empty:
-                                                    ProgressView()
-                                                case .success(let image):
-                                                    image.resizable()
-                                                        .scaledToFill()
-                                                        .onTapGesture {
-                                                            selectedImageURL = nil
-                                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                                                selectedImageURL = urlString
-                                                            }
-                                                        }
-                                                case .failure:
-                                                    Image(systemName: "photo")
-                                                        .resizable()
-                                                        .scaledToFit()
-                                                        .foregroundColor(.gray)
-                                                @unknown default:
-                                                    EmptyView()
-                                                }
-                                            }
-                                            .frame(width: 150, height: 150)
-                                            .clipped()
-                                            .cornerRadius(10)
-                                        }
+                            ImageScrollView(images: images) { tappedImageURL in
+                                    selectedImageURL = nil
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                        selectedImageURL = tappedImageURL
                                     }
                                 }
-                                .padding(.top)
-                            }
                             .offset(y: size == .small ? 500 : 0)
                         }
                         

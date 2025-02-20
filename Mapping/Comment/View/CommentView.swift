@@ -41,7 +41,8 @@ struct CommentView: View {
                                     }
                                 } label: {
                                     Image(systemName: "ellipsis")
-                                        .foregroundColor(.cBlack)
+                                        .foregroundColor(.gray)
+                                        .padding(6)
                                 }
                             }
                         }
