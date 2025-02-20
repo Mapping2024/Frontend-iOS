@@ -21,10 +21,11 @@ struct CommentInputView: View {
                 Text("등록")
                     .padding(.horizontal)
                     .padding(.vertical, 8)
-                    .background(Color.pastelAqua)
+                    .background(viewModel.isCommentValid ? Color.pastelAqua : Color.gray)
                     .foregroundColor(.white)
                     .cornerRadius(8)
             }
+            .disabled(!viewModel.isCommentValid)
         }
     }
 }
