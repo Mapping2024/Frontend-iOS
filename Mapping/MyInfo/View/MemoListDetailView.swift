@@ -51,40 +51,12 @@ struct MemoListDetailView: View {
                             .font(.body)
                         
                         if let images = detail.images, !images.isEmpty {
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 10) {
-                                    ForEach(images, id: \.self) { urlString in
-                                        if let url = URL(string: urlString) {
-                                            AsyncImage(url: url) { phase in
-                                                switch phase {
-                                                case .empty:
-                                                    ProgressView()
-                                                case .success(let image):
-                                                    image.resizable()
-                                                        .scaledToFill()
-                                                        .onTapGesture {
-                                                            selectedImageURL = nil
-                                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                                                selectedImageURL = urlString
-                                                            }
-                                                        }
-                                                case .failure:
-                                                    Image(systemName: "photo")
-                                                        .resizable()
-                                                        .scaledToFit()
-                                                        .foregroundColor(.gray)
-                                                @unknown default:
-                                                    EmptyView()
-                                                }
-                                            }
-                                            .frame(width: 150, height: 150)
-                                            .clipped()
-                                            .cornerRadius(10)
-                                        }
+                            ImageScrollView(images: images) { tappedImageURL in
+                                    selectedImageURL = nil
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                        selectedImageURL = tappedImageURL
                                     }
                                 }
-                                .padding(.top)
-                            }
                         }
                         Map(position: $position) {
                             Marker("", coordinate: CLLocationCoordinate2D(latitude: detail.lat, longitude: detail.lng))
@@ -94,15 +66,7 @@ struct MemoListDetailView: View {
                         
                         HStack {
                             Button(action: {
-                                LikeHateService.likePost(id: detail.id, accessToken: userManager.accessToken) { result in
-                                    switch result {
-                                    case .success:
-                                        print("Successfully liked the post.")
-                                        isRefresh = true
-                                    case .failure(let error):
-                                        print("Failed to like the post: \(error)")
-                                    }
-                                }
+                                likeMemo(memoId: detail.id)
                             }) {
                                 Image(systemName: detail.myLike ? "hand.thumbsup.fill" : "hand.thumbsup")
                                     .foregroundStyle(.yellow)
@@ -110,15 +74,7 @@ struct MemoListDetailView: View {
                             }
                             
                             Button(action: {
-                                LikeHateService.hatePost(id: detail.id, accessToken: userManager.accessToken) { result in
-                                    switch result {
-                                    case .success:
-                                        print("Successfully hated the post.")
-                                        isRefresh = true
-                                    case .failure(let error):
-                                        print("Failed to hate the post: \(error)")
-                                    }
-                                }
+                                hateMemo(memoId: detail.id)
                             }) {
                                 Image(systemName: detail.myHate ? "hand.thumbsdown.fill" : "hand.thumbsdown")
                                     .foregroundStyle(.yellow)
@@ -170,6 +126,30 @@ struct MemoListDetailView: View {
         .onChange(of: selectedImageURL) { oldValue, newValue in
             if newValue != nil {
                 isPhotoViewerPresented = true
+            }
+        }
+    }
+    
+    private func likeMemo(memoId: Int) {
+        LikeHateService.likePost(id: memoId, accessToken: userManager.accessToken) { result in
+            switch result {
+            case .success:
+                print("Successfully liked the post.")
+                isRefresh = true
+            case .failure(let error):
+                print("Failed to like the post: \(error)")
+            }
+        }
+    }
+    
+    private func hateMemo(memoId: Int) {
+        LikeHateService.hatePost(id: memoId, accessToken: userManager.accessToken) { result in
+            switch result {
+            case .success:
+                print("Successfully hated the post.")
+                isRefresh = true
+            case .failure(let error):
+                print("Failed to hate the post: \(error)")
             }
         }
     }

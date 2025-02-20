@@ -5,18 +5,19 @@ struct MemoDetailView: View {
     @Binding var id: Int?
     @Binding var size: PresentationDetent
     @State private var memoDetail: MemoDetail?
-    @State private var isLoading = true
+    @State private var isLoading: Bool = true
     @State private var isRefresh: Bool = false
     
-    @State private var isPhotoViewerPresented = false
+    @State private var isPhotoViewerPresented: Bool = false
     @State private var selectedImageURL: String?
     
     @State var editingComment: Int = 0
     @State var update: Bool = false
     
     var body: some View {
+        
         VStack(alignment: .leading) {
-            if let detail = memoDetail {
+            if let detail: MemoDetail = memoDetail {
                 
                 headerView(detail: detail)
                 
@@ -29,54 +30,18 @@ struct MemoDetailView: View {
                             .font(.body)
                         
                         if let images = detail.images, !images.isEmpty {
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 10) {
-                                    ForEach(images, id: \.self) { urlString in
-                                        if let url = URL(string: urlString) {
-                                            AsyncImage(url: url) { phase in
-                                                switch phase {
-                                                case .empty:
-                                                    ProgressView()
-                                                case .success(let image):
-                                                    image.resizable()
-                                                        .scaledToFill()
-                                                        .onTapGesture {
-                                                            selectedImageURL = nil
-                                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                                                selectedImageURL = urlString
-                                                            }
-                                                        }
-                                                case .failure:
-                                                    Image(systemName: "photo")
-                                                        .resizable()
-                                                        .scaledToFit()
-                                                        .foregroundColor(.gray)
-                                                @unknown default:
-                                                    EmptyView()
-                                                }
-                                            }
-                                            .frame(width: 150, height: 150)
-                                            .clipped()
-                                            .cornerRadius(10)
-                                        }
-                                    }
+                            ImageScrollView(images: images) { tappedImageURL in
+                                selectedImageURL = nil
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                    selectedImageURL = tappedImageURL
                                 }
-                                .padding(.top)
                             }
                             .offset(y: size == .small ? 500 : 0)
                         }
                         
                         HStack {
                             Button(action: {
-                                LikeHateService.likePost(id: detail.id, accessToken: userManager.accessToken) { result in
-                                    switch result {
-                                    case .success:
-                                        print("Successfully liked the post.")
-                                        isRefresh = true
-                                    case .failure(let error):
-                                        print("Failed to like the post: \(error)")
-                                    }
-                                }
+                                likeMemo(memoId: detail.id)
                             }) {
                                 Image(systemName: detail.myLike ? "hand.thumbsup.fill" : "hand.thumbsup")
                                     .foregroundStyle(.yellow)
@@ -84,32 +49,28 @@ struct MemoDetailView: View {
                             }
                             
                             Button(action: {
-                                LikeHateService.hatePost(id: detail.id, accessToken: userManager.accessToken) { result in
-                                    switch result {
-                                    case .success:
-                                        print("Successfully hated the post.")
-                                        isRefresh = true
-                                    case .failure(let error):
-                                        print("Failed to hate the post: \(error)")
-                                    }
-                                }
+                                hateMemo(memoId: detail.id)
                             }) {
                                 Image(systemName: detail.myHate ? "hand.thumbsdown.fill" : "hand.thumbsdown")
                                     .foregroundStyle(.yellow)
                                 Text("\(detail.hateCnt)")
                             }
+                            
                             Spacer()
+                            
+                            if userManager.isLoggedIn && detail.myMemo == false { // 자신의 게시글이 아닌경우
+                                userActionMenu
+                            }
                         }
                         .font(.subheadline)
                         .foregroundStyle(Color.cBlack)
                         .padding(.top)
                         .offset(y: size == .small ? 100 : 0)
                         
-                        Group{
+                        if size == .large {
                             Divider()
                             CommentListView(memoId: detail.id, editingComment: $editingComment, update: $update)
                         }
-                        .offset(y: size != .large ? 500 : 0)
                     }
                 }
                 .scrollIndicators(.hidden)
@@ -181,6 +142,38 @@ struct MemoDetailView: View {
                 .frame(width: 35, height: 35)
             Text("\(detail.nickname)")
                 .font(.subheadline)
+        }
+    }
+    
+    private var userActionMenu: some View {
+        UserActionMenuView(accesstoken: userManager.accessToken,
+                           id: memoDetail?.id ?? 0,
+                           userId: memoDetail?.authorId ?? 0,
+                           nickname: memoDetail?.nickname ?? "",
+                           type: "메모")
+    }
+    
+    private func likeMemo(memoId: Int) {
+        LikeHateService.likePost(id: memoId, accessToken: userManager.accessToken) { result in
+            switch result {
+            case .success:
+                print("Successfully liked the post.")
+                isRefresh = true
+            case .failure(let error):
+                print("Failed to like the post: \(error)")
+            }
+        }
+    }
+    
+    private func hateMemo(memoId: Int) {
+        LikeHateService.hatePost(id: memoId, accessToken: userManager.accessToken) { result in
+            switch result {
+            case .success:
+                print("Successfully hated the post.")
+                isRefresh = true
+            case .failure(let error):
+                print("Failed to hate the post: \(error)")
+            }
         }
     }
     
