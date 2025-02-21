@@ -103,7 +103,7 @@ struct MyInfoView: View {
                 GroupBox{
                     NavigationLink(destination: BlockedUsersView()) {
                         HStack{
-                            Text("🚫 차단된 사용자")
+                            Text("🚫 차단한 사용자")
                                 .font(.subheadline).fontWeight(.semibold)
                                 .padding(.leading)
                                 .foregroundStyle(Color("cBlack"))
