@@ -31,7 +31,7 @@ struct CommentView: View {
                             
                             Spacer()
                             
-                            if comment.nickname == userManager.userInfo?.nickname {
+                            if comment.nickname == userManager.userInfo?.nickname { // 내가 작성한 댓글
                                 Menu {
                                     Button("수정") {
                                         editingComment = commentID
@@ -44,6 +44,9 @@ struct CommentView: View {
                                         .foregroundColor(.gray)
                                         .padding(6)
                                 }
+                            } else if (userManager.isLoggedIn && comment.nickname != userManager.userInfo?.nickname) {
+                                UserActionMenuView(accesstoken: userManager.accessToken, id: comment.id, userId: comment.writerId, nickname: comment.nickname, type: "댓글")
+                                    .foregroundColor(.gray)
                             }
                         }
                         
