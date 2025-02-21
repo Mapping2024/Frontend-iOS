@@ -9,24 +9,28 @@ struct BlockedUsersView: View {
     
     var body: some View {
         NavigationStack {
-            List(viewModel.blockedUsers) { blockedUser in
-                Button(action: {
-                    selectedUserId = blockedUser.userId
-                    selectedUserNickname = blockedUser.nickname
-                    showAlert = true
-                }) {
-                    HStack {
-                        ProfileImageView(imageURL: blockedUser.profileImage)
-                            .frame(width: 40, height: 40)
-                        
-                        Text(blockedUser.nickname)
-                            .font(.headline)
-                            .foregroundColor(.primary)
+            if viewModel.blockedUsers.isEmpty {
+                Text("차단한 사용자가 없습니다.")
+            } else {
+                List(viewModel.blockedUsers) { blockedUser in
+                    Button(action: {
+                        selectedUserId = blockedUser.userId
+                        selectedUserNickname = blockedUser.nickname
+                        showAlert = true
+                    }) {
+                        HStack {
+                            ProfileImageView(imageURL: blockedUser.profileImage)
+                                .frame(width: 40, height: 40)
+                            
+                            Text(blockedUser.nickname)
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                        }
                     }
                 }
             }
         }
-        .navigationBarTitle("차단된 사용자")
+        .navigationBarTitle("차단한 사용자")
         .onAppear {
             viewModel.fetchBlockUsers(userManager: userManager)
         }

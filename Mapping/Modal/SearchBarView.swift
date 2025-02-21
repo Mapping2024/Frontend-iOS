@@ -15,7 +15,7 @@ struct SearchBarView: View {
         VStack {
             HStack {
                 Spacer()
-
+                
                 TextField("검색어를 입력하세요.", text: $query)
                     .textFieldStyle(.roundedBorder)
                 
@@ -47,27 +47,37 @@ struct SearchBarView: View {
                 Spacer()
             }
             
-            List(item.filter {
+            let filteredItems = item.filter {
                 $0.title.lowercased().contains(query.lowercased()) || query.isEmpty
             }
-                 , id: \.id) { result in
-                HStack {
-                    Text(result.title)
-                    Spacer()
-                    Text(result.category).font(.caption)
-                }
-                .listRowBackground(Color.cLightGray)
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    selectedMemoId = result.id
+            
+            List {
+                if filteredItems.isEmpty {
+                    Text("주변에 메모가 없습니다")
+                        .foregroundColor(.gray)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding()
+                } else {
+                    ForEach(filteredItems, id: \.id) { result in
+                        HStack {
+                            Text(result.title)
+                            Spacer()
+                            Text(result.category).font(.caption)
+                        }
+                        .listRowBackground(Color.cLightGray)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            selectedMemoId = result.id
+                        }
+                    }
                 }
             }
             .scrollContentBackground(.hidden)
             .padding(.top, -20)
-            //.offset(y: size == .small ? 10 : 0) // 작은 크기일 때 아래로 숨김
         }
     }
 }
+
 
 #Preview {
     SearchBarView(update: .constant(false), selectedMemoId: .constant(nil), item: .constant([
