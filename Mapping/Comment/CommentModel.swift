@@ -14,6 +14,7 @@ struct CommentResponse: Decodable {
 
 struct Comment: Identifiable, Decodable {
     let id: Int
+    let writerId: Int
     let comment: String
     let rating: Int
     let likeCnt: Int
@@ -26,6 +27,7 @@ struct Comment: Identifiable, Decodable {
     // 기본 생성자 추가
     init(
         id: Int = 0,
+        writerId: Int = 0,
         comment: String = "",
         rating: Int = 0,
         likeCnt: Int = 0,
@@ -36,6 +38,7 @@ struct Comment: Identifiable, Decodable {
         myLike: Bool = false
     ) {
         self.id = id
+        self.writerId = writerId
         self.comment = comment
         self.rating = rating
         self.likeCnt = likeCnt

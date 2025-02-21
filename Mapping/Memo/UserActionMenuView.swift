@@ -16,8 +16,7 @@ struct UserActionMenuView: View {
             Button("신고하기", action: {isPresentedDeclaration = true})
             Button("차단하기", action: {isPresentedBlock = true})
         } label: {
-            Label("", systemImage: "ellipsis")
-                .foregroundColor(.cBlack)
+            Image(systemName: "ellipsis")
                 .padding(6)
         }
         .alert("사용자 차단", isPresented: $isPresentedBlock) {

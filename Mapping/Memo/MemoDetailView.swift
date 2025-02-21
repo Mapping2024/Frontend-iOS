@@ -151,6 +151,7 @@ struct MemoDetailView: View {
                            userId: memoDetail?.authorId ?? 0,
                            nickname: memoDetail?.nickname ?? "",
                            type: "메모")
+        .foregroundColor(.cBlack)
     }
     
     private func likeMemo(memoId: Int) {
