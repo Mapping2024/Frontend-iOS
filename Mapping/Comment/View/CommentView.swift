@@ -56,7 +56,8 @@ struct CommentView: View {
                         
                         if comment.blind == false {
                             HStack {
-                                Text(comment.updatedAt)
+                                let timeAgoString: String = timeAgo(dateString: comment.updatedAt)
+                                Text(timeAgoString)
                                     .font(.caption)
                                     .foregroundColor(.gray)
                                 
@@ -102,6 +103,27 @@ struct CommentView: View {
         })
     }
     
+    private func timeAgo(dateString: String) -> String {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+            formatter.timeZone = TimeZone.current
+            
+            guard let date = formatter.date(from: dateString) else { return "날짜 오류" }
+            
+            let now = Date()
+            let diff = Int(now.timeIntervalSince(date)) // 초 단위 차이
+            
+            if diff < 3600 { // 1시간 이전
+                let minutes = diff / 60
+                return "\(minutes)분 전"
+            } else if diff < 86400 { // 24시간 이내
+                let hours = diff / 3600
+                return "\(hours)시간 전"
+            } else {
+                return formatter.string(from: date) // 24시간 이상이면 원래 날짜 그대로 표시
+            }
+        }
+    
     private func fetchComment() {
         guard let url = URL(string: "https://api.mapping.kro.kr/api/v2/comment/\(commentID)") else { return }
         
@@ -133,7 +155,6 @@ struct CommentView: View {
         
         let urlString = "https://api.mapping.kro.kr/api/v2/comment/\(id)"
         guard let url = URL(string: urlString) else { return }
-        print(userManager.accessToken)
         
         var request = URLRequest(url: url)
         request.httpMethod = "DELETE"
@@ -146,7 +167,7 @@ struct CommentView: View {
                     throw URLError(.badServerResponse)
                 }
                 print("Comment deleted successfully.")
-                update = true
+                updateComment = true
             } catch {
                 print("Error deleting comment: \(error)")
             }
