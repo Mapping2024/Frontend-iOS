@@ -30,58 +30,61 @@ struct CommentView: View {
                             }
                             
                             Spacer()
-                            
-                            if comment.nickname == userManager.userInfo?.nickname { // 내가 작성한 댓글
-                                Menu {
-                                    Button("수정") {
-                                        editingComment = commentID
+                            if comment.blind == false {
+                                if comment.nickname == userManager.userInfo?.nickname { // 내가 작성한 댓글
+                                    Menu {
+                                        Button("수정") {
+                                            editingComment = commentID
+                                        }
+                                        Button("삭제") {
+                                            deleteComment(id: comment.id)
+                                        }
+                                    } label: {
+                                        Image(systemName: "ellipsis")
+                                            .foregroundColor(.gray)
+                                            .padding(6)
                                     }
-                                    Button("삭제") {
-                                        deleteComment(id: comment.id)
-                                    }
-                                } label: {
-                                    Image(systemName: "ellipsis")
+                                } else if (userManager.isLoggedIn && comment.nickname != userManager.userInfo?.nickname) {
+                                    UserActionMenuView(accesstoken: userManager.accessToken, id: comment.id, userId: comment.writerId, nickname: comment.nickname, type: "댓글")
                                         .foregroundColor(.gray)
-                                        .padding(6)
                                 }
-                            } else if (userManager.isLoggedIn && comment.nickname != userManager.userInfo?.nickname) {
-                                UserActionMenuView(accesstoken: userManager.accessToken, id: comment.id, userId: comment.writerId, nickname: comment.nickname, type: "댓글")
-                                    .foregroundColor(.gray)
                             }
                         }
                         
                         Text(comment.comment)
                             .font(.body)
                         
-                        HStack {
-                            Text(comment.updatedAt)
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                            
-                            if comment.modify == true {
-                                Text("(수정됨)")
+                        if comment.blind == false {
+                            HStack {
+                                Text(comment.updatedAt)
                                     .font(.caption)
                                     .foregroundColor(.gray)
-                            }
-                            Spacer()
-                            // 좋아요 버튼
-                            Button(action: {
-                                LikeHateService.likeComment(id: comment.id, accessToken: userManager.accessToken) { result in
-                                    switch result {
-                                    case .success:
-                                        print("Successfully liked the post.")
-                                        updateComment = true
-                                    case .failure(let error):
-                                        print("Failed to like the post: \(error)")
-                                    }
-                                }
-                            }) {
-                                Image(systemName: comment.myLike ? "hand.thumbsup.fill" : "hand.thumbsup")
-                                    .foregroundStyle(.yellow)
-                                Text("\(comment.likeCnt)")
-                                    .font(.caption)
-                                    .foregroundColor(.cBlack)
                                 
+                                if comment.modify == true {
+                                    Text("(수정됨)")
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                }
+                                Spacer()
+                                // 좋아요 버튼
+                                Button(action: {
+                                    LikeHateService.likeComment(id: comment.id, accessToken: userManager.accessToken) { result in
+                                        switch result {
+                                        case .success:
+                                            print("Successfully liked the post.")
+                                            updateComment = true
+                                        case .failure(let error):
+                                            print("Failed to like the post: \(error)")
+                                        }
+                                    }
+                                }) {
+                                    Image(systemName: comment.myLike ? "hand.thumbsup.fill" : "hand.thumbsup")
+                                        .foregroundStyle(.yellow)
+                                    Text("\(comment.likeCnt)")
+                                        .font(.caption)
+                                        .foregroundColor(.cBlack)
+                                    
+                                }
                             }
                         }
                     }
@@ -103,9 +106,9 @@ struct CommentView: View {
         guard let url = URL(string: "https://api.mapping.kro.kr/api/v2/comment/\(commentID)") else { return }
         
         var request = URLRequest(url: url)
-            request.httpMethod = "GET"
-            request.addValue("*/*", forHTTPHeaderField: "accept")
-            request.addValue("Bearer \(userManager.accessToken)", forHTTPHeaderField: "Authorization")
+        request.httpMethod = "GET"
+        request.addValue("*/*", forHTTPHeaderField: "accept")
+        request.addValue("Bearer \(userManager.accessToken)", forHTTPHeaderField: "Authorization")
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {
