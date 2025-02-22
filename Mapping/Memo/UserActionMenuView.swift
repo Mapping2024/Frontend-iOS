@@ -94,6 +94,9 @@ struct UserActionMenuView: View {
             switch response.result {
             case .success:
                 print("유저 차단 성공 \(nickname)")
+                if type == "댓글"{
+                    NotificationCenter.default.post(name: NSNotification.Name("RefreshComments"), object: nil)
+                }
             case .failure(let error):
                 print("유저 차단 실패: \(error.localizedDescription)")
             }
