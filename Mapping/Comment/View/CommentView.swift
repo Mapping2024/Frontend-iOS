@@ -30,58 +30,62 @@ struct CommentView: View {
                             }
                             
                             Spacer()
-                            
-                            if comment.nickname == userManager.userInfo?.nickname { // 내가 작성한 댓글
-                                Menu {
-                                    Button("수정") {
-                                        editingComment = commentID
+                            if comment.blind == false {
+                                if comment.nickname == userManager.userInfo?.nickname { // 내가 작성한 댓글
+                                    Menu {
+                                        Button("수정") {
+                                            editingComment = commentID
+                                        }
+                                        Button("삭제") {
+                                            deleteComment(id: comment.id)
+                                        }
+                                    } label: {
+                                        Image(systemName: "ellipsis")
+                                            .foregroundColor(.gray)
+                                            .padding(6)
                                     }
-                                    Button("삭제") {
-                                        deleteComment(id: comment.id)
-                                    }
-                                } label: {
-                                    Image(systemName: "ellipsis")
+                                } else if (userManager.isLoggedIn && comment.nickname != userManager.userInfo?.nickname) {
+                                    UserActionMenuView(accesstoken: userManager.accessToken, id: comment.id, userId: comment.writerId, nickname: comment.nickname, type: "댓글")
                                         .foregroundColor(.gray)
-                                        .padding(6)
                                 }
-                            } else if (userManager.isLoggedIn && comment.nickname != userManager.userInfo?.nickname) {
-                                UserActionMenuView(accesstoken: userManager.accessToken, id: comment.id, userId: comment.writerId, nickname: comment.nickname, type: "댓글")
-                                    .foregroundColor(.gray)
                             }
                         }
                         
                         Text(comment.comment)
                             .font(.body)
                         
-                        HStack {
-                            Text(comment.updatedAt)
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                            
-                            if comment.modify == true {
-                                Text("(수정됨)")
+                        if comment.blind == false {
+                            HStack {
+                                let timeAgoString: String = timeAgo(dateString: comment.updatedAt)
+                                Text(timeAgoString)
                                     .font(.caption)
                                     .foregroundColor(.gray)
-                            }
-                            Spacer()
-                            // 좋아요 버튼
-                            Button(action: {
-                                LikeHateService.likeComment(id: comment.id, accessToken: userManager.accessToken) { result in
-                                    switch result {
-                                    case .success:
-                                        print("Successfully liked the post.")
-                                        updateComment = true
-                                    case .failure(let error):
-                                        print("Failed to like the post: \(error)")
-                                    }
-                                }
-                            }) {
-                                Image(systemName: comment.myLike ? "hand.thumbsup.fill" : "hand.thumbsup")
-                                    .foregroundStyle(.yellow)
-                                Text("\(comment.likeCnt)")
-                                    .font(.caption)
-                                    .foregroundColor(.cBlack)
                                 
+                                if comment.modify == true {
+                                    Text("(수정됨)")
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                }
+                                Spacer()
+                                // 좋아요 버튼
+                                Button(action: {
+                                    LikeHateService.likeComment(id: comment.id, accessToken: userManager.accessToken) { result in
+                                        switch result {
+                                        case .success:
+                                            print("Successfully liked the post.")
+                                            updateComment = true
+                                        case .failure(let error):
+                                            print("Failed to like the post: \(error)")
+                                        }
+                                    }
+                                }) {
+                                    Image(systemName: comment.myLike ? "hand.thumbsup.fill" : "hand.thumbsup")
+                                        .foregroundStyle(.yellow)
+                                    Text("\(comment.likeCnt)")
+                                        .font(.caption)
+                                        .foregroundColor(.cBlack)
+                                    
+                                }
                             }
                         }
                     }
@@ -99,13 +103,34 @@ struct CommentView: View {
         })
     }
     
+    private func timeAgo(dateString: String) -> String {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+            formatter.timeZone = TimeZone.current
+            
+            guard let date = formatter.date(from: dateString) else { return "날짜 오류" }
+            
+            let now = Date()
+            let diff = Int(now.timeIntervalSince(date)) // 초 단위 차이
+            
+            if diff < 3600 { // 1시간 이전
+                let minutes = diff / 60
+                return "\(minutes)분 전"
+            } else if diff < 86400 { // 24시간 이내
+                let hours = diff / 3600
+                return "\(hours)시간 전"
+            } else {
+                return formatter.string(from: date) // 24시간 이상이면 원래 날짜 그대로 표시
+            }
+        }
+    
     private func fetchComment() {
         guard let url = URL(string: "https://api.mapping.kro.kr/api/v2/comment/\(commentID)") else { return }
         
         var request = URLRequest(url: url)
-            request.httpMethod = "GET"
-            request.addValue("*/*", forHTTPHeaderField: "accept")
-            request.addValue("Bearer \(userManager.accessToken)", forHTTPHeaderField: "Authorization")
+        request.httpMethod = "GET"
+        request.addValue("*/*", forHTTPHeaderField: "accept")
+        request.addValue("Bearer \(userManager.accessToken)", forHTTPHeaderField: "Authorization")
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {
@@ -130,7 +155,6 @@ struct CommentView: View {
         
         let urlString = "https://api.mapping.kro.kr/api/v2/comment/\(id)"
         guard let url = URL(string: urlString) else { return }
-        print(userManager.accessToken)
         
         var request = URLRequest(url: url)
         request.httpMethod = "DELETE"
@@ -143,7 +167,7 @@ struct CommentView: View {
                     throw URLError(.badServerResponse)
                 }
                 print("Comment deleted successfully.")
-                update = true
+                updateComment = true
             } catch {
                 print("Error deleting comment: \(error)")
             }

@@ -6,6 +6,8 @@ struct CommentListView: View {
     
     @State private var comments: [Int] = []
     @State private var isLoading: Bool = true
+    @State private var refreshTrigger = UUID() // 새로고침 트리거
+
     @Binding var editingComment: Int
     @Binding var update: Bool
     
@@ -27,6 +29,7 @@ struct CommentListView: View {
                         ForEach(comments, id: \.self) { comment in
                             VStack(spacing: 8) {
                                 CommentView(editingComment: $editingComment, commentID: comment, update: $update)
+                                    .id(refreshTrigger)
                             }
                             Divider()
                                 .padding(.horizontal)
@@ -36,6 +39,9 @@ struct CommentListView: View {
                 }
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RefreshComments"))) { _ in
+                    fetchComments()
+                }
         .onAppear(perform: fetchComments)
         .onChange(of: update, { oldValue, newValue in
             if update {
@@ -60,6 +66,7 @@ struct CommentListView: View {
                     DispatchQueue.main.async {
                         self.comments = fetchedComments
                         self.isLoading = false
+                        self.refreshTrigger = UUID()
                     }
                 }
             } catch {

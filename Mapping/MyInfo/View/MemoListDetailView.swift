@@ -81,6 +81,9 @@ struct MemoListDetailView: View {
                                 Text("\(detail.hateCnt)")
                             }
                             Spacer()
+                            if userManager.isLoggedIn && detail.myMemo == false { // 자신의 게시글이 아닌경우
+                                userActionMenu
+                            }
                         }
                         .font(.subheadline)
                         .foregroundStyle(Color.cBlack)
@@ -152,6 +155,15 @@ struct MemoListDetailView: View {
                 print("Failed to hate the post: \(error)")
             }
         }
+    }
+    
+    private var userActionMenu: some View {
+        UserActionMenuView(accesstoken: userManager.accessToken,
+                           id: memoDetail?.id ?? 0,
+                           userId: memoDetail?.authorId ?? 0,
+                           nickname: memoDetail?.nickname ?? "",
+                           type: "메모")
+        .foregroundColor(.cBlack)
     }
     
     private func fetchMemoDetail() async {
