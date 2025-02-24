@@ -19,6 +19,8 @@ struct AddPinDetailView: View {
     
     @StateObject private var viewModel: AddPinDetailViewModel
     
+    @FocusState private var isTextFieldFocused: Bool
+    
     init(backFlag: Binding<Bool>, latitude: Double, longitude: Double, currentLocation: CLLocationCoordinate2D) {
         self._backFlag = backFlag
         self._viewModel = StateObject(
@@ -31,6 +33,7 @@ struct AddPinDetailView: View {
             Form {
                 Section(header: Text("제목"), footer: Text("* 제목은 최대 20자까지 입력 가능합니다.").font(.caption)) {
                     TextField("메모 이름", text: $viewModel.pinName)
+                        .focused($isTextFieldFocused)
                         .onChange(of: viewModel.pinName) { newValue, oldValue in
                             if newValue.count > 20 {
                                 viewModel.pinName = String(newValue.prefix(20)) // 20자 제한
@@ -40,6 +43,7 @@ struct AddPinDetailView: View {
                 
                 Section(header: Text("내용"), footer: Text("* 부적절하거나 불쾌감을 줄 수 있는 컨텐츠는 제재를 받을 수 있습니다.").font(.caption)) {
                     TextEditor(text: $viewModel.pinDescription)
+                        .focused($isTextFieldFocused)
                         .frame(minHeight: 100)
                 }
                 
@@ -65,32 +69,48 @@ struct AddPinDetailView: View {
                             .cornerRadius(10)
                     }
                     
-                    Button("사진 선택") {
-                        viewModel.isPresented = true
-                    }
-                    .confirmationDialog("사진 선택",
-                                        isPresented: $viewModel.isPresented,
-                                        actions: {
-                        Button(action: {
+                    Menu {
+                        Button("사진 보관함") {
                             viewModel.isPickerPresented = true
-                        }) {
-                            Text("사진 보관함")
                         }
-                        
-                        Button(action: {
+                        Button("카메라") {
                             viewModel.isCameraPresented = true
-                        }) {
-                            Text("카메라")
                         }
-                        
-                        Button("취소", role: .cancel) {
-                        }
-                    },
-                                        message: {
-                        Text("불러올 사진 위치를 선택해주세요.")
+                    } label: {
+                        Text("사진 선택")
                     }
-                    )
+                    
+//                    Text("사진 선택")
+//                        .foregroundStyle(Color.pastelAqua)
+//                        .onTapGesture {
+//                            viewModel.isPresented = true
+//                        }
+//                    .confirmationDialog("사진 선택",
+//                                        isPresented: $viewModel.isPresented,
+//                                        actions: {
+//                        Button(action: {
+//                            viewModel.isPickerPresented = true
+//                        }) {
+//                            Text("사진 보관함")
+//                        }
+//                        
+//                        Button(action: {
+//                            viewModel.isCameraPresented = true
+//                        }) {
+//                            Text("카메라")
+//                        }
+//                        
+//                        Button("취소", role: .cancel) {
+//                        }
+//                    },
+//                                        message: {
+//                        Text("불러올 사진 위치를 선택해주세요.")
+//                    }
+//                    )
                 }
+           }
+            .onTapGesture {
+                isTextFieldFocused = false
             }
             .navigationBarTitle(Text("핀 생성하기"), displayMode: .inline)
             .navigationBarItems(

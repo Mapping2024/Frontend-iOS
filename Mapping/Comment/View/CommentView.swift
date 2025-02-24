@@ -45,7 +45,7 @@ struct CommentView: View {
                                             .padding(6)
                                     }
                                 } else if (userManager.isLoggedIn && comment.nickname != userManager.userInfo?.nickname) {
-                                    UserActionMenuView(accesstoken: userManager.accessToken, id: comment.id, userId: comment.writerId, nickname: comment.nickname, type: "댓글")
+                                    UserActionMenuView(accesstoken: userManager.accessToken, id: comment.id, userId: comment.writerId, nickname: comment.nickname, type: "댓글", refresh: $update)
                                         .foregroundColor(.gray)
                                 }
                             }

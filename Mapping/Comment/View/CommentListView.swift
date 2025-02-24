@@ -39,9 +39,6 @@ struct CommentListView: View {
                 }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RefreshComments"))) { _ in
-                    fetchComments()
-                }
         .onAppear(perform: fetchComments)
         .onChange(of: update, { oldValue, newValue in
             if update {

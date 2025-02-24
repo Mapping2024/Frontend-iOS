@@ -16,6 +16,9 @@ struct MemoListDetailView: View {
     @State var editingComment: Int = 0
     @State var update: Bool = false
     
+    // 에러 메시지를 저장할 상태 변수
+    @State private var errorMessage: String? = nil
+    
     var body: some View {
         VStack(alignment: .leading) {
             if let detail = memoDetail {
@@ -102,6 +105,9 @@ struct MemoListDetailView: View {
                 }
             } else if isLoading {
                 ProgressView("Loading...")
+            } else if let errorMessage = errorMessage {
+                Text(errorMessage)
+                    .foregroundColor(.red)
             } else {
                 Text("Failed to load data.")
                     .foregroundColor(.red)
@@ -162,12 +168,18 @@ struct MemoListDetailView: View {
                            id: memoDetail?.id ?? 0,
                            userId: memoDetail?.authorId ?? 0,
                            nickname: memoDetail?.nickname ?? "",
-                           type: "메모")
+                           type: "메모",
+                           refresh: $isRefresh)
         .foregroundColor(.cBlack)
     }
     
     private func fetchMemoDetail() async {
         userManager.fetchUserInfo()
+        
+        // 초기화
+        errorMessage = nil
+        memoDetail = nil
+        isLoading = true
         
         guard let id = id else { return }
         let urlString = "https://api.mapping.kro.kr/api/v2/memo/detail?memoId=\(id)"
@@ -179,26 +191,27 @@ struct MemoListDetailView: View {
         
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            guard let httpResponse = response as? HTTPURLResponse else {
                 throw URLError(.badServerResponse)
             }
             
-            let decodedResponse = try JSONDecoder().decode(MemoDetailResponse.self, from: data)
-            if decodedResponse.success {
-                memoDetail = decodedResponse.data
-                if let detail = memoDetail {
-                    position = .region(
-                        MKCoordinateRegion(
-                            center: CLLocationCoordinate2D(latitude: detail.lat, longitude: detail.lng),
-                            span: MKCoordinateSpan(latitudeDelta: 0.001, longitudeDelta: 0.001) // 원하는 줌 레벨 설정
-                        )
-                    )
+            switch httpResponse.statusCode {
+            case 200:
+                let decodedResponse = try JSONDecoder().decode(MemoDetailResponse.self, from: data)
+                if decodedResponse.success {
+                    memoDetail = decodedResponse.data
+                } else {
+                    print("Failed to fetch memo detail: \(decodedResponse.message)")
                 }
-            } else {
-                print("Failed to fetch memo detail: \(decodedResponse.message)")
+            case 400:
+                print("차단된 사용자의 메모입니다.")
+                errorMessage = "차단된 사용자의 메모입니다."
+            default:
+                throw URLError(.badServerResponse)
             }
         } catch {
             print("Error fetching memo detail: \(error)")
+            errorMessage = "메모 정보를 가져오지 못했습니다."
         }
         isLoading = false
     }

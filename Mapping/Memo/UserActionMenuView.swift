@@ -6,7 +6,8 @@ struct UserActionMenuView: View {
     var id: Int
     var userId: Int
     var nickname: String
-    var type: String
+    var type: String // 신고 메세지 표시를 위함
+    @Binding var refresh: Bool
     
     @State var isPresentedDeclaration: Bool = false
     @State var isPresentedBlock: Bool = false
@@ -94,9 +95,7 @@ struct UserActionMenuView: View {
             switch response.result {
             case .success:
                 print("유저 차단 성공 \(nickname)")
-                if type == "댓글"{
-                    NotificationCenter.default.post(name: NSNotification.Name("RefreshComments"), object: nil)
-                }
+                refresh = true
             case .failure(let error):
                 print("유저 차단 실패: \(error.localizedDescription)")
             }
