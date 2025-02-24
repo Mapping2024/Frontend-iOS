@@ -43,7 +43,7 @@ struct UserActionMenuView: View {
         .alert("신고 완료", isPresented: $isReportSuccess) {
             Button("확인", role: .cancel) { }
         } message: {
-            Text("정상적으로 신고되었습니다.")
+            Text("정상적으로 신고되었습니다. 신고는 24시간 이내에 검토 후 처리됩니다.")
         }
     }
     
