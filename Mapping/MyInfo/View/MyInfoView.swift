@@ -38,7 +38,8 @@ struct MyInfoView: View {
                     }
                 }
             }
-            .padding()
+            .padding(.horizontal)
+            .padding(.bottom)
             .navigationBarTitle("내 정보", displayMode: .inline)
             .navigationBarItems(trailing: Button(action: {
                 showAlertLogout = true
@@ -64,7 +65,8 @@ struct MyInfoView: View {
                             HStack{
                                 Text("📝 내 메모")
                                     .font(.subheadline).fontWeight(.semibold)
-                                    .padding()
+                                    .padding(.leading)
+                                    .padding(.vertical,6)
                                     .foregroundStyle(Color("cBlack"))
                                 
                                 Spacer()
@@ -77,7 +79,8 @@ struct MyInfoView: View {
                             HStack{
                                 Text("👍 좋아요 누른 메모")
                                     .font(.subheadline).fontWeight(.semibold)
-                                    .padding()
+                                    .padding(.leading)
+                                    .padding(.vertical,6)
                                     .foregroundStyle(Color("cBlack"))
                                 
                                 Spacer()
@@ -90,7 +93,8 @@ struct MyInfoView: View {
                             HStack{
                                 Text("💬 댓글 단 메모")
                                     .font(.subheadline).fontWeight(.semibold)
-                                    .padding()
+                                    .padding(.leading)
+                                    .padding(.vertical,6)
                                     .foregroundStyle(Color("cBlack"))
                                 
                                 Spacer()
@@ -126,7 +130,7 @@ struct MyInfoView: View {
                             .foregroundStyle(Color.gray)
                             .padding(.leading)
                     }
-                    .padding()
+                    .padding(.leading)
                     .alert("회원 탈퇴", isPresented: $showAlertWithdraw) {
                         Button("취소", role: .cancel) { }
                         Button("확인", role: .destructive) {
@@ -180,12 +184,11 @@ struct MyInfoView: View {
                 Text("문의하기 이메일: mapping@google.com")
                     .font(.subheadline)
                     .foregroundStyle(Color.gray)
-                    .padding(.leading)
+                    .padding()
                 Spacer()
             }
             .padding(.leading)
         }
-        .padding(.top)
     }
 }
 
